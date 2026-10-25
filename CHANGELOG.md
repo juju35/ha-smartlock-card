@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+### Fixes
+- Compact cylinder picture: the state could hardly be seen. The grip ridge now takes the state color and the status light is larger, with a halo.
+
 ## 1.1.0
 
 ### Changes

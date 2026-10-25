@@ -129,9 +129,9 @@ const FAMILIES = {
     body: `<circle cx="60" cy="66" r="46" fill="url(#r)"/>
       ${Array.from({ length: 36 }, (_, i) => `<line x1="60" y1="20" x2="60" y2="27" stroke="${p.f[2]}" stroke-width="2" transform="rotate(${i * 10} 60 66)"/>`).join("")}
       <circle cx="60" cy="66" r="36" fill="url(#ri)"/><circle cx="60" cy="66" r="30" fill="url(#r)"/>
-      ${part(p, 60, 66, `<path d="M54 42 h12 l3 48 h-18 z" fill="url(#ri)" opacity=".9"/>`)}
-      <circle cx="60" cy="102" r="3.4" fill="${p.color}" class="${p.glow}"/>
-      <circle cx="60" cy="102" r="6" fill="none" stroke="${p.color}" stroke-width="1.2" opacity=".45"/>`,
+      ${part(p, 60, 66, `<path d="M54 42 h12 l3 48 h-18 z" fill="url(#ri)" opacity=".9"/><path d="M58 46 h4 l1.2 40 h-6.4 z" fill="${p.color}" class="${p.glow}"/>`)}
+      <circle cx="60" cy="122" r="9" fill="${p.color}" opacity=".22"/>
+      <circle cx="60" cy="122" r="5" fill="${p.color}" class="${p.glow}"/>`,
   }),
   // Deadbolt with an outside keypad and a light bar.
   keypad: (p) => {

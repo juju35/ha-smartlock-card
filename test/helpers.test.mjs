@@ -16,15 +16,45 @@ test("statusClass maps the lock states to colors", () => {
   assert.equal(sl.statusClass("unknown"), "idle");
 });
 
-test("the picture lifts the shackle when unlocked and animates moving states", () => {
-  assert.doesNotMatch(sl.lockSvg("locked"), /class="up"/);
-  assert.match(sl.lockSvg("unlocked"), /class="up"/);
-  assert.match(sl.lockSvg("locking"), /class="locking"/);
-  assert.match(sl.lockSvg("unlocking"), /@keyframes unlocking/);
+test("the padlock lifts its shackle when unlocked and animates moving states", () => {
+  assert.doesNotMatch(sl.lockSvg("locked"), /class="part on"/);
+  assert.match(sl.lockSvg("unlocked"), /class="part on"[^>]*--on:translateY\(-16px\)/);
+  assert.match(sl.lockSvg("locking"), /class="part locking"/);
   assert.match(sl.lockSvg("jammed"), /class="shake"/);
   assert.match(sl.lockSvg("opening"), /class="wave d0"/);
-  assert.doesNotMatch(sl.lockSvg("locked"), /@keyframes/);
   assert.match(sl.lockSvg("jammed"), /#db4437/);
+});
+
+test("every family draws every state, with its finish or the one asked for", () => {
+  for (const family of Object.keys(sl.FAMILIES))
+    for (const state of ["locked", "unlocked", "open", "opening", "locking", "unlocking", "jammed", "unknown"]) {
+      const svg = sl.lockSvg(state, family);
+      assert.match(svg, /^<svg[^>]*viewBox="0 0 120 140">/);
+      assert.doesNotMatch(svg, /undefined|NaN/);
+    }
+  assert.match(sl.lockSvg("locked", "retrofit"), /#fbfbfa/);
+  assert.match(sl.lockSvg("locked", "retrofit", "black"), /#4a4e54/);
+  assert.match(sl.lockSvg("locked", "lever"), /--on:rotate\(12deg\)|class="part "/);
+});
+
+test("the automatic picture follows the integration and the model", () => {
+  const pick = (manufacturer, model, platform = "matter") => {
+    const h = {
+      entities: { "lock.x": { entity_id: "lock.x", device_id: "d", platform } },
+      devices: { d: { id: "d", manufacturer, model, name: "Door" } },
+      states: { "lock.x": { entity_id: "lock.x", state: "locked", attributes: {} } },
+    };
+    return [...sl.autoImage(h, "lock.x")];
+  };
+  assert.deepEqual(pick("Nuki", "Smart Lock Ultra", "nuki"), ["compact", "steel"]);
+  assert.deepEqual(pick("Nuki", "Smart Lock Pro 5", "nuki"), ["retrofit", "white"]);
+  assert.deepEqual(pick("SwitchBot", "Lock Ultra"), ["retrofit", "black"]);
+  assert.deepEqual(pick("tedee", "GO"), ["compact", "black"]);
+  assert.deepEqual(pick("tedee", "PRO"), ["knob", "black"]);
+  assert.deepEqual(pick("Yale", "Assure Lock 2", "zwave_js"), ["keypad", "black"]);
+  assert.deepEqual(pick("U-tec", "Ultraloq Latch 5"), ["lever", "black"]);
+  assert.deepEqual(pick("Ubiquiti", "UA Hub", "unifi_access"), ["reader", "white"]);
+  assert.deepEqual(pick("Acme", "Lock 1"), ["padlock", undefined]);
 });
 
 test("findLock picks the configured lock, else the first one by name", () => {

@@ -22,7 +22,8 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 
 - Two cards: a full **Smart Lock Card** and a compact **Smart Lock Mini Card**
 - Works with every lock integration of Home Assistant (the standard `lock` entity)
-- Drawn padlock that follows the state: locked, unlocked, open, jammed, animated while locking, unlocking or opening
+- Drawn lock picture that follows the model: retrofit, rotary knob, compact cylinder, keypad deadbolt, fingerprint lever, access reader or padlock, in white, black or steel; or a picture of your own
+- The picture follows the state: locked, unlocked, open, jammed, animated while locking, unlocking or opening
 - Lock, Unlock and Open buttons; Open (pull the latch) only for locks that support it
 - Confirmation popup at the top of the card before unlocking and opening (configurable, also for locking)
 - Code entry when the lock asks for one (`code_format`), checked against the lock's format; the code is never stored
@@ -91,6 +92,8 @@ type: custom:smartlock-mini-card
 type: custom:smartlock-card
 entity: lock.front_door
 title: Front door
+image: auto
+finish: white
 show_icon: true
 show_picture: true
 show_controls: true
@@ -113,6 +116,7 @@ language: fr
 type: custom:smartlock-mini-card
 entity: lock.garage
 title: Garage
+image: knob
 show_icon: true
 show_picture: true
 show_controls: true
@@ -130,8 +134,10 @@ language: fr
 |---|---|---|---|
 | `entity` | both | First lock | Lock entity (`lock.*`) |
 | `title` | both | Lock name | Card title |
+| `image` | both | `auto` | Lock picture: `auto` (per model), `retrofit`, `knob`, `compact`, `keypad`, `lever`, `reader`, `padlock`, `none`, or the URL of your own picture (e.g. `/local/my-lock.png`) |
+| `finish` | both | Per model | Finish of the drawn picture: `white`, `black` or `steel` |
 | `show_icon` | both | `true` | State icon at the left of the header |
-| `show_picture` | both | `true` | Padlock picture |
+| `show_picture` | both | `true` | Lock picture (same as `image: none` when `false`) |
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
 | `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…) |
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |
@@ -170,7 +176,9 @@ The other entities of the lock are found through the entity and device registrie
 
 <p align="center"><img src="images/states.svg" alt="Lock states" width="760"></p>
 
-The picture follows the lock state: shackle down when locked, lifted when unlocked, moving while locking or unlocking, waves while opening, shaking when jammed. It stays still with the reduced-motion setting.
+The picture is drawn for the family of the lock, picked from its integration, manufacturer, model and name: retrofit case (Nuki Smart Lock 3/4/5, SwitchBot Lock), rotary knob (Tedee Pro, Yale Linus, Sesame, Aqara U100/U200, August), compact cylinder (Nuki Smart Lock Ultra, Tedee GO), keypad deadbolt (Yale Assure, Schlage, Kwikset, Ultraloq U-Bolt), fingerprint lever (Ultraloq Latch, Aqara D100/A100, LOQED), access reader (UniFi Access, ekey, KIWI) and padlock for anything else. These are generic drawings of each kind of lock, not pictures of the products. Use `image` and `finish` to pick another one, or your own picture.
+
+The picture follows the lock state: the thumb turn or knob turns (the lever dips, the shackle lifts) when unlocked, moves while locking or unlocking, waves while opening, shakes when jammed, and the light takes the state color. It stays still with the reduced-motion setting.
 
 After a button press, the card shows the requested state (Locking…, Unlocking…, Opening…) until the lock reports a new one (20 s at most); if the call fails (wrong code, lock offline), the real state is shown again and Home Assistant reports the error.
 

@@ -216,3 +216,11 @@ test("a binary keypad battery reads OK / Low", () => {
   const html = newCard(makeHass()).shadowRoot.innerHTML;
   assert.match(html, /Keypad battery<\/div><div class="v">Battery OK</);
 });
+
+test("image: automatic family, a preset, your own picture or none", () => {
+  const src = (config) => newCard(makeHass(), config).shadowRoot.innerHTML.match(/<div class="picture[^>]*><img src="([^"]*)"/)?.[1];
+  assert.match(decodeURIComponent(src({})), /#fbfbfa/);
+  assert.match(decodeURIComponent(src({ image: "keypad" })), /cx="48" cy="46"/);
+  assert.equal(src({ image: "/local/serrure.png" }), "/local/serrure.png");
+  assert.equal(src({ image: "none" }), undefined);
+});

@@ -5,7 +5,7 @@ export const states = {};
 export const entities = {};
 export const devices = {};
 
-const device = (id, name, model) => (devices[id] = { id, name, model, identifiers: [["lock", id]], name_by_user: null });
+const device = (id, name, manufacturer, model) => (devices[id] = { id, name, manufacturer, model, identifiers: [["lock", id]], name_by_user: null });
 const entity = (entity_id, device_id, platform, translation_key, state, attributes = {}, extra = {}) => {
   entities[entity_id] = { entity_id, device_id, platform, translation_key: translation_key || null, ...extra };
   states[entity_id] = { entity_id, state: String(state), attributes, last_changed: new Date(Date.now() - 42 * 60e3).toISOString() };
@@ -13,7 +13,7 @@ const entity = (entity_id, device_id, platform, translation_key, state, attribut
 const minutesAgo = (m) => new Date(Date.now() - m * 60e3).toISOString();
 
 // Nuki Smart Lock: can pull the latch (supported_features 1), door sensor, battery, keypad, settings.
-device("nuki", "Front door", "Smart Lock Pro 5");
+device("nuki", "Front door", "Nuki", "Smart Lock Pro 5");
 entity("lock.porte_entree", "nuki", "nuki", null, "locked", { friendly_name: "Front door", supported_features: 1 });
 entity("sensor.porte_entree_batterie", "nuki", "nuki", "battery", "78", { friendly_name: "Front door Battery", device_class: "battery", unit_of_measurement: "%" });
 entity("binary_sensor.porte_entree_batterie_critique", "nuki", "nuki", "battery_critical", "off", { friendly_name: "Front door Battery critical", device_class: "battery" });
@@ -34,7 +34,7 @@ entity("switch.porte_entree_mode_nuit", "nuki", "nuki", "night_mode", "off", { f
 entity("select.porte_entree_led", "nuki", "nuki", "led_brightness", "Medium", { friendly_name: "Front door LED brightness" }, { entity_category: "config" });
 
 // Matter lock on the garage door: asks for a 4 to 8 digit code, no latch.
-device("garage", "Garage", "Linus L2");
+device("garage", "Garage", "Yale", "Linus L2");
 entity("lock.garage", "garage", "matter", null, "unlocked", { friendly_name: "Garage", supported_features: 0, code_format: "^\\d{4,8}$", changed_by: "Keypad" });
 entity("sensor.garage_batterie", "garage", "matter", "battery", "22", { friendly_name: "Garage Battery", device_class: "battery", unit_of_measurement: "%" });
 entity("binary_sensor.garage_porte", "garage", "matter", "door", "on", { friendly_name: "Garage Door", device_class: "door" });

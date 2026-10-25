@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0
+
+### Changes
+- The lock picture follows the model instead of always showing a padlock: retrofit case, rotary knob, compact cylinder, keypad deadbolt, fingerprint lever, access reader or padlock, in white, black or steel, picked from the integration, manufacturer, model and name of the lock (generic drawings of each kind of lock).
+- New `image` option (also in the visual editor): `auto`, one of the families, `none`, or the URL of your own picture; new `finish` option: `white`, `black` or `steel`.
+- Every picture is animated by the lock state: thumb turn or knob turning, lever dipping, shackle lifting, waves while opening, shaking when jammed.
+
+### Maintenance
+- Tests for every family and state and for the automatic choice (27 in all); screenshots regenerated.
+
 ## 1.0.0
 
 First release of the Smart Lock cards for Home Assistant, for any [lock entity](https://www.home-assistant.io/integrations/lock/).

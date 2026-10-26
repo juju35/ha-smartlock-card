@@ -109,35 +109,43 @@ for (const s of shots) {
   await page.close();
 }
 
-// The lock mid-turn, recorded as a looping GIF (screenshots/unlocking.gif) — needs ffmpeg on PATH. Every animation
-// is paused and stepped frame by frame, so the GIF is identical whatever the machine's speed.
-const gif = { file: "unlocking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "unlocking" } } };
-const FPS = 20;
-const SECONDS = 3;
-{
+// A lock mid-animation, recorded as a looping GIF (needs ffmpeg on PATH). Every animation is paused and stepped
+// frame by frame, so each GIF is identical whatever the machine's speed.
+async function makeGif(browser, gif, { fps = 20, seconds = 3 } = {}) {
   const page = await openCard(browser, gif);
   await page.waitForTimeout(300);
   const box = await page.locator("#root").boundingBox();
   const clip = { x: 0, y: 0, width: gif.width + 32, height: Math.ceil(box.height) + 32 };
   const dir = mkdtempSync(join(tmpdir(), "sl-frames-"));
-  const frames = Math.round(FPS * SECONDS);
+  const frames = Math.round(fps * seconds);
   for (let i = 0; i < frames; i++) {
     await page.evaluate((t) => {
       for (const a of document.getAnimations()) {
         a.pause();
         a.currentTime = t;
       }
-    }, (i * 1000) / FPS);
+    }, (i * 1000) / fps);
     await page.screenshot({ path: join(dir, `f${String(i).padStart(3, "0")}.png`), clip });
   }
   await page.close();
   const out = `${root}screenshots/${gif.file}.gif`;
   execFileSync("ffmpeg", [
-    "-y", "-loglevel", "error", "-framerate", String(FPS), "-i", join(dir, "f%03d.png"),
+    "-y", "-loglevel", "error", "-framerate", String(fps), "-i", join(dir, "f%03d.png"),
     "-vf", `scale=${clip.width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4`,
     "-loop", "0", out,
   ]);
   rmSync(dir, { recursive: true });
   console.log(`screenshots/${gif.file}.gif`);
 }
+
+// One GIF per lock type and per distinct animation: the bolt turning + glowing as a lock unlocks and locks
+// (Nuki front door and matter garage), the jammed shake, and the door-opening wave.
+const gifs = [
+  { file: "unlocking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "unlocking" } } },
+  { file: "locking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "locking" } } },
+  { file: "garage-unlocking", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage" }, overrides: { "lock.garage": { state: "unlocking" } } },
+  { file: "jammed", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
+  { file: "opening", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: opening },
+];
+for (const gif of gifs) await makeGif(browser, gif);
 await browser.close();

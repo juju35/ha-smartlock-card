@@ -153,9 +153,27 @@ language: fr
 
 ## Screenshots
 
-While the lock turns, the card animates: the bolt rotates and glows as it locks or unlocks. It settles to a still card once idle (and honours `prefers-reduced-motion`).
+The card animates while the lock is busy, and settles to a still card once idle. Each state has its own animation, and every lock honours `prefers-reduced-motion` (no movement when the system asks for reduced motion).
+
+As a lock unlocks, the bolt rotates and glows — here the Nuki front door:
 
 ![unlocking animation](screenshots/unlocking.gif)
+
+The same turn runs in reverse, with the glow, as it locks again:
+
+![locking animation](screenshots/locking.gif)
+
+Any lock integration gets the animation — here the matter garage lock mid-turn:
+
+![garage unlocking animation](screenshots/garage-unlocking.gif)
+
+When a lock is jammed, the picture shakes:
+
+![jammed animation](screenshots/jammed.gif)
+
+While a door is opening, waves ripple out from the light:
+
+![opening animation](screenshots/opening.gif)
 
 | Light | Dark (unlocked, door open) |
 |---|---|
@@ -195,7 +213,7 @@ npm install
 npm run build        # bundles src/smartlock-card.js into dist/smartlock-card.js
 npm run check        # builds and checks the card (run in CI)
 npm test             # unit tests (node --test, no browser)
-npm run screenshots  # renders the cards (and unlocking.gif, needs ffmpeg) with mock data into screenshots/
+npm run screenshots  # renders the cards (and the animation gifs, needs ffmpeg) with mock data into screenshots/
 ```
 
 `dist/` is not committed: `npm run build` creates it locally, CI builds it on every push, and the release workflow attaches the built file to the release, which is where HACS downloads it from.

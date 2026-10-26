@@ -128,10 +128,11 @@ const FAMILIES = {
     led: [60, 66],
     body: `<circle cx="60" cy="66" r="46" fill="url(#r)"/>
       ${Array.from({ length: 36 }, (_, i) => `<line x1="60" y1="20" x2="60" y2="27" stroke="${p.f[2]}" stroke-width="2" transform="rotate(${i * 10} 60 66)"/>`).join("")}
-      <circle cx="60" cy="66" r="36" fill="url(#ri)"/><circle cx="60" cy="66" r="30" fill="url(#r)"/>
-      ${part(p, 60, 66, `<path d="M54 42 h12 l3 48 h-18 z" fill="url(#ri)" opacity=".9"/><path d="M58 46 h4 l1.2 40 h-6.4 z" fill="${p.color}" class="${p.glow}"/>`)}
-      <circle cx="60" cy="122" r="9" fill="${p.color}" opacity=".22"/>
-      <circle cx="60" cy="122" r="5" fill="${p.color}" class="${p.glow}"/>`,
+      <circle cx="60" cy="66" r="38" fill="url(#ri)"/>
+      <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="${p.f[1]}" stroke-width="3.5" opacity=".4"/>
+      <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="${p.color}" stroke-width="3.5" stroke-linecap="round" class="${p.glow}"/>
+      <circle cx="60" cy="66" r="28" fill="url(#r)"/>
+      ${part(p, 60, 66, `<rect x="57" y="46" width="6" height="40" rx="3" fill="url(#ri)" opacity=".85"/>`)}`,
   }),
   // Deadbolt with an outside keypad and a light bar.
   keypad: (p) => {

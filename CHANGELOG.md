@@ -3,7 +3,7 @@
 ## 1.1.1
 
 ### Fixes
-- Compact cylinder picture: the state could hardly be seen. The grip ridge now takes the state color and the status light is larger, with a halo.
+- Compact cylinder picture: the state could hardly be seen. A status light ring around the center, open at the bottom, now takes the state color (green locked, orange unlocked, red jammed).
 
 ## 1.1.0
 

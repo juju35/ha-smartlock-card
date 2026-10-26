@@ -1,7 +1,6 @@
 # Changelog
 
-## Unreleased
-
+## 1.3.0
 ### Changes
 - Header badge icon at 24 px, the size shared by the other ha-* cards.
 - The highlighted Lock / Unlock button (round on the mini card) and the popup's confirm button are tinted with the accent color instead of filled, like the other ha-* cards.

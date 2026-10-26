@@ -868,8 +868,8 @@ class SmartLockBase extends HTMLElement {
     const c = this._confirm;
     const numeric = c.code && /^\^?\\d|^\^?\[0-9\]/.test(c.code);
     return `<style>${DIALOG_STYLE}</style><div class="backdrop" data-action="confirm_backdrop">
-      <div class="modal" role="dialog" aria-modal="true">
-        <div class="msg">${esc(c.text)}</div>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sl-confirm-msg">
+        <div class="msg" id="sl-confirm-msg">${esc(c.text)}</div>
         ${
           c.code
             ? `<input name="code" type="password" autocomplete="off" inputmode="${numeric ? "numeric" : "text"}" placeholder="${esc(this._t("code"))}" aria-label="${esc(this._t("code"))}">

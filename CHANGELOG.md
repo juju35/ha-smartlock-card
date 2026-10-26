@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0
+
+_2026-10-26_
+
+### Fixes
+- Accessibility: the confirmation popup (`role="dialog" aria-modal="true"`) now has an accessible name. It is linked to its message through `aria-labelledby`, so a screen reader announces the requested action ("Unlock …?", "Open …?") instead of an unnamed dialog (WCAG 4.1.2).
+
 ## 1.3.0
 ### Changes
 - Header badge icon at 24 px, the size shared by the other ha-* cards.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.3
+
+### Changes
+- Mini card: laid out like the alarm card — the state shown in color under the name, a shorter battery bar, and the detail button inline at the far right of the row, clear of the controls.
+
 ## 1.2.2
 
 ### Fixes

@@ -1244,22 +1244,22 @@ class SmartLockCard extends SmartLockBase {
 // ---------------------------------------------------------------------------
 
 const MINI_STYLE = `
-  .mini { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
-  .mini .right { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-  .mini .right .zoom { margin: 0; }
-  .mini .picture { width: 54px; height: 62px; flex: none; }
+  .mini { display: flex; align-items: center; gap: 10px; padding: 12px; }
+  .mini .picture { width: 50px; height: 58px; flex: none; }
   .mini .picture img { filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
-  .mini .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .top .name { flex: 1; min-width: 0; font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .batt { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-  .batt .icon { color: var(--c); width: 15px; height: 15px; }
-  .batt .bar { flex: 1; }
-  .batt .v { font-weight: 500; min-width: 36px; text-align: right; white-space: nowrap; }
-  .batt .bolt { color: var(--sl-ok); }
-  .line, .alert-line { font-size: 12px; }
-  .line .icon, .alert-line .icon { width: 14px; height: 14px; }
-  .controls { display: flex; gap: 6px; flex: none; }
+  .mini .titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .mini .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini .sub { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini .sub .st { color: var(--c); font-weight: 500; }
+  .mini .sub .dot { margin-right: 4px; vertical-align: 1px; }
+  .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .mini .batt .icon { color: var(--c); width: 14px; height: 14px; }
+  .mini .batt .bar { width: 64px; flex: none; }
+  .mini .batt .v { font-weight: 500; white-space: nowrap; }
+  .mini .batt .bolt { color: var(--sl-ok); }
+  .mini .controls { display: flex; gap: 6px; flex: none; }
+  .mini .controls .btn.round { width: 32px; height: 32px; }
+  .mini .controls .btn .icon { width: 16px; height: 16px; }
 `;
 
 // The mini card is a full card drawn compact: its detail button (top right, `zoom: false` removes it) switches it
@@ -1324,30 +1324,31 @@ class SmartLockMiniCard extends SmartLockCard {
     const state = this._state(lock);
     const cls = statusClass(state);
     const controls = this._controls(lock, state, true);
-    // One secondary line, by priority: alert (jammed, problem), open door, then the last change.
-    const secondary =
-      this._alertLine(m, state) ||
-      this._doorLine(m) ||
-      (valid(lock) ? `<div class="line">${svgIcon(ICONS.clock)}<span>${esc(this._changedText(lock))}</span></div>` : "");
+    // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change).
     return `<style>${BASE_STYLE}${MINI_STYLE}</style>
       <ha-card>
         <div class="mini">
           ${this._picture(lock, state)}
-          <div class="info">
-            <div class="top">
-              <span class="name clickable" data-entity="${esc(lock.entity_id)}">${esc(this._config.title || name(this._hass, lock.entity_id))}</span>
-              <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}"><span class="dot"></span>${esc(this._fmtState(state))}</span>
-            </div>
+          <div class="titles">
+            <div class="name clickable" data-entity="${esc(lock.entity_id)}">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
+            <div class="sub clickable" data-entity="${esc(lock.entity_id)}"><span class="st ${cls}"><span class="dot"></span>${esc(this._fmtState(state))}</span>${esc(this._miniDetail(m, state, lock))}</div>
             ${this._batteryLine(this._battery(m))}
-            ${secondary}
           </div>
-          ${
-            controls || this._zoomButton()
-              ? `<div class="right">${this._zoomButton()}${controls ? `<div class="controls">${controls}</div>` : ""}</div>`
-              : ""
-          }
+          ${controls ? `<div class="controls">${controls}</div>` : ""}
+          ${this._zoomButton()}
         </div>
       </ha-card>`;
+  }
+
+  // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>".
+  _miniDetail(m, state, lock) {
+    const door = this._s(m.door);
+    if (valid(door) && (door.state === "on" || door.state === "open")) return ` · ${this._t("door_open")}`;
+    if (!valid(lock)) return "";
+    const when = ago(this._hass, this._config, lock.last_changed);
+    if (!when) return "";
+    const by = lock.attributes?.changed_by;
+    return ` · ${when}${by ? ` · ${this._t("by", { who: by })}` : ""}`;
   }
 }
 

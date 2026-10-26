@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+
+### Fixes
+- Mini card: the detail button was cramped between the status pill and the buttons. It is now in the top-right corner of the card, clear of the controls.
+
 ## 1.2.0
 
 ### Changes

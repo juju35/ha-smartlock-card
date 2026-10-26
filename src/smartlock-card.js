@@ -1331,7 +1331,7 @@ class SmartLockMiniCard extends SmartLockCard {
           ${this._picture(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${esc(lock.entity_id)}">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            <div class="sub clickable" data-entity="${esc(lock.entity_id)}"><span class="st ${cls}"><span class="dot"></span>${esc(this._fmtState(state))}</span>${esc(this._miniDetail(m, state, lock))}</div>
+            <div class="sub clickable" data-entity="${esc(lock.entity_id)}"><span class="st ${cls}"><span class="dot"></span>${esc(this._fmtState(state))}</span>${esc(this._miniDetail(m, lock))}</div>
             ${this._batteryLine(this._battery(m))}
           </div>
           ${controls ? `<div class="controls">${controls}</div>` : ""}
@@ -1341,7 +1341,7 @@ class SmartLockMiniCard extends SmartLockCard {
   }
 
   // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>".
-  _miniDetail(m, state, lock) {
+  _miniDetail(m, lock) {
     const door = this._s(m.door);
     if (valid(door) && (door.state === "on" || door.state === "open")) return ` · ${this._t("door_open")}`;
     if (!valid(lock)) return "";

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.4
+
+### Maintenance
+- Removed an unused parameter (no functional change).
+
 ## 1.2.3
 
 ### Changes

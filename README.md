@@ -153,7 +153,7 @@ language: fr
 
 ## Screenshots
 
-| Light | Dark (French, unlocked, door open) |
+| Light | Dark (unlocked, door open) |
 |---|---|
 | ![card](screenshots/card.png) | ![card dark](screenshots/card-dark.png) |
 | ![mini card](screenshots/mini-card.png) | ![mini card dark](screenshots/mini-card-dark.png) |

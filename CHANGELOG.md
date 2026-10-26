@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+### Changes
+- Mini card (compact view): tighter single-row layout — picture, title, status, battery and the lock / unlock button on one line, with a single secondary line (alert, open door, or last change). The redundant state icon and the empty vertical space are gone; the card is noticeably shorter.
+
 ## 1.1.2
 
 ### Fixes

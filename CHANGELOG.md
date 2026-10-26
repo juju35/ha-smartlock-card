@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2
+
+### Fixes
+- Compact cylinder picture: the center mark is more visible, so its rotation while locking and unlocking (and the status ring turning to the active color) reads clearly.
+
 ## 1.1.1
 
 ### Fixes

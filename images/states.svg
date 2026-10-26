@@ -71,7 +71,7 @@
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="#9ea3a9" stroke-width="3.5" opacity=".4"/>
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="#43a047" stroke-width="3.5" stroke-linecap="round" class=""/>
       <circle cx="60" cy="66" r="28" fill="url(#r6)"/>
-      <g class="part " style="transform-origin:60px 66px"><rect x="57" y="46" width="6" height="40" rx="3" fill="url(#ri6)" opacity=".85"/></g></svg>
+      <g class="part " style="transform-origin:60px 66px"><rect x="56.5" y="45" width="7" height="42" rx="3.5" fill="url(#g6)" stroke="#b9bdc2" stroke-width="1"/></g></svg>
 <svg x="330" y="250" width="86" height="100" viewBox="0 0 120 140"><defs><linearGradient id="g7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f5f6"/><stop offset="1" stop-color="#9ea3a9"/></linearGradient>
    <radialGradient id="r7" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#f4f5f6"/><stop offset="1" stop-color="#9ea3a9"/></radialGradient>
    <radialGradient id="ri7" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#9ea3a9"/><stop offset="1" stop-color="#f4f5f6"/></radialGradient>
@@ -81,7 +81,7 @@
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="#9ea3a9" stroke-width="3.5" opacity=".4"/>
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="#ffa600" stroke-width="3.5" stroke-linecap="round" class=""/>
       <circle cx="60" cy="66" r="28" fill="url(#r7)"/>
-      <g class="part on" style="transform-origin:60px 66px"><rect x="57" y="46" width="6" height="40" rx="3" fill="url(#ri7)" opacity=".85"/></g></svg>
+      <g class="part on" style="transform-origin:60px 66px"><rect x="56.5" y="45" width="7" height="42" rx="3.5" fill="url(#g7)" stroke="#b9bdc2" stroke-width="1"/></g></svg>
 <svg x="430" y="250" width="86" height="100" viewBox="0 0 120 140"><defs><linearGradient id="g8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f5f6"/><stop offset="1" stop-color="#9ea3a9"/></linearGradient>
    <radialGradient id="r8" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#f4f5f6"/><stop offset="1" stop-color="#9ea3a9"/></radialGradient>
    <radialGradient id="ri8" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#9ea3a9"/><stop offset="1" stop-color="#f4f5f6"/></radialGradient>
@@ -91,7 +91,7 @@
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="#9ea3a9" stroke-width="3.5" opacity=".4"/>
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="#db4437" stroke-width="3.5" stroke-linecap="round" class=""/>
       <circle cx="60" cy="66" r="28" fill="url(#r8)"/>
-      <g class="part " style="transform-origin:60px 66px"><rect x="57" y="46" width="6" height="40" rx="3" fill="url(#ri8)" opacity=".85"/></g></g></svg>
+      <g class="part " style="transform-origin:60px 66px"><rect x="56.5" y="45" width="7" height="42" rx="3.5" fill="url(#g8)" stroke="#b9bdc2" stroke-width="1"/></g></g></svg>
 <svg x="230" y="370" width="86" height="100" viewBox="0 0 120 140"><defs><linearGradient id="g9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4e54"/><stop offset="1" stop-color="#25272b"/></linearGradient>
    <radialGradient id="r9" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#4a4e54"/><stop offset="1" stop-color="#25272b"/></radialGradient>
    <radialGradient id="ri9" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#25272b"/><stop offset="1" stop-color="#4a4e54"/></radialGradient>

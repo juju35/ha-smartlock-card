@@ -132,7 +132,7 @@ const FAMILIES = {
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="${p.f[1]}" stroke-width="3.5" opacity=".4"/>
       <path d="M51.5 97.9 A 33 33 0 1 1 68.5 97.9" fill="none" stroke="${p.color}" stroke-width="3.5" stroke-linecap="round" class="${p.glow}"/>
       <circle cx="60" cy="66" r="28" fill="url(#r)"/>
-      ${part(p, 60, 66, `<rect x="57" y="46" width="6" height="40" rx="3" fill="url(#ri)" opacity=".85"/>`)}`,
+      ${part(p, 60, 66, `<rect x="56.5" y="45" width="7" height="42" rx="3.5" fill="url(#g)" stroke="${p.f[2]}" stroke-width="1"/>`)}`,
   }),
   // Deadbolt with an outside keypad and a light bar.
   keypad: (p) => {

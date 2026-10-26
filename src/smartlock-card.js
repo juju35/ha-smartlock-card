@@ -1244,8 +1244,9 @@ class SmartLockCard extends SmartLockBase {
 // ---------------------------------------------------------------------------
 
 const MINI_STYLE = `
-  .mini { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
-  .mini .zoom { position: absolute; top: 6px; right: 8px; margin: 0; }
+  .mini { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+  .mini .right { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .mini .right .zoom { margin: 0; }
   .mini .picture { width: 54px; height: 62px; flex: none; }
   .mini .picture img { filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
   .mini .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
@@ -1340,8 +1341,11 @@ class SmartLockMiniCard extends SmartLockCard {
             ${this._batteryLine(this._battery(m))}
             ${secondary}
           </div>
-          ${controls ? `<div class="controls">${controls}</div>` : ""}
-          ${this._zoomButton()}
+          ${
+            controls || this._zoomButton()
+              ? `<div class="right">${this._zoomButton()}${controls ? `<div class="controls">${controls}</div>` : ""}</div>`
+              : ""
+          }
         </div>
       </ha-card>`;
   }

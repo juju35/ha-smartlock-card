@@ -1,6 +1,6 @@
 {
   "name": "ha-smartlock-card",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Lovelace cards for Home Assistant to monitor and control smart locks from any integration.",
   "private": true,
   "type": "module",

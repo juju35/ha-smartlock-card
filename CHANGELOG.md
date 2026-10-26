@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.2
+
+### Fixes
+- Mini card: the lock / unlock button was too close to the detail button. The detail button now sits above the controls in a right-hand column, with a clear gap.
+
 ## 1.2.1
 
 ### Fixes

@@ -153,6 +153,10 @@ language: fr
 
 ## Screenshots
 
+While the lock turns, the card animates: the bolt rotates and glows as it locks or unlocks. It settles to a still card once idle (and honours `prefers-reduced-motion`).
+
+![unlocking animation](screenshots/unlocking.gif)
+
 | Light | Dark (unlocked, door open) |
 |---|---|
 | ![card](screenshots/card.png) | ![card dark](screenshots/card-dark.png) |
@@ -191,7 +195,7 @@ npm install
 npm run build        # bundles src/smartlock-card.js into dist/smartlock-card.js
 npm run check        # builds and checks the card (run in CI)
 npm test             # unit tests (node --test, no browser)
-npm run screenshots  # renders the cards with mock data (scripts/mock-states.mjs) into screenshots/
+npm run screenshots  # renders the cards (and unlocking.gif, needs ffmpeg) with mock data into screenshots/
 ```
 
 `dist/` is not committed: `npm run build` creates it locally, CI builds it on every push, and the release workflow attaches the built file to the release, which is where HACS downloads it from.

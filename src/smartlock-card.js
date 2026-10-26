@@ -547,7 +547,7 @@ const BASE_STYLE = `
           background: color-mix(in srgb, var(--c, var(--sl-ok)) 15%, transparent); color: var(--c, var(--sl-ok)); flex: none; }
   .bar { height: 4px; border-radius: 3px; background: var(--divider-color, rgba(127,127,127,.25)); overflow: hidden; }
   .bar > div { height: 100%; border-radius: 3px; background: var(--c, var(--sl-ok)); transition: width .6s ease; }
-  .header { display: flex; align-items: center; gap: 10px; padding: 12px 12px 4px; }
+  .header { display: flex; align-items: center; gap: 10px; padding: 12px 12px 0; }
   .badge { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center;
            background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); }
   .badge .icon { width: 24px; height: 24px; }
@@ -567,7 +567,8 @@ const BASE_STYLE = `
          font-weight: 500; padding: 6px 12px; border-radius: 18px; background: var(--secondary-background-color, rgba(127,127,127,.12));
          color: var(--primary-text-color); min-width: 0; }
   .btn:hover { background: color-mix(in srgb, var(--sl-accent) 12%, var(--secondary-background-color, rgba(127,127,127,.12))); }
-  .btn.primary { background: var(--sl-accent); color: #fff; }
+  .btn.primary { background: color-mix(in srgb, var(--sl-accent) 16%, transparent); color: var(--sl-accent); }
+  .btn.primary:hover { background: color-mix(in srgb, var(--sl-accent) 24%, transparent); }
   .btn .icon { width: 18px; height: 18px; }
   .btn.round { width: 36px; height: 36px; padding: 0; border-radius: 50%; }
   .btn.busy { opacity: .6; cursor: progress; }
@@ -994,11 +995,11 @@ class SmartLockBase extends HTMLElement {
 // ---------------------------------------------------------------------------
 
 const FULL_STYLE = `
-  .content { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 12px; }
+  .content { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 12px; }
   .hero { display: flex; gap: 12px; align-items: center; }
   .picture { width: 88px; height: 102px; }
   .picture img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }
-  .state { font-size: 24px; font-weight: 400; line-height: 1.1; color: var(--c); }
+  .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--c); }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }

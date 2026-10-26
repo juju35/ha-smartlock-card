@@ -1,7 +1,10 @@
 // Renders the cards with mock lock data and saves the README screenshots.
 // Usage: npm run build && npm run screenshots
 import { chromium } from "playwright";
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { states, entities, devices, opening, jammed, logbook } from "./mock-states.mjs";
 
@@ -45,19 +48,10 @@ const page_html = (theme, width) => `<!doctype html><html><head><meta charset="u
 </style></head><body><div id="root"></div></body></html>`;
 
 const section = (key) => `[data-section="${key}"]`;
-const shots = [
-  { file: "card", type: "smartlock-card", theme: "light", width: 460, config: {}, clicks: [section("activity")] },
-  { file: "card-dark", type: "smartlock-card", theme: "dark", width: 460, config: {}, overrides: opening, clicks: [section("settings")] },
-  { file: "card-code", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage" }, clicks: ['[data-action="lock"]'] },
-  { file: "card-jammed", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
-  { file: "mini-card", type: "smartlock-mini-card", theme: "light", width: 380, config: {} },
-  { file: "mini-card-dark", type: "smartlock-mini-card", theme: "dark", width: 380, config: { entity: "lock.garage" } },
-  { file: "mini-card-zoom", type: "smartlock-mini-card", theme: "light", width: 460, config: {}, clicks: [".zoom"] },
-];
 
-const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
-for (const s of shots) {
-  // A new page per shot: the card's script declares top-level names, which cannot be evaluated twice in one page.
+// Mount a shot's card on a fresh page and return it (a new page per shot: the card's script declares top-level
+// names, which cannot be evaluated twice in one page).
+async function openCard(browser, s) {
   const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 1000, height: 2000 } });
   page.on("pageerror", (err) => console.error(`pageerror (${s.file}): ${err.message}`));
   await page.setContent(page_html(s.theme, s.width));
@@ -76,6 +70,22 @@ for (const s of shots) {
     },
     { type: s.type, config: s.config, states, entities, devices, overrides: s.overrides, logbook },
   );
+  return page;
+}
+
+const shots = [
+  { file: "card", type: "smartlock-card", theme: "light", width: 460, config: {}, clicks: [section("activity")] },
+  { file: "card-dark", type: "smartlock-card", theme: "dark", width: 460, config: {}, overrides: opening, clicks: [section("settings")] },
+  { file: "card-code", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage" }, clicks: ['[data-action="lock"]'] },
+  { file: "card-jammed", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
+  { file: "mini-card", type: "smartlock-mini-card", theme: "light", width: 380, config: {} },
+  { file: "mini-card-dark", type: "smartlock-mini-card", theme: "dark", width: 380, config: { entity: "lock.garage" } },
+  { file: "mini-card-zoom", type: "smartlock-mini-card", theme: "light", width: 460, config: {}, clicks: [".zoom"] },
+];
+
+const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
+for (const s of shots) {
+  const page = await openCard(browser, s);
   for (const sel of s.clicks || []) {
     // A mouse click (detail 1), not .click(): a keyboard-like click would move the focus and show its ring.
     await page.evaluate(
@@ -98,4 +108,44 @@ for (const s of shots) {
   console.log(`screenshots/${s.file}.png`);
   await page.close();
 }
+
+// A lock mid-animation, recorded as a looping GIF (needs ffmpeg on PATH). Every animation is paused and stepped
+// frame by frame, so each GIF is identical whatever the machine's speed.
+async function makeGif(browser, gif, { fps = 20, seconds = 3 } = {}) {
+  const page = await openCard(browser, gif);
+  await page.waitForTimeout(300);
+  const box = await page.locator("#root").boundingBox();
+  const clip = { x: 0, y: 0, width: gif.width + 32, height: Math.ceil(box.height) + 32 };
+  const dir = mkdtempSync(join(tmpdir(), "sl-frames-"));
+  const frames = Math.round(fps * seconds);
+  for (let i = 0; i < frames; i++) {
+    await page.evaluate((t) => {
+      for (const a of document.getAnimations()) {
+        a.pause();
+        a.currentTime = t;
+      }
+    }, (i * 1000) / fps);
+    await page.screenshot({ path: join(dir, `f${String(i).padStart(3, "0")}.png`), clip });
+  }
+  await page.close();
+  const out = `${root}screenshots/${gif.file}.gif`;
+  execFileSync("ffmpeg", [
+    "-y", "-loglevel", "error", "-framerate", String(fps), "-i", join(dir, "f%03d.png"),
+    "-vf", `scale=${clip.width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4`,
+    "-loop", "0", out,
+  ]);
+  rmSync(dir, { recursive: true });
+  console.log(`screenshots/${gif.file}.gif`);
+}
+
+// One GIF per lock type and per distinct animation: the bolt turning + glowing as a lock unlocks and locks
+// (Nuki front door and matter garage), the jammed shake, and the door-opening wave.
+const gifs = [
+  { file: "unlocking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "unlocking" } } },
+  { file: "locking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "locking" } } },
+  { file: "garage-unlocking", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage" }, overrides: { "lock.garage": { state: "unlocking" } } },
+  { file: "jammed", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
+  { file: "opening", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: opening },
+];
+for (const gif of gifs) await makeGif(browser, gif);
 await browser.close();

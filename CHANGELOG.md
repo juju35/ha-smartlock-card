@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+- Header badge icon at 24 px, the size shared by the other ha-* cards.
+
+### Maintenance
+- Screenshots: 16 px frame on the theme background, shared theme tokens, 460 px cards and 380 px mini cards, English everywhere.
+
 ## 1.2.4
 
 ### Maintenance

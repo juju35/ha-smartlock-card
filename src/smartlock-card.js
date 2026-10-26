@@ -550,7 +550,7 @@ const BASE_STYLE = `
   .header { display: flex; align-items: center; gap: 10px; padding: 12px 12px 4px; }
   .badge { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center;
            background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); }
-  .badge .icon { width: 22px; height: 22px; }
+  .badge .icon { width: 24px; height: 24px; }
   .titles { flex: 1; min-width: 0; }
   .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sub { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

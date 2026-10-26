@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+- Header badge icon at 24 px, the size shared by the other ha-* cards.
+- The highlighted Lock / Unlock button (round on the mini card) and the popup's confirm button are tinted with the accent color instead of filled, like the other ha-* cards.
+- The state next to the lock picture is 22 px (was 24 px), like the other cards' main state.
+- The content starts 8 px under the header (was 4 px), like the other cards.
+
+### Maintenance
+- Screenshots: 16 px frame on the theme background, shared theme tokens, 460 px cards and 380 px mini cards, English everywhere.
+
 ## 1.2.4
 
 ### Maintenance

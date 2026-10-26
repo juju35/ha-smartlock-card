@@ -33,11 +33,11 @@ jobs:
       # ffmpeg is required to assemble the GIFs and is not preinstalled; Roboto keeps text faithful. Retry to ride
       # out a flaky apt mirror, cap the wait so it can never hang the job, and fail loudly if ffmpeg is still missing.
       - name: Install ffmpeg and Roboto
-        timeout-minutes: 8
+        timeout-minutes: 10
         run: |
           for i in 1 2 3; do
-            sudo apt-get update && sudo apt-get install -y ffmpeg fonts-roboto && break
-            echo "apt attempt $i failed, retrying in 10s"; sleep 10
+            timeout 120 sudo apt-get update && timeout 180 sudo apt-get install -y ffmpeg fonts-roboto && break
+            echo "apt attempt $i failed or timed out, retrying in 10s"; sleep 10
           done
           ffmpeg -version > /dev/null
       - run: npm run build

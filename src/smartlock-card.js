@@ -692,6 +692,10 @@ class SmartLockBase extends HTMLElement {
       else this._update();
     };
     document.addEventListener("click", this._onOutside, true);
+    // The relative "changed … ago" text moves on its own: re-render once a minute so it does not stay frozen on a
+    // quiet instance (no new hass pushed). _update only touches the DOM when the rendered text actually changed.
+    clearInterval(this._agoTimer);
+    this._agoTimer = setInterval(() => this._update(), 60e3);
     // Reattached with the popup still open (view switch, editor): Escape keeps closing it.
     if (this._confirm) window.addEventListener("keydown", this._onKey);
   }
@@ -699,6 +703,7 @@ class SmartLockBase extends HTMLElement {
   disconnectedCallback() {
     document.removeEventListener("click", this._onOutside, true);
     window.removeEventListener("keydown", this._onKey);
+    clearInterval(this._agoTimer);
     clearTimeout(this._pendingTimer);
   }
 

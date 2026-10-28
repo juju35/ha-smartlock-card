@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0
+
+_2026-10-28_
+
+### Changes
+- German and Spanish translations: the cards and the visual editor are now available in English, French, German and Spanish (`language: de` / `language: es`, or detected from Home Assistant).
+
 ## 1.4.1
 
 _2026-10-28_

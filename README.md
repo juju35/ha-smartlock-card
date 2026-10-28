@@ -37,7 +37,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Detail button on the mini card (top right): it switches the mini card to the full card's content and back; a click anywhere outside the card brings the compact view back
 - Click any value to open its Home Assistant history (more-info dialog)
 - Visual editor in the dashboard UI for both cards (no YAML needed)
-- Light and dark mode, English and French
+- Light and dark mode, English, French, German and Spanish
 - Single file, no external dependency
 
 ## Prerequisites
@@ -149,7 +149,7 @@ language: fr
 | `show_settings` | full | `true` | Switches, selects, numbers and buttons of the lock device |
 | `show_activity` | full | `true` | Last events of the lock in the logbook |
 | `collapsed` | full | `[settings, activity]` | Sections folded by default, among `details`, `settings` and `activity` (`[]` to unfold everything). Click a section title to fold or unfold it |
-| `language` | both | Auto | Force language: `fr` or `en` (auto-detects from HA settings) |
+| `language` | both | Auto | Force language: `en`, `fr`, `de` or `es` (auto-detects from HA settings) |
 
 ## Screenshots
 
@@ -252,6 +252,8 @@ The cards auto-detect the language from your Home Assistant settings. Currently 
 |---|---|
 | English | `en` |
 | Français | `fr` |
+| Deutsch | `de` |
+| Español | `es` |
 
 Contributions for additional languages are welcome!
 

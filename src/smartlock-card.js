@@ -627,6 +627,8 @@ class SmartLockBase extends HTMLElement {
         ev.stopPropagation();
         this._closeConfirm();
       } else if (ev.key === "Enter" && this._confirm.code) {
+        // Not with the focus on Cancel: Enter must click it (the native click the preventDefault would swallow).
+        if (this.shadowRoot.activeElement?.dataset.action === "confirm_cancel") return;
         ev.preventDefault();
         this._confirmOk();
       }

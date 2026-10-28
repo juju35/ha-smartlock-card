@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.4.1
+
+_2026-10-28_
+
+### Fixes
+- Code popup: pressing Enter while the Cancel button has focus now cancels instead of sending the code.
+- Accessibility: the collapsible section titles and the clickable state chips can be reached with the keyboard and activated with Enter / Space.
+- The relative time ("Locked 42 minutes ago") keeps moving on a quiet instance, refreshed once a minute.
+- Performance: without `entity` configured, the default lock is no longer looked up again on every state change of the instance.
+
+### Maintenance
+- README: one unlocking animation GIF per drawn lock family, recorded deterministically; `show_icon` documented as acting on the full view only.
+- CI: release gated on the tests, screenshot commits guarded against forks and manual runs, unused Ruff tooling removed.
+
 ## 1.4.0
 
 _2026-10-26_

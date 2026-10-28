@@ -109,11 +109,25 @@ for (const s of shots) {
   await page.close();
 }
 
-// A lock mid-animation, recorded as a looping GIF (needs ffmpeg on PATH). Every animation is paused and stepped
-// frame by frame, so each GIF is identical whatever the machine's speed.
+// A lock mid-animation, recorded as a looping GIF (needs ffmpeg on PATH). The SVG picture is served as an
+// <img src="data:image/svg+xml,…">, whose internal document is invisible to document.getAnimations(): the image
+// is first swapped for the same SVG inline, so every animation really is paused and stepped frame by frame and
+// each GIF is identical whatever the machine's speed.
 async function makeGif(browser, gif, { fps = 20, seconds = 3 } = {}) {
   const page = await openCard(browser, gif);
   await page.waitForTimeout(300);
+  await page.evaluate(() => {
+    const img = document.getElementById("root").firstElementChild.shadowRoot.querySelector(".picture img");
+    const box = img.getBoundingClientRect();
+    const span = document.createElement("span");
+    span.innerHTML = decodeURIComponent(img.src.slice("data:image/svg+xml,".length));
+    const svg = span.firstElementChild;
+    // The inline svg no longer matches the `.picture img` sizing rules: keep the img's rendered box and shadow.
+    svg.style.width = `${box.width}px`;
+    svg.style.height = `${box.height}px`;
+    svg.style.filter = getComputedStyle(img).filter;
+    img.replaceWith(svg);
+  });
   const box = await page.locator("#root").boundingBox();
   const clip = { x: 0, y: 0, width: gif.width + 32, height: Math.ceil(box.height) + 32 };
   const dir = mkdtempSync(join(tmpdir(), "sl-frames-"));

@@ -471,9 +471,22 @@ const locksOf = (hass) =>
 
 const name = (hass, id) => hass.states[id]?.attributes?.friendly_name || id;
 
+// First lock of the instance (no `entity` configured), resolved on every `set hass` (before the `_deps` test):
+// cached so the scan of all the states and the localeCompare sort only run again when the set of locks (or one of
+// their names) changed — the same `hass` object (several cards) skips even the scan.
+let _firstLock = {};
+const firstLock = (hass) => {
+  if (_firstLock.states === hass.states && _firstLock.entities === hass.entities) return _firstLock.id;
+  const locks = Object.keys(hass.states || {}).filter((id) => domainOf(id) === "lock" && !hass.entities?.[id]?.hidden);
+  const key = locks.map((id) => `${id}\n${name(hass, id)}`).join("\n");
+  const id = _firstLock.key === key ? _firstLock.id : locks.sort((a, b) => name(hass, a).localeCompare(name(hass, b)))[0];
+  _firstLock = { states: hass.states, entities: hass.entities, key, id };
+  return id;
+};
+
 const findLock = (hass, config) => {
   if (config.entity) return hass.states[config.entity] ? { id: config.entity } : { error: "unknown_lock" };
-  const id = locksOf(hass)[0];
+  const id = firstLock(hass);
   return id ? { id } : { error: "no_lock" };
 };
 

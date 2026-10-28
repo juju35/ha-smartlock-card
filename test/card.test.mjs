@@ -217,6 +217,24 @@ test("French strings", () => {
   assert.match(html, /Porte fermée/);
 });
 
+test("I18N parity: every language has exactly the keys and placeholders of en", () => {
+  const keys = Object.keys(sl.STRINGS.en).sort();
+  const vars = (s) => (String(s).match(/\{\w+\}/g) || []).sort().join();
+  for (const l of ["fr", "de", "es"]) {
+    assert.deepEqual(Object.keys(sl.STRINGS[l]).sort(), keys, l);
+    for (const k of keys) assert.equal(vars(sl.STRINGS[l][k]), vars(sl.STRINGS.en[k]), `${l}.${k}`);
+  }
+});
+
+test("German and Spanish strings", () => {
+  let html = newCard(makeHass(), { language: "de" }).shadowRoot.innerHTML;
+  assert.match(html, />Verriegelt</);
+  assert.match(html, /Tür geschlossen/);
+  html = newCard(makeHass({ ...states }, { language: "es-ES" })).shadowRoot.innerHTML;
+  assert.match(html, />Bloqueada</);
+  assert.match(html, /Puerta cerrada/);
+});
+
 test("mini card: one toggle button, Open, and the detail button switches to the full card", () => {
   const card = newCard(makeHass(), {}, sl.SmartLockMiniCard);
   let html = card.shadowRoot.innerHTML;

@@ -130,6 +130,22 @@ test("a failed call drops the requested state and leaves no unhandled rejection"
   clearTimeout(card._pendingTimer);
 });
 
+test("Enter confirms the code, except with the focus on Cancel", () => {
+  const hass = makeHass();
+  const card = newCard(hass, { entity: "lock.garage" });
+  click(card, { action: "lock" });
+  card._code = "1234";
+  // Tab put the focus on Cancel: Enter must not send the code.
+  card.shadowRoot.activeElement = { dataset: { action: "confirm_cancel" } };
+  sl.window.fire("keydown", { key: "Enter", preventDefault() {} });
+  assert.equal(hass.calls.length, 0);
+  assert.notEqual(card._confirm, null);
+  card.shadowRoot.activeElement = { dataset: {} };
+  sl.window.fire("keydown", { key: "Enter", preventDefault() {} });
+  assert.deepEqual(plain(hass.calls), [["lock", "lock", { entity_id: "lock.garage", code: "1234" }]]);
+  clearTimeout(card._pendingTimer);
+});
+
 test("Escape closes the popup", () => {
   const card = newCard(makeHass());
   click(card, { action: "unlock" });

@@ -628,6 +628,14 @@ class SmartLockBase extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._html = "";
     this.shadowRoot.addEventListener("click", (ev) => this._onClick(ev));
+    // Enter / Space activate the clickable non-buttons (section titles, state chips): same path as a click.
+    // Space on a real button or the code field already clicks / types natively.
+    this.shadowRoot.addEventListener("keydown", (ev) => {
+      const el = ev.composedPath()[0];
+      if ((ev.key !== "Enter" && ev.key !== " ") || el?.getAttribute?.("role") !== "button") return;
+      ev.preventDefault(); // Space must not scroll the page.
+      this._onClick(ev);
+    });
     // The code typed in the popup is kept here (never written into the HTML) and put back after a redraw.
     this.shadowRoot.addEventListener("input", (ev) => {
       if (ev.target?.name === "code") this._code = ev.target.value;
@@ -921,7 +929,7 @@ class SmartLockBase extends HTMLElement {
           <div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div>
           ${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
         </div>
-        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}"><span class="dot"></span>${esc(this._fmtState(state))}</span>
+        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="dot"></span>${esc(this._fmtState(state))}</span>
         ${this._zoomButton()}
       </div>`;
   }
@@ -1103,7 +1111,7 @@ class SmartLockCard extends SmartLockBase {
     return `<div class="hero">
       ${this._picture(lock, state)}
       <div class="info">
-        <div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}">${esc(this._fmtState(state))}</div>
+        <div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>
         ${this._batteryLine(this._battery(m))}
         ${this._doorLine(m)}
         ${this._alertLine(m, state)}
@@ -1130,7 +1138,7 @@ class SmartLockCard extends SmartLockBase {
   _section(key, icon, body) {
     const closed = this._isCollapsed(key);
     return `<div>
-      <div class="section-title toggle" data-action="toggle_section" data-section="${key}" aria-expanded="${!closed}">${svgIcon(icon)}${esc(
+      <div class="section-title toggle" data-action="toggle_section" data-section="${key}" role="button" tabindex="0" aria-expanded="${!closed}">${svgIcon(icon)}${esc(
         this._t(key),
       )}${svgIcon(ICONS.chevron_down, "chevron")}</div>
       ${closed ? "" : body}

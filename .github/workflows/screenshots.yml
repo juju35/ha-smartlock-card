@@ -24,7 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
+          # Only check out the PR branch itself for same-repo PRs (needed to push back);
+          # fork PRs and manual runs use the default ref, since they never push.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref || github.ref_name }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
@@ -54,6 +56,9 @@ jobs:
             exit 1
           }
       - name: Commit refreshed screenshots
+        # Only same-repo PRs get the refreshed screenshots pushed back: fork PRs have a
+        # read-only token, and manual runs upload an artifact below instead of pushing.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
           if [ -z "$(git status --porcelain screenshots)" ]; then
             echo "No screenshot changes."
@@ -62,5 +67,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add screenshots
-          git commit -m "chore: refresh screenshots [skip ci]"
+          git commit -m "chore: refresh screenshots"
           git push
+      - name: Upload screenshots artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: screenshots
+          path: screenshots/

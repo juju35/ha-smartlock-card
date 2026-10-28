@@ -51,6 +51,10 @@ export const load = () => {
     },
     setTimeout,
     clearTimeout,
+    // The "ago" refresh interval of connectedCallback: never fired in the tests, and a real one would keep the
+    // test process alive.
+    setInterval: () => 0,
+    clearInterval() {},
   };
   // window-level listeners, fired by hand with fire(type, ev).
   const winListeners = {};

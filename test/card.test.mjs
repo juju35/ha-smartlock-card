@@ -57,6 +57,16 @@ test("an unrelated state change does not rebuild the card", () => {
   assert.match(card.shadowRoot.innerHTML, /77 %/);
 });
 
+test("the first lock (no entity configured) is cached but follows a new or renamed lock", () => {
+  const hass = makeHass();
+  assert.equal(sl.findLock(hass, {}).id, "lock.porte_entree");
+  assert.equal(sl.findLock(hass, {}).id, "lock.porte_entree"); // same hass: served from the cache
+  const added = { ...states, "lock.autre": { entity_id: "lock.autre", state: "locked", attributes: { friendly_name: "A gate" } } };
+  assert.equal(sl.findLock(makeHass(added), {}).id, "lock.autre");
+  const renamed = { ...states, "lock.garage": { ...states["lock.garage"], attributes: { ...states["lock.garage"].attributes, friendly_name: "A garage" } } };
+  assert.equal(sl.findLock(makeHass(renamed), {}).id, "lock.garage");
+});
+
 test("Lock runs right away; the requested state shows until the lock changes", () => {
   const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked" } });
   const card = newCard(hass);

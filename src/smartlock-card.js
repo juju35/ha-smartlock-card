@@ -471,9 +471,22 @@ const locksOf = (hass) =>
 
 const name = (hass, id) => hass.states[id]?.attributes?.friendly_name || id;
 
+// First lock of the instance (no `entity` configured), resolved on every `set hass` (before the `_deps` test):
+// cached so the scan of all the states and the localeCompare sort only run again when the set of locks (or one of
+// their names) changed — the same `hass` object (several cards) skips even the scan.
+let _firstLock = {};
+const firstLock = (hass) => {
+  if (_firstLock.states === hass.states && _firstLock.entities === hass.entities) return _firstLock.id;
+  const locks = Object.keys(hass.states || {}).filter((id) => domainOf(id) === "lock" && !hass.entities?.[id]?.hidden);
+  const key = locks.map((id) => `${id}\n${name(hass, id)}`).join("\n");
+  const id = _firstLock.key === key ? _firstLock.id : locks.sort((a, b) => name(hass, a).localeCompare(name(hass, b)))[0];
+  _firstLock = { states: hass.states, entities: hass.entities, key, id };
+  return id;
+};
+
 const findLock = (hass, config) => {
   if (config.entity) return hass.states[config.entity] ? { id: config.entity } : { error: "unknown_lock" };
-  const id = locksOf(hass)[0];
+  const id = firstLock(hass);
   return id ? { id } : { error: "no_lock" };
 };
 
@@ -615,6 +628,14 @@ class SmartLockBase extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._html = "";
     this.shadowRoot.addEventListener("click", (ev) => this._onClick(ev));
+    // Enter / Space activate the clickable non-buttons (section titles, state chips): same path as a click.
+    // Space on a real button or the code field already clicks / types natively.
+    this.shadowRoot.addEventListener("keydown", (ev) => {
+      const el = ev.composedPath()[0];
+      if ((ev.key !== "Enter" && ev.key !== " ") || el?.getAttribute?.("role") !== "button") return;
+      ev.preventDefault(); // Space must not scroll the page.
+      this._onClick(ev);
+    });
     // The code typed in the popup is kept here (never written into the HTML) and put back after a redraw.
     this.shadowRoot.addEventListener("input", (ev) => {
       if (ev.target?.name === "code") this._code = ev.target.value;
@@ -671,6 +692,10 @@ class SmartLockBase extends HTMLElement {
       else this._update();
     };
     document.addEventListener("click", this._onOutside, true);
+    // The relative "changed … ago" text moves on its own: re-render once a minute so it does not stay frozen on a
+    // quiet instance (no new hass pushed). _update only touches the DOM when the rendered text actually changed.
+    clearInterval(this._agoTimer);
+    this._agoTimer = setInterval(() => this._update(), 60e3);
     // Reattached with the popup still open (view switch, editor): Escape keeps closing it.
     if (this._confirm) window.addEventListener("keydown", this._onKey);
   }
@@ -678,6 +703,7 @@ class SmartLockBase extends HTMLElement {
   disconnectedCallback() {
     document.removeEventListener("click", this._onOutside, true);
     window.removeEventListener("keydown", this._onKey);
+    clearInterval(this._agoTimer);
     clearTimeout(this._pendingTimer);
   }
 
@@ -908,7 +934,7 @@ class SmartLockBase extends HTMLElement {
           <div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div>
           ${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
         </div>
-        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}"><span class="dot"></span>${esc(this._fmtState(state))}</span>
+        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="dot"></span>${esc(this._fmtState(state))}</span>
         ${this._zoomButton()}
       </div>`;
   }
@@ -1090,7 +1116,7 @@ class SmartLockCard extends SmartLockBase {
     return `<div class="hero">
       ${this._picture(lock, state)}
       <div class="info">
-        <div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}">${esc(this._fmtState(state))}</div>
+        <div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>
         ${this._batteryLine(this._battery(m))}
         ${this._doorLine(m)}
         ${this._alertLine(m, state)}
@@ -1117,7 +1143,7 @@ class SmartLockCard extends SmartLockBase {
   _section(key, icon, body) {
     const closed = this._isCollapsed(key);
     return `<div>
-      <div class="section-title toggle" data-action="toggle_section" data-section="${key}" aria-expanded="${!closed}">${svgIcon(icon)}${esc(
+      <div class="section-title toggle" data-action="toggle_section" data-section="${key}" role="button" tabindex="0" aria-expanded="${!closed}">${svgIcon(icon)}${esc(
         this._t(key),
       )}${svgIcon(ICONS.chevron_down, "chevron")}</div>
       ${closed ? "" : body}

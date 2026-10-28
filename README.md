@@ -136,7 +136,7 @@ language: fr
 | `title` | both | Lock name | Card title |
 | `image` | both | `auto` | Lock picture: `auto` (per model), `retrofit`, `knob`, `compact`, `keypad`, `lever`, `reader`, `padlock`, `none`, or the URL of your own picture (e.g. `/local/my-lock.png`) |
 | `finish` | both | Per model | Finish of the drawn picture: `white`, `black` or `steel` |
-| `show_icon` | both | `true` | State icon at the left of the header |
+| `show_icon` | both | `true` | State icon at the left of the header, on the full card and the zoomed-in mini card (the compact mini view has no header icon) |
 | `show_picture` | both | `true` | Lock picture (same as `image: none` when `false`) |
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
 | `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…) |
@@ -174,6 +174,26 @@ When a lock is jammed, the picture shakes:
 While a door is opening, waves ripple out from the light:
 
 ![opening animation](screenshots/opening.gif)
+
+Every drawn family animates the part that moves on the real lock. The compact cylinder (Nuki Smart Lock Ultra, Tedee GO) turns its knurled knob while the light arc glows:
+
+![compact cylinder unlocking animation](screenshots/compact-unlocking.gif)
+
+The keypad deadbolt (Yale Assure, Schlage, Kwikset, Ultraloq U-Bolt) turns its thumb turn under the glowing light bar:
+
+![keypad deadbolt unlocking animation](screenshots/keypad-unlocking.gif)
+
+The fingerprint lever (Ultraloq Latch, Aqara D100/A100, LOQED) dips its handle as the reader ring glows:
+
+![fingerprint lever unlocking animation](screenshots/lever-unlocking.gif)
+
+The access reader (UniFi Access, ekey, KIWI) flashes its light bar while the strike opens:
+
+![access reader unlocking animation](screenshots/reader-unlocking.gif)
+
+And the padlock (smart padlocks, and any lock with no drawn model) lifts its shackle:
+
+![padlock unlocking animation](screenshots/padlock-unlocking.gif)
 
 | Light | Dark (unlocked, door open) |
 |---|---|

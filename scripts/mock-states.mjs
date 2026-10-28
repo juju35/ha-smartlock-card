@@ -44,6 +44,22 @@ export const opening = { "lock.porte_entree": { state: "unlocked" }, "binary_sen
 // Garage lock jammed.
 export const jammed = { "lock.garage": { state: "jammed", last_changed: minutesAgo(3) } };
 
+// One extra lock per remaining drawn family (compact, keypad, lever, reader, padlock — retrofit and knob are the
+// Nuki and the Yale above), kept out of the base registries so the default lock of the existing screenshots and
+// tests never changes. Each entry is merged into a shot's registries by scripts/screenshots.mjs (`extra`).
+export const families = {};
+const familyLock = (family, entity_id, deviceName, manufacturer, model) => {
+  const f = (families[family] = { states: {}, entities: {}, devices: {} });
+  f.devices[family] = { id: family, name: deviceName, manufacturer, model, identifiers: [["lock", family]], name_by_user: null };
+  f.entities[entity_id] = { entity_id, device_id: family, platform: manufacturer.toLowerCase(), translation_key: null };
+  f.states[entity_id] = { entity_id, state: "locked", attributes: { friendly_name: deviceName, supported_features: 0 }, last_changed: minutesAgo(42) };
+};
+familyLock("compact", "lock.cave", "Cellar", "Nuki", "Smart Lock Ultra");
+familyLock("keypad", "lock.bureau", "Office", "Schlage", "Encode Plus");
+familyLock("lever", "lock.atelier", "Workshop", "Ultraloq", "Latch 5 NFC");
+familyLock("reader", "lock.local_velo", "Bike room", "Ubiquiti", "UniFi Access Lock");
+familyLock("padlock", "lock.abri", "Shed", "Igloohome", "Padlock 2"); // no rule matches: the padlock fallback
+
 // Response of the logbook/get_events command for the front door (neutral names).
 export const logbook = [
   { entity_id: "lock.porte_entree", state: "locked", when: (Date.now() - 42 * 60e3) / 1000, context_name: "Leaving home" },

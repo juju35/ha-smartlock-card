@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { states, entities, devices, opening, jammed, logbook } from "./mock-states.mjs";
+import { states, entities, devices, families, opening, jammed, logbook } from "./mock-states.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const cardJs = readFileSync(`${root}dist/smartlock-card.js`, "utf8");
@@ -50,7 +50,8 @@ const page_html = (theme, width) => `<!doctype html><html><head><meta charset="u
 const section = (key) => `[data-section="${key}"]`;
 
 // Mount a shot's card on a fresh page and return it (a new page per shot: the card's script declares top-level
-// names, which cannot be evaluated twice in one page).
+// names, which cannot be evaluated twice in one page). `extra` merges a shot-only lock (mock-states' `families`)
+// into the base registries.
 async function openCard(browser, s) {
   const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 1000, height: 2000 } });
   page.on("pageerror", (err) => console.error(`pageerror (${s.file}): ${err.message}`));
@@ -68,7 +69,15 @@ async function openCard(browser, s) {
       };
       document.getElementById("root").appendChild(el);
     },
-    { type: s.type, config: s.config, states, entities, devices, overrides: s.overrides, logbook },
+    {
+      type: s.type,
+      config: s.config,
+      states: { ...states, ...s.extra?.states },
+      entities: { ...entities, ...s.extra?.entities },
+      devices: { ...devices, ...s.extra?.devices },
+      overrides: s.overrides,
+      logbook,
+    },
   );
   return page;
 }
@@ -152,14 +161,29 @@ async function makeGif(browser, gif, { fps = 20, seconds = 3 } = {}) {
   console.log(`screenshots/${gif.file}.gif`);
 }
 
-// One GIF per lock type and per distinct animation: the bolt turning + glowing as a lock unlocks and locks
-// (Nuki front door and matter garage), the jammed shake, and the door-opening wave.
+// One GIF per lock family and per distinct animation: the bolt turning + glowing as a lock unlocks and locks
+// (Nuki front door and matter garage), the jammed shake, the door-opening wave, and one unlocking GIF for each
+// of the other drawn families (compact, keypad, lever, reader, padlock), each on its own mock lock.
+const familyGif = (family, id) => ({
+  file: `${family}-unlocking`,
+  type: "smartlock-card",
+  theme: "light",
+  width: 460,
+  config: { entity: id, show_activity: false },
+  extra: families[family],
+  overrides: { [id]: { state: "unlocking" } },
+});
 const gifs = [
   { file: "unlocking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "unlocking" } } },
   { file: "locking", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: { "lock.porte_entree": { state: "locking" } } },
   { file: "garage-unlocking", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage" }, overrides: { "lock.garage": { state: "unlocking" } } },
   { file: "jammed", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
   { file: "opening", type: "smartlock-card", theme: "light", width: 460, config: {}, overrides: opening },
+  familyGif("compact", "lock.cave"),
+  familyGif("keypad", "lock.bureau"),
+  familyGif("lever", "lock.atelier"),
+  familyGif("reader", "lock.local_velo"),
+  familyGif("padlock", "lock.abri"),
 ];
 for (const gif of gifs) await makeGif(browser, gif);
 await browser.close();

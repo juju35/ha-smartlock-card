@@ -15,6 +15,7 @@ _2026-10-29_
 
 ### Maintenance
 - CI: the screenshots workflow no longer fails at checkout on pull requests from forks, fails clearly when the browser dependencies cannot be installed, and uses the current upload-artifact action.
+- CI: when the screenshots workflow pushes refreshed screenshots to a pull request, it re-runs the lint, validate and HACS checks on that commit.
 
 ## 1.5.0
 

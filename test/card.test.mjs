@@ -191,6 +191,43 @@ test("the buttons are enabled again once the card's request has run out", () => 
   clearTimeout(card._pendingTimer);
 });
 
+test("a card reattached while its request runs still drops Locking once the request runs out", async () => {
+  const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked" } });
+  const card = newCard(hass);
+  card.connectedCallback();
+  click(card, { action: "lock" });
+  assert.match(card.shadowRoot.innerHTML, /data-action="lock" disabled/);
+  // View switch: detached, then attached again before the request runs out. The lock never moves, hass is the same.
+  card.disconnectedCallback();
+  card._pending.until = Date.now() + 50;
+  card.connectedCallback();
+  await new Promise((r) => setTimeout(r, 300));
+  assert.doesNotMatch(card.shadowRoot.innerHTML, />Locking</);
+  assert.doesNotMatch(card.shadowRoot.innerHTML, / disabled/);
+  card.disconnectedCallback();
+});
+
+test("a request that ran out while the card was detached is dropped right after reattaching", async () => {
+  const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked" } });
+  const card = newCard(hass);
+  card.connectedCallback();
+  click(card, { action: "lock" });
+  card.disconnectedCallback();
+  card._pending.until = Date.now() - 1000;
+  card.connectedCallback();
+  card.connectedCallback(); // attached twice (editor preview): a single timer
+  await new Promise((r) => setTimeout(r, 300));
+  assert.doesNotMatch(card.shadowRoot.innerHTML, />Locking</);
+  card.disconnectedCallback();
+});
+
+test("reattaching a card with no request running arms no request timer", () => {
+  const card = newCard(makeHass());
+  card.connectedCallback();
+  assert.equal(card._pendingTimer, undefined);
+  card.disconnectedCallback();
+});
+
 test("Open on a lock that never reports opening drops Opening shortly after the call", async () => {
   const hass = makeHass(states, { callService: () => Promise.resolve() });
   const card = newCard(hass, { confirm: [] });

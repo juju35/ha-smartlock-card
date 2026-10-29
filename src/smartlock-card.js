@@ -855,6 +855,10 @@ class SmartLockBase extends HTMLElement {
     // quiet instance (no new hass pushed). _update only touches the DOM when the rendered text actually changed.
     clearInterval(this._agoTimer);
     this._agoTimer = setInterval(() => this._update(), 60e3);
+    // Reattached while a request runs (view switch): disconnectedCallback cancelled its timer, and nothing else
+    // re-renders the card when it runs out on a lock that never moved (same hass). Armed again for what is left.
+    clearTimeout(this._pendingTimer);
+    if (this._pending) this._pendingTimer = setTimeout(() => this._update(), Math.max(0, this._pending.until - Date.now()) + 100);
     // Reattached with the popup still open (view switch, editor): Escape keeps closing it.
     if (this._confirm) window.addEventListener("keydown", this._onKey);
   }

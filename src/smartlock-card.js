@@ -1179,12 +1179,15 @@ class SmartLockBase extends HTMLElement {
   // the mini card: a single toggle button, then Open.
   _controls(lock, state, round = false) {
     if (this._config.show_controls === false || !valid(lock)) return "";
-    // While a request runs the buttons are disabled: a double click does not send the command twice.
+    // A moving lock dims the buttons. They are disabled only while a request sent by the card runs (a double click
+    // does not send the command twice): a lock left in locking / unlocking / opening by its integration keeps usable
+    // buttons, so the command can be sent again.
     const busy = ["locking", "unlocking", "opening"].includes(state);
+    const disabled = busy && !!this._pending;
     const locked = state === "locked" || state === "locking";
     const btn = (action, icon, primary) => {
       const label = esc(this._t(action));
-      return `<button class="btn${round ? " round" : ""}${primary ? " primary" : ""}${busy ? " busy" : ""}" data-action="${action}"${busy ? " disabled" : ""} title="${label}" aria-label="${label}">${svgIcon(icon)}${round ? "" : `<span>${label}</span>`}</button>`;
+      return `<button class="btn${round ? " round" : ""}${primary ? " primary" : ""}${busy ? " busy" : ""}" data-action="${action}"${disabled ? " disabled" : ""} title="${label}" aria-label="${label}">${svgIcon(icon)}${round ? "" : `<span>${label}</span>`}</button>`;
     };
     const buttons = round
       ? [locked ? btn("unlock", ICONS.unlock, true) : btn("lock", ICONS.lock, true)]

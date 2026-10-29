@@ -214,7 +214,7 @@ Mini card zoomed in with its detail button (top right, click it again or anywher
 
 The cards use the standard `lock` entity, so every lock integration works: the state (`locked`, `unlocked`, `open`, `locking`, `unlocking`, `opening`, `jammed`), the `lock.lock`, `lock.unlock` and `lock.open` actions, the Open feature (`supported_features`), the `code_format` and `changed_by` attributes.
 
-The other entities of the lock are found through the entity and device registries: everything on the same device as the lock, matched by its domain and device class (`door` / `opening` / `garage_door` for the door, `battery`, `battery_charging`, `problem`), the keypad by its name. Entity ids can therefore be in any language or renamed without breaking the cards. When the door sensor or the battery belongs to another device, set `door_entity` or `battery_entity`.
+The other entities of the lock are found through the entity and device registries: everything on the same device as the lock, matched by its domain and device class (`door` / `opening` / `garage_door` for the door, `battery`, `battery_charging`, `problem`). Entity ids can therefore be in any language or renamed without breaking the cards. The keypad is the exception: it is found by its name (`keypad`, `clavier`, `Tastatur` or `teclado` in the entity id) or by the integration's translation key (Nuki), so a keypad entity renamed to something else shows under Details. When the door sensor or the battery belongs to another device, set `door_entity` or `battery_entity`.
 
 <p align="center"><img src="images/states.svg" alt="Lock states" width="760"></p>
 

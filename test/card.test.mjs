@@ -140,6 +140,44 @@ test("a failed call drops the requested state and leaves no unhandled rejection"
   clearTimeout(card._pendingTimer);
 });
 
+test("Lock on a locked lock is sent without showing Locking", () => {
+  const hass = makeHass();
+  const card = newCard(hass);
+  click(card, { action: "lock" });
+  assert.deepEqual(plain(hass.calls), [["lock", "lock", { entity_id: "lock.porte_entree" }]]);
+  assert.equal(card._pending, undefined);
+  assert.doesNotMatch(card.shadowRoot.innerHTML, />Locking</);
+});
+
+test("while a request runs the buttons are disabled and a second click sends nothing", () => {
+  const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked" } });
+  const card = newCard(hass);
+  click(card, { action: "lock" });
+  assert.match(card.shadowRoot.innerHTML, /data-action="lock" disabled/);
+  click(card, { action: "lock" });
+  click(card, { action: "unlock" });
+  assert.equal(hass.calls.length, 1);
+  clearTimeout(card._pendingTimer);
+});
+
+test("Open on a lock that never reports opening drops Opening shortly after the call", async () => {
+  const hass = makeHass(states, { callService: () => Promise.resolve() });
+  const card = newCard(hass, { confirm: [] });
+  click(card, { action: "open" });
+  assert.match(card.shadowRoot.innerHTML, />Opening</);
+  await new Promise((r) => setTimeout(r, 4200));
+  assert.equal(card._pending, null);
+  assert.match(card.shadowRoot.innerHTML, /class="state clickable ok"[^>]*>Locked</);
+  clearTimeout(card._pendingTimer);
+});
+
+test("the battery bar stays within 0-100 % and the header badge is a keyboard button", () => {
+  const batt = "sensor.porte_entree_batterie";
+  const html = newCard(makeHass({ ...states, [batt]: { ...states[batt], state: "104" } })).shadowRoot.innerHTML;
+  assert.match(html, /style="width:100%"/);
+  assert.match(html, /class="badge clickable ok"[^>]*role="button" tabindex="0"/);
+});
+
 test("Enter confirms the code, except with the focus on Cancel", () => {
   const hass = makeHass();
   const card = newCard(hass, { entity: "lock.garage" });

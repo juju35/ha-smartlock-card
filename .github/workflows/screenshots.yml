@@ -21,12 +21,18 @@ jobs:
   screenshots:
     name: Render screenshots
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # Lets the job dispatch the check workflows on the screenshot commit (see below).
+      actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Only check out the PR branch itself for same-repo PRs (needed to push back);
-          # fork PRs and manual runs use the default ref, since they never push.
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref || github.ref_name }}
+          # Fork PR branches do not exist in this repository: only check out the
+          # head branch for same-repo PRs (where screenshots get pushed back).
+          # Everything else keeps the default ref — for a fork PR that is the merge
+          # ref, which github.ref_name ("N/merge") does not resolve to.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref || '' }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
@@ -43,9 +49,10 @@ jobs:
             timeout 150 sudo apt-get update \
               && timeout 300 sudo apt-get install -y ffmpeg fonts-roboto \
               && timeout 300 npx playwright install-deps chromium \
-              && break
+              && ok=1 && break
             echo "apt attempt $i failed or timed out, retrying in 15s"; sleep 15
           done
+          [ -n "$ok" ] || { echo "::error::apt failed 3 times"; exit 1; }
           ffmpeg -version > /dev/null
       - run: npm run build
       - name: Render screenshots
@@ -56,6 +63,7 @@ jobs:
             exit 1
           }
       - name: Commit refreshed screenshots
+        id: commit
         # Only same-repo PRs get the refreshed screenshots pushed back: fork PRs have a
         # read-only token, and manual runs upload an artifact below instead of pushing.
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
@@ -69,9 +77,20 @@ jobs:
           git add screenshots
           git commit -m "chore: refresh screenshots"
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+      # A push made with GITHUB_TOKEN triggers no pull_request run, but workflow_dispatch does: re-run the checks
+      # explicitly on the PR branch so the screenshot commit (the new head) gets its own lint / validate / HACS runs.
+      - name: Re-run checks on the screenshot commit
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in lint.yml validate.yml hacs.yml; do
+            [ -f ".github/workflows/$wf" ] && gh workflow run "$wf" --repo "${{ github.repository }}" --ref "${{ github.head_ref }}"
+          done
       - name: Upload screenshots artifact
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots
           path: screenshots/

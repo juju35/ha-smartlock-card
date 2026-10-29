@@ -13,6 +13,9 @@ const VERSION = "__VERSION__";
 const FEATURE_OPEN = 1;
 // Requested action shown until the lock reports a new state, at most this long.
 const PENDING_MS = 20000;
+// Open on a lock that never reports `opening` / `open`: the requested state is dropped this long after the call
+// succeeded when the lock state has not moved, instead of showing "Opening" for the whole PENDING_MS.
+const OPEN_SETTLE_MS = 4000;
 const DEFAULT_COLLAPSED = ["settings", "activity"];
 const DEFAULT_CONFIRM = ["unlock", "open"];
 const ACTIVITY_DAYS = 7;
@@ -372,7 +375,7 @@ const STRINGS = {
     image: "Illustration de la serrure",
     image_auto: "Automatique (selon le modèle)",
     image_none: "Aucune",
-    img_retrofit: "Retrofit",
+    img_retrofit: "Module retrofit",
     img_knob: "Bouton rotatif",
     img_compact: "Cylindre compact",
     img_keypad: "Pêne dormant à clavier",
@@ -409,7 +412,7 @@ const STRINGS = {
     s_unlocking: "Déverrouillage",
     s_jammed: "Bloquée",
     s_unavailable: "Indisponible",
-    s_unknown: "Inconnu",
+    s_unknown: "Inconnue",
   },
   de: {
     lock: "Verriegeln",
@@ -528,7 +531,7 @@ const STRINGS = {
     image: "Ilustración de la cerradura",
     image_auto: "Automática (según el modelo)",
     image_none: "Ninguna",
-    img_retrofit: "Retrofit",
+    img_retrofit: "Adaptador de cerradura",
     img_knob: "Pomo giratorio",
     img_compact: "Cilindro compacto",
     img_keypad: "Cerrojo con teclado",
@@ -565,7 +568,7 @@ const STRINGS = {
     s_unlocking: "Desbloqueando",
     s_jammed: "Atascada",
     s_unavailable: "No disponible",
-    s_unknown: "Desconocido",
+    s_unknown: "Desconocida",
   },
 };
 
@@ -666,7 +669,7 @@ const siblingsOf = (hass, lockId) => {
 };
 
 const DOOR_CLASSES = ["door", "opening", "garage_door"];
-const isKeypad = (hass, id) => /keypad|clavier/i.test(`${id} ${hass.entities?.[id]?.translation_key || ""}`);
+const isKeypad = (hass, id) => /keypad|clavier|tastatur|teclado/i.test(`${id} ${hass.entities?.[id]?.translation_key || ""}`);
 
 /**
  * What the card shows about a lock: { id, platform, door, battery, batteryLow, charging, keypad, problem,
@@ -980,6 +983,9 @@ class SmartLockBase extends HTMLElement {
   _request(action) {
     const lock = this._s(this._lockId);
     if (!lock) return;
+    // A request is already running (double click): it is not sent again.
+    this._state(lock);
+    if (this._pending) return;
     const format = lock.attributes?.code_format;
     const needsCode = !!format && !this._config.code;
     const confirm = this._config.confirm ?? DEFAULT_CONFIRM;
@@ -998,14 +1004,27 @@ class SmartLockBase extends HTMLElement {
     const data = { entity_id: this._lockId };
     const c = code ?? this._config.code;
     if (c) data.code = String(c);
-    this._pending = { state: { lock: "locking", unlock: "unlocking", open: "opening" }[action], from: lock?.state, until: Date.now() + PENDING_MS };
+    // Lock on a locked lock (or Unlock on an unlocked one): the state will not change, so no "Locking…" is shown.
+    const done = { lock: "locked", unlock: "unlocked", open: "open" }[action];
+    if (lock?.state === done) return this._call("lock", action, data);
+    const p = { state: { lock: "locking", unlock: "unlocking", open: "opening" }[action], from: lock?.state, until: Date.now() + PENDING_MS };
+    this._pending = p;
     clearTimeout(this._pendingTimer);
     this._pendingTimer = setTimeout(() => this._update(), PENDING_MS + 100);
     this._update();
-    return this._call("lock", action, data, () => {
+    const call = this._call("lock", action, data, () => {
       // The request failed (wrong code, lock offline…): show the lock's real state again.
       this._pending = null;
       this._update();
+    });
+    if (action !== "open") return call;
+    // Many integrations pull the latch without ever reporting `opening` / `open`.
+    return call.then(() => {
+      setTimeout(() => {
+        if (this._pending !== p || this._s(this._lockId)?.state !== p.from) return;
+        this._pending = null;
+        this._update();
+      }, OPEN_SETTLE_MS);
     });
   }
 
@@ -1083,7 +1102,7 @@ class SmartLockBase extends HTMLElement {
       <div class="header">
         ${
           c.show_icon !== false
-            ? `<div class="badge clickable ${cls}" data-entity="${esc(lock.entity_id)}">${svgIcon(state === "jammed" ? ICONS.alert : state === "locked" || state === "locking" ? ICONS.lock : ICONS.unlock)}</div>`
+            ? `<div class="badge clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" aria-label="${esc(this._fmtState(state))}">${svgIcon(state === "jammed" ? ICONS.alert : state === "locked" || state === "locking" ? ICONS.lock : ICONS.unlock)}</div>`
             : ""
         }
         <div class="titles">
@@ -1131,7 +1150,7 @@ class SmartLockBase extends HTMLElement {
     if (!b) return "";
     const value = b.v === null ? b.text : `${Math.round(b.v)} %`;
     return `<div class="batt clickable ${b.cls}" data-entity="${esc(b.entity)}">${svgIcon(ICONS.battery)}${
-      b.v !== null ? `<div class="bar ${b.cls}"><div style="width:${b.v}%"></div></div>` : ""
+      b.v !== null ? `<div class="bar ${b.cls}"><div style="width:${Math.min(100, Math.max(0, b.v))}%"></div></div>` : ""
     }<span class="v">${esc(value)}</span>${b.charging ? svgIcon(ICONS.bolt, "bolt") : ""}</div>`;
   }
 
@@ -1160,11 +1179,12 @@ class SmartLockBase extends HTMLElement {
   // the mini card: a single toggle button, then Open.
   _controls(lock, state, round = false) {
     if (this._config.show_controls === false || !valid(lock)) return "";
-    const busy = ["locking", "unlocking", "opening"].includes(state) ? " busy" : "";
+    // While a request runs the buttons are disabled: a double click does not send the command twice.
+    const busy = ["locking", "unlocking", "opening"].includes(state);
     const locked = state === "locked" || state === "locking";
     const btn = (action, icon, primary) => {
       const label = esc(this._t(action));
-      return `<button class="btn${round ? " round" : ""}${primary ? " primary" : ""}${busy}" data-action="${action}" title="${label}" aria-label="${label}">${svgIcon(icon)}${round ? "" : `<span>${label}</span>`}</button>`;
+      return `<button class="btn${round ? " round" : ""}${primary ? " primary" : ""}${busy ? " busy" : ""}" data-action="${action}"${busy ? " disabled" : ""} title="${label}" aria-label="${label}">${svgIcon(icon)}${round ? "" : `<span>${label}</span>`}</button>`;
     };
     const buttons = round
       ? [locked ? btn("unlock", ICONS.unlock, true) : btn("lock", ICONS.lock, true)]

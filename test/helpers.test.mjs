@@ -76,6 +76,18 @@ test("describe finds the door, battery, keypad and settings on the lock device",
   assert.deepEqual([...m.settings], ["select.porte_entree_led", "switch.porte_entree_mode_nuit", "switch.porte_entree_verrouillage_auto"]);
 });
 
+test("a keypad named in German or Spanish (no translation key) is still the keypad", () => {
+  for (const word of ["tastatur", "teclado"]) {
+    const id = `binary_sensor.porte_entree_${word}_batterie`;
+    const old = "binary_sensor.porte_entree_clavier";
+    const ents = { ...entities, [id]: { ...entities[old], entity_id: id, translation_key: null } };
+    const st = { ...states, [id]: { ...states[old], entity_id: id } };
+    delete ents[old];
+    delete st[old];
+    assert.equal(sl.describe({ entities: ents, devices, states: st }, {}, "lock.porte_entree").keypad, id, word);
+  }
+});
+
 test("door and battery entities set in the config win; a binary battery is a low flag", () => {
   const m = sl.describe(hass, { door_entity: "binary_sensor.garage_porte", battery_entity: "binary_sensor.porte_entree_batterie_critique" }, "lock.porte_entree");
   assert.equal(m.door, "binary_sensor.garage_porte");

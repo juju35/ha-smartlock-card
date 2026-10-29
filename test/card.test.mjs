@@ -160,6 +160,37 @@ test("while a request runs the buttons are disabled and a second click sends not
   clearTimeout(card._pendingTimer);
 });
 
+test("a lock stuck in locking / unlocking / opening by its integration keeps its buttons usable", () => {
+  for (const stuck of ["locking", "unlocking", "opening"]) {
+    const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: stuck } });
+    for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+      const html = newCard(hass, { confirm: [] }, Cls).shadowRoot.innerHTML;
+      assert.match(html, /data-action="(un)?lock"/, `${stuck} ${Cls.name}`);
+      assert.doesNotMatch(html, / disabled/, `${stuck} ${Cls.name}`);
+      assert.match(html, /class="btn[^"]* busy"/, `${stuck} ${Cls.name}`);
+    }
+    // The command can be sent again from the card.
+    const card = newCard(hass, { confirm: [] });
+    click(card, { action: "lock" });
+    assert.equal(hass.calls.length, 1, stuck);
+    clearTimeout(card._pendingTimer);
+  }
+});
+
+test("the buttons are enabled again once the card's request has run out", () => {
+  const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked" } });
+  const card = newCard(hass);
+  click(card, { action: "lock" });
+  assert.match(card.shadowRoot.innerHTML, /data-action="lock" disabled/);
+  clearTimeout(card._pendingTimer);
+  card._pending.until = Date.now() - 1;
+  card._update();
+  assert.doesNotMatch(card.shadowRoot.innerHTML, / disabled/);
+  click(card, { action: "lock" });
+  assert.equal(hass.calls.length, 2);
+  clearTimeout(card._pendingTimer);
+});
+
 test("Open on a lock that never reports opening drops Opening shortly after the call", async () => {
   const hass = makeHass(states, { callService: () => Promise.resolve() });
   const card = newCard(hass, { confirm: [] });

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.2
+
+_2026-10-29_
+
+### Fixes
+- A lock that its integration leaves in "Locking", "Unlocking" or "Opening" (bolt blocked, state update lost) no longer disables the Lock / Unlock / Open buttons: the command can be sent again from the card. The buttons are only disabled while a request sent by the card itself is running (20 seconds at most).
+
 ## 1.5.1
 
 _2026-10-29_

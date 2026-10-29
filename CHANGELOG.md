@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.5.1
+
+_2026-10-29_
+
+### Fixes
+- Lock on a lock that is already locked (or Unlock on an unlocked one) no longer shows "Locking…" and its animation for 20 seconds.
+- Open on a lock whose integration never reports `opening` / `open` stops showing "Opening" a few seconds after the latch was pulled.
+- While a request is running, the Lock / Unlock / Open buttons are disabled: a double click no longer sends the command twice.
+- The battery bar stays within its frame when a raw sensor reports more than 100 % or less than 0 %.
+- Accessibility: the header badge can be reached with the keyboard and activated with Enter / Space, like the state chip.
+- Keypads named in German or Spanish (`tastatur`, `teclado`) are now recognised as the keypad instead of showing under Details.
+- Translations: "Inconnue" (French) and "Desconocida" (Spanish) for an unknown state, and the retrofit lock picture is translated in French and Spanish.
+
+### Maintenance
+- CI: the screenshots workflow no longer fails at checkout on pull requests from forks, fails clearly when the browser dependencies cannot be installed, and uses the current upload-artifact action.
+
 ## 1.5.0
 
 _2026-10-28_

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.3
+
+_2026-10-29_
+
+### Fixes
+- After a Lock / Unlock / Open sent from the card, switching to another dashboard view and coming back before the lock answered no longer leaves the card on "Locking" (or "Unlocking" / "Opening") with its buttons disabled for up to a minute more: the card drops the pending state as soon as the 20-second request window runs out.
+
 ## 1.5.2
 
 _2026-10-29_

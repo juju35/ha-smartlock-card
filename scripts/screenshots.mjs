@@ -86,10 +86,13 @@ const shots = [
   { file: "card", type: "smartlock-card", theme: "light", width: 460, config: {}, clicks: [section("activity")] },
   { file: "card-dark", type: "smartlock-card", theme: "dark", width: 460, config: {}, overrides: opening, clicks: [section("settings")] },
   { file: "card-code", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage" }, clicks: ['[data-action="lock"]'] },
+  { file: "card-code-dark", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage" }, clicks: ['[data-action="lock"]'] },
   { file: "card-jammed", type: "smartlock-card", theme: "dark", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
+  { file: "card-jammed-light", type: "smartlock-card", theme: "light", width: 460, config: { entity: "lock.garage", show_activity: false }, overrides: jammed },
   { file: "mini-card", type: "smartlock-mini-card", theme: "light", width: 380, config: {} },
   { file: "mini-card-dark", type: "smartlock-mini-card", theme: "dark", width: 380, config: { entity: "lock.garage" } },
   { file: "mini-card-zoom", type: "smartlock-mini-card", theme: "light", width: 460, config: {}, clicks: [".zoom"] },
+  { file: "mini-card-zoom-dark", type: "smartlock-mini-card", theme: "dark", width: 460, config: {}, clicks: [".zoom"] },
 ];
 
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});

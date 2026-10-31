@@ -157,43 +157,63 @@ The card animates while the lock is busy, and settles to a still card once idle.
 
 As a lock unlocks, the bolt rotates and glows — here the Nuki front door:
 
-![unlocking animation](screenshots/unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![unlocking animation](screenshots/unlocking.gif) | ![unlocking animation dark](screenshots/unlocking-dark.gif) |
 
 The same turn runs in reverse, with the glow, as it locks again:
 
-![locking animation](screenshots/locking.gif)
+| Light | Dark |
+|---|---|
+| ![locking animation](screenshots/locking.gif) | ![locking animation dark](screenshots/locking-dark.gif) |
 
 Any lock integration gets the animation — here the matter garage lock mid-turn:
 
-![garage unlocking animation](screenshots/garage-unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![garage unlocking animation](screenshots/garage-unlocking.gif) | ![garage unlocking animation dark](screenshots/garage-unlocking-dark.gif) |
 
 When a lock is jammed, the picture shakes:
 
-![jammed animation](screenshots/jammed.gif)
+| Light | Dark |
+|---|---|
+| ![jammed animation light](screenshots/jammed-light.gif) | ![jammed animation](screenshots/jammed.gif) |
 
 While a door is opening, waves ripple out from the light:
 
-![opening animation](screenshots/opening.gif)
+| Light | Dark |
+|---|---|
+| ![opening animation](screenshots/opening.gif) | ![opening animation dark](screenshots/opening-dark.gif) |
 
 Every drawn family animates the part that moves on the real lock. The compact cylinder (Nuki Smart Lock Ultra, Tedee GO) turns its knurled knob while the light arc glows:
 
-![compact cylinder unlocking animation](screenshots/compact-unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![compact cylinder unlocking animation](screenshots/compact-unlocking.gif) | ![compact cylinder unlocking animation dark](screenshots/compact-unlocking-dark.gif) |
 
 The keypad deadbolt (Yale Assure, Schlage, Kwikset, Ultraloq U-Bolt) turns its thumb turn under the glowing light bar:
 
-![keypad deadbolt unlocking animation](screenshots/keypad-unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![keypad deadbolt unlocking animation](screenshots/keypad-unlocking.gif) | ![keypad deadbolt unlocking animation dark](screenshots/keypad-unlocking-dark.gif) |
 
 The fingerprint lever (Ultraloq Latch, Aqara D100/A100, LOQED) dips its handle as the reader ring glows:
 
-![fingerprint lever unlocking animation](screenshots/lever-unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![fingerprint lever unlocking animation](screenshots/lever-unlocking.gif) | ![fingerprint lever unlocking animation dark](screenshots/lever-unlocking-dark.gif) |
 
 The access reader (UniFi Access, ekey, KIWI) flashes its light bar while the strike opens:
 
-![access reader unlocking animation](screenshots/reader-unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![access reader unlocking animation](screenshots/reader-unlocking.gif) | ![access reader unlocking animation dark](screenshots/reader-unlocking-dark.gif) |
 
 And the padlock (smart padlocks, and any lock with no drawn model) lifts its shackle:
 
-![padlock unlocking animation](screenshots/padlock-unlocking.gif)
+| Light | Dark |
+|---|---|
+| ![padlock unlocking animation](screenshots/padlock-unlocking.gif) | ![padlock unlocking animation dark](screenshots/padlock-unlocking-dark.gif) |
 
 | Light | Dark (unlocked, door open) |
 |---|---|

@@ -215,10 +215,19 @@ And the padlock (smart padlocks, and any lock with no drawn model) lifts its sha
 |---|---|
 | ![padlock unlocking animation](screenshots/padlock-unlocking.gif) | ![padlock unlocking animation dark](screenshots/padlock-unlocking-dark.gif) |
 
-| Light | Dark (unlocked, door open) |
+Locked front door with its activity, then unlocked with the door open and its settings:
+
+| Light | Dark |
 |---|---|
 | ![card](screenshots/card.png) | ![card dark](screenshots/card-dark.png) |
+| ![card unlocked, door open](screenshots/card-open.png) | ![card unlocked, door open dark](screenshots/card-open-dark.png) |
+
+Mini card for the front door and for the garage lock:
+
+| Light | Dark |
+|---|---|
 | ![mini card](screenshots/mini-card.png) | ![mini card dark](screenshots/mini-card-dark.png) |
+| ![mini card garage](screenshots/mini-card-garage.png) | ![mini card garage dark](screenshots/mini-card-garage-dark.png) |
 
 Lock asking for a code, and jammed lock:
 

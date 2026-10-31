@@ -202,13 +202,16 @@ And the padlock (smart padlocks, and any lock with no drawn model) lifts its sha
 
 Lock asking for a code, and jammed lock:
 
-| Code | Jammed |
+| Light | Dark |
 |---|---|
-| ![code](screenshots/card-code.png) | ![jammed](screenshots/card-jammed.png) |
+| ![code](screenshots/card-code.png) | ![code dark](screenshots/card-code-dark.png) |
+| ![jammed light](screenshots/card-jammed-light.png) | ![jammed](screenshots/card-jammed.png) |
 
 Mini card zoomed in with its detail button (top right, click it again or anywhere outside the card to go back):
 
-![mini card zoomed in](screenshots/mini-card-zoom.png)
+| Light | Dark |
+|---|---|
+| ![mini card zoomed in](screenshots/mini-card-zoom.png) | ![mini card zoomed in dark](screenshots/mini-card-zoom-dark.png) |
 
 ## How it works
 

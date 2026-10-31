@@ -188,5 +188,8 @@ const gifs = [
   familyGif("reader", "lock.local_velo"),
   familyGif("padlock", "lock.abri"),
 ];
-for (const gif of gifs) await makeGif(browser, gif);
+// Every animation is also rendered in the other theme, with the exact same setup: X-dark.gif for a light X.gif,
+// X-light.gif for a dark one.
+const twin = (gif) => ({ ...gif, file: `${gif.file}-${gif.theme === "light" ? "dark" : "light"}`, theme: gif.theme === "light" ? "dark" : "light" });
+for (const gif of gifs.flatMap((g) => [g, twin(g)])) await makeGif(browser, gif);
 await browser.close();

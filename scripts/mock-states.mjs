@@ -39,7 +39,7 @@ entity("lock.garage", "garage", "matter", null, "unlocked", { friendly_name: "Ga
 entity("sensor.garage_batterie", "garage", "matter", "battery", "22", { friendly_name: "Garage Battery", device_class: "battery", unit_of_measurement: "%" });
 entity("binary_sensor.garage_porte", "garage", "matter", "door", "on", { friendly_name: "Garage Door", device_class: "door" });
 
-// Front door while the latch is being pulled, and once the door is open.
+// Front door unlocked with the door open.
 export const opening = { "lock.porte_entree": { state: "unlocked" }, "binary_sensor.porte_entree_porte": { state: "on" } };
 // Garage lock jammed.
 export const jammed = { "lock.garage": { state: "jammed", last_changed: minutesAgo(3) } };

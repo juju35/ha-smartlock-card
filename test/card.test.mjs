@@ -326,7 +326,8 @@ test("French strings", () => {
 test("I18N parity: every language has exactly the keys, array lengths and placeholders of en", () => {
   const keys = Object.keys(sl.STRINGS.en).sort();
   const vars = (s) => (String(s).match(/\{\w+\}/g) || []).sort().join();
-  for (const l of ["fr", "de", "es", "sr", "sr-Latn"]) {
+  assert.deepEqual(Object.keys(sl.STRINGS).sort(), ["de", "en", "es", "fr", "it", "nl", "pl", "pt", "sr", "sr-Latn"]);
+  for (const l of ["fr", "de", "es", "sr", "sr-Latn", "it", "nl", "pt", "pl"]) {
     assert.ok(sl.STRINGS[l], l);
     assert.deepEqual(Object.keys(sl.STRINGS[l]).sort(), keys, l);
     for (const k of keys) {
@@ -335,6 +336,7 @@ test("I18N parity: every language has exactly the keys, array lengths and placeh
       assert.equal(Array.isArray(v), Array.isArray(en), `${l}.${k}`);
       if (Array.isArray(en)) assert.equal(v.length, en.length, `${l}.${k}`);
       assert.equal(vars(v), vars(en), `${l}.${k}`);
+      for (const x of [v].flat()) assert.ok(String(x).trim(), `${l}.${k} is empty`);
     }
   }
 });
@@ -350,11 +352,22 @@ test("language resolution: full code, then the part before the dash, then en", (
   assert.equal(sl.lang(null, { language: "fr-FR" }), "fr");
   assert.equal(sl.lang(null, { language: "sr-Latn" }), "sr-Latn");
   assert.equal(sl.lang(null, { language: "sr" }), "sr");
-  assert.equal(sl.lang(null, { language: "pt-BR" }), "en");
+  assert.equal(sl.lang(null, { language: "pt-BR" }), "pt");
   assert.equal(sl.lang(hassIn("sr-Latn"), {}), "sr-Latn");
   assert.equal(sl.lang(hassIn("sr"), {}), "sr");
   assert.equal(sl.lang(hassIn("fr-FR"), {}), "fr");
-  assert.equal(sl.lang(hassIn("pt-BR"), {}), "en");
+  assert.equal(sl.lang(hassIn("pt-BR"), {}), "pt");
+  // Italian, Dutch, European Portuguese and Polish; Brazilian Portuguese falls back to European Portuguese.
+  assert.equal(sl.lang(hassIn("it-IT"), {}), "it");
+  assert.equal(sl.lang(hassIn("nl-BE"), {}), "nl");
+  assert.equal(sl.lang(hassIn("pt"), {}), "pt");
+  assert.equal(sl.lang(hassIn("pl-PL"), {}), "pl");
+  assert.equal(sl.lang(null, { language: "it-IT" }), "it");
+  assert.equal(sl.lang(null, { language: "nl-BE" }), "nl");
+  assert.equal(sl.lang(null, { language: "pt" }), "pt");
+  assert.equal(sl.lang(null, { language: "pl-PL" }), "pl");
+  assert.equal(sl.lang(hassIn("ja"), {}), "en");
+  assert.equal(sl.lang(null, { language: "ja" }), "en");
   // The card option wins over Home Assistant.
   assert.equal(sl.lang(hassIn("sr-Latn"), { language: "de" }), "de");
 });
@@ -381,6 +394,34 @@ test("editor: Serbian language options", () => {
     assert.match(field, /"value":"sr","label":"Српски"/);
     assert.match(field, /"value":"sr-Latn","label":"Srpski \(latinica\)"/);
     assert.match(field, /"label":"Automatski"/);
+  }
+});
+
+test("editor: Italian, Dutch, Portuguese and Polish language options", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    ed._config = { entity: "lock.porte_entree", language: "pl" };
+    const field = JSON.stringify(ed._schema().find((f) => f.name === "language"));
+    assert.match(field, /"value":"it","label":"Italiano"/);
+    assert.match(field, /"value":"nl","label":"Nederlands"/);
+    assert.match(field, /"value":"pt","label":"Português \(Portugal\)"/);
+    assert.match(field, /"value":"pl","label":"Polski"/);
+    assert.match(field, /"label":"Automatycznie"/);
+  }
+});
+
+test("Italian, Dutch, Portuguese and Polish strings", () => {
+  const cases = [
+    ["it-IT", />Bloccata</, /Porta chiusa/],
+    ["nl-BE", />Vergrendeld</, /Deur dicht/],
+    ["pt-PT", />Trancada</, /Porta fechada/],
+    ["pl-PL", />Zablokowany</, /Drzwi zamknięte/],
+  ];
+  for (const [language, state, door] of cases) {
+    const html = newCard(makeHass({ ...states }, { language, locale: { language } })).shadowRoot.innerHTML;
+    assert.match(html, state, language);
+    assert.match(html, door, language);
   }
 });
 

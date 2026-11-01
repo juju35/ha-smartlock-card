@@ -63,3 +63,20 @@ test("scripts/screenshots.mjs renders into a work folder and goes through replac
   assert.doesNotMatch(src, /\$\{root\}screenshots\/\$\{(s|gif)\.file\}/, "an image is written straight into screenshots/");
   assert.match(src, /replaceIfChanged\(/);
 });
+
+// Re-rendering the same card must give the same pixels: a fixed clock (Node and page), the picture's animations
+// (inside its SVG image) inlined and paused for the stills as well as stepped for the GIFs.
+test("scripts/screenshots.mjs renders at a fixed time with every animation paused", () => {
+  const src = readFileSync(new URL("../scripts/screenshots.mjs", import.meta.url), "utf8");
+  assert.match(src, /Date\.now = \(\) => NOW;/);
+  // mock-states.mjs computes its times when it loads: it must be imported after Date.now is fixed.
+  assert.doesNotMatch(src, /^import .*mock-states|^import .*shots\.mjs/m);
+  assert.ok(src.indexOf("Date.now = ") < src.indexOf('import("./mock-states.mjs")'));
+  assert.match(src, /page\.clock\.install\(/);
+  assert.match(src, /page\.clock\.pauseAt\(/);
+  assert.match(src, /timezoneId:/);
+  assert.match(src, /shadowRoot\.getAnimations\(\)/);
+  // The stills: picture inlined and animations set to 0 before the screenshot.
+  const still = src.slice(src.indexOf("for (const s of shots)"), src.indexOf("async function makeGif"));
+  assert.match(still, /await inlinePicture\(page\);\s*await setAnimations\(page, 0\);[\s\S]*page\.screenshot/);
+});

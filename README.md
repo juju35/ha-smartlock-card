@@ -149,7 +149,7 @@ language: fr
 | `show_settings` | full | `true` | Switches, selects, numbers and buttons of the lock device |
 | `show_activity` | full | `true` | Last events of the lock in the logbook |
 | `collapsed` | full | `[settings, activity]` | Sections folded by default, among `details`, `settings` and `activity` (`[]` to unfold everything). Click a section title to fold or unfold it |
-| `language` | both | Auto | Force language: `en`, `fr`, `de` or `es` (auto-detects from HA settings) |
+| `language` | both | Auto | Force language: `en`, `fr`, `de`, `es`, `sr` (Serbian Cyrillic) or `sr-Latn` (Serbian Latin) (auto-detects from HA settings) |
 
 ## Screenshots
 
@@ -286,6 +286,8 @@ The cards auto-detect the language from your Home Assistant settings. Currently 
 | Français | `fr` |
 | Deutsch | `de` |
 | Español | `es` |
+| Српски | `sr` |
+| Srpski (latinica) | `sr-Latn` |
 
 Contributions for additional languages are welcome!
 

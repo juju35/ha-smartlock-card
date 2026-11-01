@@ -738,7 +738,7 @@ const STRINGS = {
     cancel: "Annulla",
     battery_low: "Batteria scarica",
     battery_ok: "Batteria OK",
-    keypad_battery: "Batteria del tastierino",
+    keypad_battery: "Batteria tastierino",
     door_open: "Porta aperta",
     door_closed: "Porta chiusa",
     problem: "Problema segnalato",
@@ -782,7 +782,7 @@ const STRINGS = {
     show_details: "Mostra i dettagli",
     show_settings: "Mostra le impostazioni",
     show_activity: "Mostra l'attività",
-    confirm: "Chiedi conferma prima di",
+    confirm: "Chiedi conferma per",
     collapsed: "Sezioni compresse per impostazione predefinita",
     entities: "Entità (facoltative, cercate per impostazione predefinita sul dispositivo della serratura)",
     door_entity: "Sensore porta",
@@ -814,9 +814,9 @@ const STRINGS = {
     code: "Code",
     code_invalid: "Ongeldige code",
     cancel: "Annuleren",
-    battery_low: "Batterij bijna leeg",
+    battery_low: "Batterij laag",
     battery_ok: "Batterij OK",
-    keypad_battery: "Batterij van het toetsenbord",
+    keypad_battery: "Batterij toetsenbord",
     door_open: "Deur open",
     door_closed: "Deur dicht",
     problem: "Probleem gemeld",
@@ -924,8 +924,8 @@ const STRINGS = {
     img_retrofit: "Módulo de adaptação",
     img_knob: "Botão rotativo",
     img_compact: "Cilindro compacto",
-    img_keypad: "Trinco com teclado",
-    img_lever: "Puxador com impressão digital",
+    img_keypad: "Ferrolho com teclado",
+    img_lever: "Manípulo com impressão digital",
     img_reader: "Leitor de acesso",
     img_padlock: "Cadeado",
     finish: "Acabamento",
@@ -970,7 +970,7 @@ const STRINGS = {
     code: "Kod",
     code_invalid: "Nieprawidłowy kod",
     cancel: "Anuluj",
-    battery_low: "Niski poziom baterii",
+    battery_low: "Słaba bateria",
     battery_ok: "Bateria OK",
     keypad_battery: "Bateria klawiatury",
     door_open: "Drzwi otwarte",
@@ -1016,7 +1016,7 @@ const STRINGS = {
     show_details: "Pokaż szczegóły",
     show_settings: "Pokaż ustawienia",
     show_activity: "Pokaż aktywność",
-    confirm: "Pytaj o potwierdzenie dla",
+    confirm: "Potwierdzenie wymagane dla",
     collapsed: "Sekcje domyślnie zwinięte",
     entities: "Encje (opcjonalnie, domyślnie wyszukiwane na urządzeniu zamka)",
     door_entity: "Czujnik drzwi",
@@ -1033,7 +1033,7 @@ const STRINGS = {
     s_open: "Otwarty",
     s_opening: "Otwieranie",
     s_locking: "Blokowanie",
-    s_unlocking: "Odblokowywanie",
+    s_unlocking: "Odblokowanie",
     s_jammed: "Zacięty",
     s_unavailable: "Niedostępny",
     s_unknown: "Nieznany",
@@ -1678,7 +1678,7 @@ const FULL_STYLE = `
   .hero { display: flex; gap: 12px; align-items: center; }
   .picture { width: 88px; height: 102px; }
   .picture img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }
-  .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--c); }
+  .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--c); overflow-wrap: anywhere; }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }

@@ -1188,6 +1188,14 @@ const describe = (hass, config, id) => {
 const BASE_STYLE = `
   :host { --sl-ok: var(--success-color, #43a047); --sl-warn: var(--warning-color, #ffa600); --sl-crit: var(--error-color, #db4437);
           --sl-idle: var(--disabled-text-color, #9e9e9e); --sl-active: var(--info-color, #039be5); --sl-accent: var(--primary-color, #03a9f4); }
+  /* The card is the container of its width queries (@container below). Inline-size containment drops the content
+     from the card's own intrinsic width: in a parent that sizes it from its content (layout-card, a button-card, a
+     grid column auto, an inline-block), it would fall to a few pixels. An empty, zero-height row (::before) gives it
+     back a preferred width of 300 px, as a max-content width only: in a single minmax(0, 1fr) column its min-content
+     width stays 0, so in a 1fr 1fr grid or a flex row, even wrapped in another element, the card still shrinks with
+     its column instead of overflowing it. Anywhere else (Sections, masonry, stacks) the parent sets the width. */
+  :host { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; }
+  :host::before { content: ""; width: 300px; max-width: 100%; height: 0; }
   ha-card { overflow: hidden; container-type: inline-size; }
   .icon { width: 18px; height: 18px; fill: currentColor; flex: none; }
   .muted { color: var(--secondary-text-color); }
@@ -1200,7 +1208,7 @@ const BASE_STYLE = `
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--sl-ok)); flex: none; display: inline-block; }
   .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap;
           background: color-mix(in srgb, var(--c, var(--sl-ok)) 15%, transparent); color: var(--ink, var(--c, var(--sl-ok)));
-          box-sizing: border-box; flex: 0 1 auto; min-width: 0; max-width: 50%; overflow: hidden; }
+          box-sizing: border-box; flex: 0 1 auto; min-width: 0; overflow: hidden; }
   .chip .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .bar { height: 4px; border-radius: 3px; background: var(--divider-color, rgba(127,127,127,.25)); overflow: hidden; }
   .bar > div { height: 100%; border-radius: 3px; background: var(--c, var(--sl-ok)); transition: width .6s ease; }
@@ -1208,8 +1216,9 @@ const BASE_STYLE = `
   .badge { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center;
            background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); }
   .badge .icon { width: 24px; height: 24px; }
-  /* The name gives way last: the chip shrinks first, then shows only its dot (see @container below). */
-  .titles { flex: 1 1 auto; min-width: 5ch; }
+  /* The name block takes what the badge, the chip and the buttons leave (basis 0: its long name never squeezes the
+     chip), down to its first letters; only then does the chip shrink. Narrower, the chip shows only its dot. */
+  .titles { flex: 1 1 0; min-width: 5ch; }
   .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sub { font-size: 12px; line-height: 1.2; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* With a sub-line, the chip sits on the name line: lifted by half the sub-line (12px × 1.2). */
@@ -1240,11 +1249,18 @@ const BASE_STYLE = `
   .zoom:hover { background: color-mix(in srgb, var(--sl-idle) 16%, transparent); color: var(--primary-text-color); }
   .zoom:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 1px; }
   [role="button"]:focus-visible, .btn:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 2px; }
-  /* Narrow full card (6 columns, mini card zoomed in on a phone): the chip keeps only its dot, the state is in its
-     title / aria-label and in big under the header. */
-  @container (max-width: 300px) {
-    .header .chip { padding: 4px; }
+  /* Narrow full card (6 and 8 columns of a phone, mini card zoomed in there): the chip keeps only its whole dot,
+     the state is in its title / aria-label and in big under the header. From 9 columns of a phone, it has its text. */
+  @container (max-width: 230px) {
+    .header .chip { padding: 4px; flex: none; }
     .header .chip .t { display: none; }
+  }
+  /* 6 columns of a phone (156-178 px): tighter header, smaller badge, so that the name, the dot and the detail
+     button all fit. */
+  @container (max-width: 200px) {
+    .header { gap: 6px; padding: 10px 8px 0; }
+    .badge { width: 32px; height: 32px; }
+    .badge .icon { width: 20px; height: 20px; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;
@@ -1766,6 +1782,19 @@ const FULL_STYLE = `
   .act .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .act .who { color: var(--secondary-text-color); }
   .act .when { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; }
+  /* Narrow cards: the state is written in whole words (the longest, Spanish "Desbloqueando", is ~7.9 em wide), so
+     the picture shrinks and the state size follows the width left to it (cqi: % of the card width) ... */
+  @container (max-width: 300px) {
+    .picture { width: 64px; height: 74px; }
+    .state { font-size: 18px; font-size: clamp(16px, 12.6cqi - 12.7px, 22px); }
+  }
+  /* ... and on 6 or 8 columns of a phone the picture goes above, the state and its lines get the whole width. */
+  @container (max-width: 230px) {
+    .content { padding: 8px 8px 12px; }
+    .hero { flex-direction: column; align-items: stretch; gap: 8px; }
+    .hero .picture { align-self: center; }
+    .state { font-size: clamp(16px, 12.6cqi - 2px, 22px); }
+  }
 `;
 
 class SmartLockCard extends SmartLockBase {
@@ -1978,7 +2007,7 @@ const MINI_STYLE = `
   .mini { display: flex; align-items: center; gap: 10px; padding: 12px; }
   .mini .picture { width: 50px; height: 58px; flex: none; }
   .mini .picture img { filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
-  .mini .titles { flex: 1 1 auto; min-width: 5ch; display: flex; flex-direction: column; gap: 3px; }
+  .mini .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; gap: 3px; }
   .mini .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* The state word keeps its room: the detail after it ("· 5 minutes ago") is cut first. */
   .mini .sub { display: flex; align-items: center; font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; }
@@ -2014,6 +2043,15 @@ const MINI_STYLE = `
     .mini .batt:has(.bolt) > .icon:not(.bolt) { display: none; }
     .mini .controls { gap: 4px; }
     .mini .controls .btn.round { width: 28px; height: 28px; }
+  }
+  /* 6 columns of a phone (156-178 px): the detail button goes above the buttons, which stack, so that the name and
+     the state word keep the width of the card. */
+  @container (max-width: 200px) {
+    .mini { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 6px; row-gap: 4px; }
+    .mini .titles { grid-column: 1; grid-row: 1 / span 2; }
+    .mini .zoom { grid-column: 2; grid-row: 1; justify-self: end; align-self: start; margin: -4px -4px 0 0; }
+    .mini .controls { grid-column: 2; grid-row: 2; flex-direction: column; align-self: start; }
+    .mini:not(:has(.zoom)) .controls { grid-row: 1 / span 2; align-self: center; }
   }
 `;
 
@@ -2066,7 +2104,8 @@ class SmartLockMiniCard extends SmartLockCard {
   // click count), the focus moves to the button that replaced this one.
   _toggleZoom(ev) {
     this._setZoom(!this._zoomed);
-    if (ev.detail === 0) this.shadowRoot.querySelector(".zoom")?.focus();
+    // preventScroll: the card grows or shrinks around the button, the page must not jump.
+    if (ev.detail === 0) this.shadowRoot.querySelector(".zoom")?.focus({ preventScroll: true });
   }
 
   _render() {

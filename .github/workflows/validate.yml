@@ -35,14 +35,7 @@ jobs:
 
       - name: Install Chromium system libraries
         timeout-minutes: 12
-        run: |
-          for i in 1 2 3; do
-            timeout 150 sudo apt-get update \
-              && timeout 300 npx playwright install-deps chromium \
-              && ok=1 && break
-            echo "apt attempt $i failed or timed out, retrying in 15s"; sleep 15
-          done
-          [ -n "$ok" ] || { echo "::error::apt failed 3 times"; exit 1; }
+        run: .github/scripts/install-chromium-deps.sh
 
       - name: Build and check the card
         run: npm run check

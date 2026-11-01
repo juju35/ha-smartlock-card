@@ -25,10 +25,29 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install dependencies
+        run: npm ci
+
+      # The layout tests (test/layout.test.mjs) render the mini card in Chromium. The browser binary is downloaded
+      # apart from its system libraries, whose apt work is time-boxed and retried so that a flaky mirror cannot hang.
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      - name: Install Chromium system libraries
+        timeout-minutes: 12
+        run: |
+          for i in 1 2 3; do
+            timeout 150 sudo apt-get update \
+              && timeout 300 npx playwright install-deps chromium \
+              && ok=1 && break
+            echo "apt attempt $i failed or timed out, retrying in 15s"; sleep 15
+          done
+          [ -n "$ok" ] || { echo "::error::apt failed 3 times"; exit 1; }
+
       - name: Build and check the card
         run: npm run check
 
-      - name: Unit tests
+      - name: Unit and layout tests
         run: npm test
 
       - name: Check hacs.json points to the built file

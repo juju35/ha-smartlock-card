@@ -1464,14 +1464,31 @@ const MINI_STYLE = `
   .mini .sub { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mini .sub .st { color: var(--c); font-weight: 500; }
   .mini .sub .dot { margin-right: 4px; vertical-align: 1px; }
-  .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
   .mini .batt .icon { color: var(--c); width: 14px; height: 14px; }
-  .mini .batt .bar { width: 64px; flex: none; }
+  .mini .batt .bar { flex: 0 1 64px; min-width: 0; }
   .mini .batt .v { font-weight: 500; white-space: nowrap; }
   .mini .batt .bolt { color: var(--sl-ok); }
   .mini .controls { display: flex; gap: 6px; flex: none; }
   .mini .controls .btn.round { width: 32px; height: 32px; }
   .mini .controls .btn .icon { width: 16px; height: 16px; }
+  /* Narrow cards (6 columns of a Sections view, phones): the battery keeps its value and drops its bar, then the
+     picture shrinks and finally goes, so that the name, the state and the buttons always fit. */
+  ha-card { container-type: inline-size; }
+  @container (max-width: 300px) {
+    .mini { gap: 8px; }
+    .mini .picture { width: 36px; height: 42px; }
+    .mini .batt .bar { display: none; }
+  }
+  @container (max-width: 220px) {
+    .mini { padding: 12px 10px; }
+    .mini .picture { display: none; }
+    .mini .batt { gap: 4px; }
+    /* While charging, the bolt stands in for the battery icon. */
+    .mini .batt:has(.bolt) > .icon:not(.bolt) { display: none; }
+    .mini .controls { gap: 4px; }
+    .mini .controls .btn.round { width: 28px; height: 28px; }
+  }
 `;
 
 // The mini card is a full card drawn compact: its detail button (top right, `zoom: false` removes it) switches it

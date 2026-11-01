@@ -76,8 +76,8 @@ test("describe finds the door, battery, keypad and settings on the lock device",
   assert.deepEqual([...m.settings], ["select.porte_entree_led", "switch.porte_entree_mode_nuit", "switch.porte_entree_verrouillage_auto"]);
 });
 
-test("a keypad named in German or Spanish (no translation key) is still the keypad", () => {
-  for (const word of ["tastatur", "teclado"]) {
+test("a keypad named in German, Spanish, Italian, Dutch or Polish (no translation key) is still the keypad", () => {
+  for (const word of ["tastatur", "teclado", "tastierino", "toetsenbord", "klawiatura"]) {
     const id = `binary_sensor.porte_entree_${word}_batterie`;
     const old = "binary_sensor.porte_entree_clavier";
     const ents = { ...entities, [id]: { ...entities[old], entity_id: id, translation_key: null } };

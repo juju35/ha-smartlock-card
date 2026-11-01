@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.6
+
+_2026-11-01_
+
+### Added
+- Added Italian, Dutch, European Portuguese and Polish translations: the cards and the visual editor are available in Italian (`language: it`), Dutch (`nl`), European Portuguese (`pt`, also used when Home Assistant is set to Brazilian Portuguese) and Polish (`pl`), picked automatically from the Home Assistant language.
+- A keypad named `tastierino`, `toetsenbord` or `klawiatura` in its entity id is recognised as the keypad.
+
 ## 1.5.5
 
 _2026-11-01_

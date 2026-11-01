@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { states, entities, devices, logbook } from "./mock-states.mjs";
+import { replaceIfChanged } from "./pixels.mjs";
 import { gifs, shots } from "./shots.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -78,6 +79,10 @@ async function openCard(browser, s) {
   return page;
 }
 
+// Every image is rendered here first and only replaces its committed twin when its pixels changed (see pixels.mjs).
+const work = mkdtempSync(join(tmpdir(), "sl-shots-"));
+const save = (tmp, rel) => console.log(`${replaceIfChanged(tmp, `${root}${rel}`) ? "updated  " : "unchanged"} ${rel}`);
+
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 for (const s of shots) {
   const page = await openCard(browser, s);
@@ -95,12 +100,13 @@ for (const s of shots) {
   }
   await page.waitForTimeout(800);
   const box = await page.locator("#root").boundingBox();
+  const tmp = join(work, `${s.file}.png`);
   await page.screenshot({
-    path: `${root}screenshots/${s.file}.png`,
+    path: tmp,
     clip: { x: 0, y: 0, width: s.width + 32, height: Math.ceil(box.height) + 32 },
     animations: "disabled",
   });
-  console.log(`screenshots/${s.file}.png`);
+  save(tmp, `screenshots/${s.file}.png`);
   await page.close();
 }
 
@@ -137,15 +143,17 @@ async function makeGif(browser, gif, { fps = 20, seconds = 3 } = {}) {
     await page.screenshot({ path: join(dir, `f${String(i).padStart(3, "0")}.png`), clip });
   }
   await page.close();
-  const out = `${root}screenshots/${gif.file}.gif`;
+  const out = join(work, `${gif.file}.gif`);
+  // Ordered (bayer) dithering and a palette computed from the frames only: the same frames give the same GIF.
   execFileSync("ffmpeg", [
     "-y", "-loglevel", "error", "-framerate", String(fps), "-i", join(dir, "f%03d.png"),
     "-vf", `scale=${clip.width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4`,
     "-loop", "0", out,
   ]);
   rmSync(dir, { recursive: true });
-  console.log(`screenshots/${gif.file}.gif`);
+  save(out, `screenshots/${gif.file}.gif`);
 }
 
 for (const gif of gifs) await makeGif(browser, gif);
 await browser.close();
+rmSync(work, { recursive: true });

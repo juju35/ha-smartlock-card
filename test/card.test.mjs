@@ -467,3 +467,108 @@ test("image: automatic family, a preset, your own picture or none", () => {
   assert.equal(src({ image: "/local/serrure.png" }), "/local/serrure.png");
   assert.equal(src({ image: "none" }), undefined);
 });
+
+test("activity: a logbook read that failed is tried again when the section is unfolded again", async () => {
+  let calls = 0;
+  const callWS = async () => {
+    calls++;
+    if (calls === 1) throw new Error("connection lost");
+    return logbook;
+  };
+  const card = newCard(makeHass(states, { callWS }), { collapsed: [] });
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(calls, 1);
+  assert.match(card.shadowRoot.innerHTML, /Could not read the logbook/);
+  // Re-renders while it stays unfolded do not hammer a failing connection.
+  card._html = "";
+  card._update();
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(calls, 1);
+  click(card, { action: "toggle_section", section: "activity" });
+  click(card, { action: "toggle_section", section: "activity" });
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(calls, 2);
+  assert.match(card.shadowRoot.innerHTML, /Leaving home/);
+});
+
+test("activity: an unfold after a successful read does not read the logbook again", async () => {
+  let calls = 0;
+  const card = newCard(makeHass(states, { callWS: async () => (calls++, logbook) }), { collapsed: [] });
+  await new Promise((r) => setTimeout(r, 0));
+  click(card, { action: "toggle_section", section: "activity" });
+  click(card, { action: "toggle_section", section: "activity" });
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(calls, 1);
+});
+
+// Every element that opens a more-info dialog or acts is reachable from the keyboard (Enter / Space on role=button).
+const clickables = (html) => [...html.matchAll(/<(\w+)([^>]*class="[^"]*\bclickable\b[^"]*"[^>]*)>/g)].map((m) => m[0]);
+
+test("keyboard: every clickable part of the full card is a focusable button", () => {
+  const st = { ...states, "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" } };
+  const card = newCard(makeHass(st, { callWS: async () => logbook }), { collapsed: [] });
+  return new Promise((r) => setTimeout(r, 0)).then(() => {
+    const html = card.shadowRoot.innerHTML;
+    const tags = clickables(html);
+    // Badge, chip, picture, state, battery, door, tiles, activity rows.
+    for (const cls of ["badge", "chip", "picture", "state", "batt", "line", "tile", "act"])
+      assert.ok(
+        tags.some((t) => t.includes(`class="${cls} `)),
+        `no clickable .${cls}`,
+      );
+    for (const t of tags) {
+      assert.match(t, /role="button"/, t);
+      assert.match(t, /tabindex="0"/, t);
+    }
+    // The picture has no text: it is named after the lock.
+    assert.match(html, /class="picture clickable"[^>]*aria-label="Front door"/);
+  });
+});
+
+test("keyboard: the mini card name and state line are focusable buttons", () => {
+  const html = newCard(makeHass(), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  const tags = clickables(html);
+  for (const cls of ["name", "sub", "batt"]) assert.ok(tags.some((t) => t.includes(`class="${cls} `)), `no clickable .${cls}`);
+  for (const t of tags) assert.match(t, /role="button" tabindex="0"/, t);
+});
+
+test("settings switches expose their state (aria-pressed)", () => {
+  const card = newCard(makeHass(), { collapsed: [] });
+  const html = card.shadowRoot.innerHTML;
+  const toggles = [...html.matchAll(/<button[^>]*data-action="toggle"[^>]*>/g)].map((m) => m[0]);
+  assert.ok(toggles.length > 0);
+  for (const b of toggles) assert.match(b, /aria-pressed="(true|false)"/);
+  assert.ok(toggles.some((b) => /class="btn on"[^>]*aria-pressed="true"/.test(b)));
+});
+
+test("editor: picture options only with the picture, Open and confirm only with the buttons", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    const names = (config) => {
+      ed._config = { entity: "lock.porte_entree", ...config };
+      return JSON.stringify(ed._schema()).match(/"name":"\w+"/g).join();
+    };
+    const all = names({});
+    for (const n of ["image", "finish", "show_open", "confirm"]) assert.match(all, new RegExp(`"name":"${n}"`));
+    const noPicture = names({ show_picture: false });
+    assert.doesNotMatch(noPicture, /"name":"(image|finish)"/);
+    assert.match(noPicture, /"name":"show_open"/);
+    const noControls = names({ show_controls: false });
+    assert.doesNotMatch(noControls, /"name":"(show_open|confirm)"/);
+    assert.match(noControls, /"name":"finish"/);
+    // The switches themselves stay, so they can be turned back on.
+    assert.match(noControls, /"name":"show_controls"/);
+    assert.match(noPicture, /"name":"show_picture"/);
+  }
+});
+
+test("editor: turning the picture off updates the form schema", () => {
+  const ed = sl.SmartLockCard.getConfigElement();
+  ed._form = {}; // stands in for ha-form (no DOM here)
+  ed.hass = makeHass();
+  ed.setConfig({ entity: "lock.porte_entree" });
+  assert.match(JSON.stringify(ed._form.schema), /"name":"finish"/);
+  ed.setConfig({ entity: "lock.porte_entree", show_picture: false });
+  assert.doesNotMatch(JSON.stringify(ed._form.schema), /"name":"finish"/);
+});

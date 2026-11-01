@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.5.6
+
+_2026-11-01_
+
+### Added
+- Added Italian, Dutch, European Portuguese and Polish translations: the cards and the visual editor are available in Italian (`language: it`), Dutch (`nl`), European Portuguese (`pt`, also used when Home Assistant is set to Brazilian Portuguese) and Polish (`pl`), picked automatically from the Home Assistant language.
+- A keypad named `tastierino`, `toetsenbord` or `klawiatura` in its entity id is recognised as the keypad.
+
+## 1.5.5
+
+_2026-11-01_
+
+### Added
+- Added Serbian (Cyrillic and Latin) translations: the cards and the visual editor are available in Serbian Cyrillic (`language: sr`) and Serbian Latin (`language: sr-Latn`), and Serbian Latin is picked automatically when Home Assistant is set to it.
+
+## 1.5.4
+
+_2026-11-01_
+
+### Fixes
+- Mini card: at its default width (6 columns of a Sections view) and on phones, the battery value no longer runs under the Lock / Open buttons and the name and state are no longer squeezed out. On a narrow card the battery bar is dropped (the value stays), then the lock picture shrinks and, on the narrowest cards, makes room for the name; the buttons and the detail button always stay inside the card.
+
+### Maintenance
+- Biome 2.6.3 for the pre-commit hook and the CI, which now reads the version from the pre-commit configuration.
+- The mini card layout is checked in a real browser by the tests at 380, 246 and 175 px.
+
 ## 1.5.3
 
 _2026-10-29_

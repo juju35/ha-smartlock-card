@@ -37,7 +37,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Detail button on the mini card (top right): it switches the mini card to the full card's content and back; a click anywhere outside the card brings the compact view back
 - Click any value to open its Home Assistant history (more-info dialog)
 - Visual editor in the dashboard UI for both cards (no YAML needed)
-- Light and dark mode, English, French, German and Spanish
+- Light and dark mode, English, French, German, Spanish, Serbian (Cyrillic and Latin), Italian, Dutch, European Portuguese and Polish
 - Single file, no external dependency
 
 ## Prerequisites
@@ -149,7 +149,7 @@ language: fr
 | `show_settings` | full | `true` | Switches, selects, numbers and buttons of the lock device |
 | `show_activity` | full | `true` | Last events of the lock in the logbook |
 | `collapsed` | full | `[settings, activity]` | Sections folded by default, among `details`, `settings` and `activity` (`[]` to unfold everything). Click a section title to fold or unfold it |
-| `language` | both | Auto | Force language: `en`, `fr`, `de` or `es` (auto-detects from HA settings) |
+| `language` | both | Auto | Force language: `en`, `fr`, `de`, `es`, `sr` (Serbian Cyrillic), `sr-Latn` (Serbian Latin), `it`, `nl`, `pt` (European Portuguese, also used for Brazilian Portuguese) or `pl` (auto-detects from HA settings) |
 
 ## Screenshots
 
@@ -246,7 +246,7 @@ Mini card zoomed in with its detail button (top right, click it again or anywher
 
 The cards use the standard `lock` entity, so every lock integration works: the state (`locked`, `unlocked`, `open`, `locking`, `unlocking`, `opening`, `jammed`), the `lock.lock`, `lock.unlock` and `lock.open` actions, the Open feature (`supported_features`), the `code_format` and `changed_by` attributes.
 
-The other entities of the lock are found through the entity and device registries: everything on the same device as the lock, matched by its domain and device class (`door` / `opening` / `garage_door` for the door, `battery`, `battery_charging`, `problem`). Entity ids can therefore be in any language or renamed without breaking the cards. The keypad is the exception: it is found by its name (`keypad`, `clavier`, `Tastatur` or `teclado` in the entity id) or by the integration's translation key (Nuki), so a keypad entity renamed to something else shows under Details. When the door sensor or the battery belongs to another device, set `door_entity` or `battery_entity`.
+The other entities of the lock are found through the entity and device registries: everything on the same device as the lock, matched by its domain and device class (`door` / `opening` / `garage_door` for the door, `battery`, `battery_charging`, `problem`). Entity ids can therefore be in any language or renamed without breaking the cards. The keypad is the exception: it is found by its name (`keypad`, `clavier`, `Tastatur`, `teclado`, `tastierino`, `toetsenbord` or `klawiatura` in the entity id) or by the integration's translation key (Nuki), so a keypad entity renamed to something else shows under Details. When the door sensor or the battery belongs to another device, set `door_entity` or `battery_entity`.
 
 <p align="center"><img src="images/states.svg" alt="Lock states" width="760"></p>
 
@@ -286,6 +286,12 @@ The cards auto-detect the language from your Home Assistant settings. Currently 
 | Français | `fr` |
 | Deutsch | `de` |
 | Español | `es` |
+| Српски | `sr` |
+| Srpski (latinica) | `sr-Latn` |
+| Italiano | `it` |
+| Nederlands | `nl` |
+| Português (Portugal) | `pt` |
+| Polski | `pl` |
 
 Contributions for additional languages are welcome!
 

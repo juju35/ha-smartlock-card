@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.4
+
+_2026-11-01_
+
+### Fixes
+- Mini card: at its default width (6 columns of a Sections view) and on phones, the battery value no longer runs under the Lock / Open buttons and the name and state are no longer squeezed out. On a narrow card the battery bar is dropped (the value stays), then the lock picture shrinks and, on the narrowest cards, makes room for the name; the buttons and the detail button always stay inside the card.
+
+### Maintenance
+- Biome 2.6.3 for the pre-commit hook and the CI, which now reads the version from the pre-commit configuration.
+- The mini card layout is checked in a real browser by the tests at 380, 246 and 175 px.
+
 ## 1.5.3
 
 _2026-10-29_

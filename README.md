@@ -36,7 +36,8 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Collapsible sections (settings and activity folded by default)
 - Detail button on the mini card (top right): it switches the mini card to the full card's content and back; a click anywhere outside the card brings the compact view back
 - Click any value to open its Home Assistant history (more-info dialog)
-- Visual editor in the dashboard UI for both cards (no YAML needed)
+- Visual editor in the dashboard UI for both cards (no YAML needed); options that would have no effect (picture options without the picture, Open and confirmations without the buttons) are hidden
+- Keyboard: every part that opens a dialog or acts can be reached with Tab and activated with Enter / Space
 - Light and dark mode, English, French, German, Spanish, Serbian (Cyrillic and Latin), Italian, Dutch, European Portuguese and Polish
 - Single file, no external dependency
 
@@ -139,7 +140,7 @@ language: fr
 | `show_icon` | both | `true` | State icon at the left of the header, on the full card and the zoomed-in mini card (the compact mini view has no header icon) |
 | `show_picture` | both | `true` | Lock picture (same as `image: none` when `false`) |
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
-| `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…) |
+| `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…). On a narrow mini card (6 columns), it moves behind the detail button so that the state stays readable; without the detail button (`zoom: false`) it stays on the card |
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |
 | `code` | both | — | Code sent with every action, for locks that need one and when you don't want to type it. It is stored in the dashboard configuration in clear text: prefer typing it |
 | `door_entity` | both | Found on the lock device | Door sensor (`binary_sensor`), when it belongs to another device (a contact sensor on the door) |

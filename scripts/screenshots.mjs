@@ -6,8 +6,16 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { states, entities, devices, logbook } from "./mock-states.mjs";
-import { gifs, shots } from "./shots.mjs";
+import { replaceIfChanged } from "./pixels.mjs";
+
+// One fixed instant for every render, in Node (the mock states' last_changed and logbook times are computed from
+// Date.now() when mock-states.mjs loads, hence the dynamic imports after this line) and in the page (its clock is
+// installed at the same instant and paused): "42 minutes ago" and the activity times never change from one run to
+// the next, and the card's one-minute refresh never fires and redraws the picture in the middle of a GIF.
+const NOW = Date.parse("2026-06-15T10:00:00Z");
+Date.now = () => NOW;
+const { states, entities, devices, logbook } = await import("./mock-states.mjs");
+const { gifs, shots } = await import("./shots.mjs");
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const cardJs = readFileSync(`${root}dist/smartlock-card.js`, "utf8");
@@ -49,7 +57,9 @@ const page_html = (theme, width) => `<!doctype html><html><head><meta charset="u
 </style></head><body><div id="root"></div></body></html>`;
 
 async function openCard(browser, s) {
-  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 1000, height: 2000 } });
+  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 1000, height: 2000 }, locale: "en-US", timezoneId: "UTC" });
+  await page.clock.install({ time: NOW - 1000 });
+  await page.clock.pauseAt(NOW);
   page.on("pageerror", (err) => console.error(`pageerror (${s.file}): ${err.message}`));
   await page.setContent(page_html(s.theme, s.width));
   await page.addScriptTag({ content: HA_CARD });
@@ -78,6 +88,37 @@ async function openCard(browser, s) {
   return page;
 }
 
+// The SVG picture is served as an <img src="data:image/svg+xml,…">, whose internal document is invisible to
+// getAnimations() and to Playwright's `animations: "disabled"`: it is swapped for the same SVG inline, so that every
+// animation of the card can be paused and set to the time `t` (ms). Stills are taken at t = 0, GIF frames stepped.
+async function inlinePicture(page) {
+  await page.evaluate(() => {
+    const img = document.getElementById("root").firstElementChild.shadowRoot.querySelector(".picture img");
+    if (!img?.src.startsWith("data:image/svg+xml,")) return;
+    const box = img.getBoundingClientRect();
+    const span = document.createElement("span");
+    span.innerHTML = decodeURIComponent(img.src.slice("data:image/svg+xml,".length));
+    const svg = span.firstElementChild;
+    // The inline svg no longer matches the `.picture img` sizing rules: keep the img's rendered box and shadow.
+    svg.style.width = `${box.width}px`;
+    svg.style.height = `${box.height}px`;
+    svg.style.filter = getComputedStyle(img).filter;
+    img.replaceWith(svg);
+  });
+}
+const setAnimations = (page, t) =>
+  page.evaluate((t) => {
+    const card = document.getElementById("root").firstElementChild;
+    for (const a of [...document.getAnimations(), ...card.shadowRoot.getAnimations()]) {
+      a.pause();
+      a.currentTime = t;
+    }
+  }, t);
+
+// Every image is rendered here first and only replaces its committed twin when its pixels changed (see pixels.mjs).
+const work = mkdtempSync(join(tmpdir(), "sl-shots-"));
+const save = (tmp, rel) => console.log(`${replaceIfChanged(tmp, `${root}${rel}`) ? "updated  " : "unchanged"} ${rel}`);
+
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 for (const s of shots) {
   const page = await openCard(browser, s);
@@ -94,58 +135,45 @@ for (const s of shots) {
     await page.waitForTimeout(100);
   }
   await page.waitForTimeout(800);
+  await inlinePicture(page);
+  await setAnimations(page, 0);
   const box = await page.locator("#root").boundingBox();
+  const tmp = join(work, `${s.file}.png`);
   await page.screenshot({
-    path: `${root}screenshots/${s.file}.png`,
+    path: tmp,
     clip: { x: 0, y: 0, width: s.width + 32, height: Math.ceil(box.height) + 32 },
     animations: "disabled",
   });
-  console.log(`screenshots/${s.file}.png`);
+  save(tmp, `screenshots/${s.file}.png`);
   await page.close();
 }
 
-// A lock mid-animation, recorded as a looping GIF (needs ffmpeg on PATH). The SVG picture is served as an
-// <img src="data:image/svg+xml,…">, whose internal document is invisible to document.getAnimations(): the image
-// is first swapped for the same SVG inline, so every animation really is paused and stepped frame by frame and
-// each GIF is identical whatever the machine's speed.
+// A lock mid-animation, recorded as a looping GIF (needs ffmpeg on PATH): every animation paused and stepped frame
+// by frame (see inlinePicture), so each GIF is identical whatever the machine's speed.
 async function makeGif(browser, gif, { fps = 20, seconds = 3 } = {}) {
   const page = await openCard(browser, gif);
   await page.waitForTimeout(300);
-  await page.evaluate(() => {
-    const img = document.getElementById("root").firstElementChild.shadowRoot.querySelector(".picture img");
-    const box = img.getBoundingClientRect();
-    const span = document.createElement("span");
-    span.innerHTML = decodeURIComponent(img.src.slice("data:image/svg+xml,".length));
-    const svg = span.firstElementChild;
-    // The inline svg no longer matches the `.picture img` sizing rules: keep the img's rendered box and shadow.
-    svg.style.width = `${box.width}px`;
-    svg.style.height = `${box.height}px`;
-    svg.style.filter = getComputedStyle(img).filter;
-    img.replaceWith(svg);
-  });
+  await inlinePicture(page);
   const box = await page.locator("#root").boundingBox();
   const clip = { x: 0, y: 0, width: gif.width + 32, height: Math.ceil(box.height) + 32 };
   const dir = mkdtempSync(join(tmpdir(), "sl-frames-"));
   const frames = Math.round(fps * seconds);
   for (let i = 0; i < frames; i++) {
-    await page.evaluate((t) => {
-      for (const a of document.getAnimations()) {
-        a.pause();
-        a.currentTime = t;
-      }
-    }, (i * 1000) / fps);
+    await setAnimations(page, (i * 1000) / fps);
     await page.screenshot({ path: join(dir, `f${String(i).padStart(3, "0")}.png`), clip });
   }
   await page.close();
-  const out = `${root}screenshots/${gif.file}.gif`;
+  const out = join(work, `${gif.file}.gif`);
+  // Ordered (bayer) dithering and a palette computed from the frames only: the same frames give the same GIF.
   execFileSync("ffmpeg", [
     "-y", "-loglevel", "error", "-framerate", String(fps), "-i", join(dir, "f%03d.png"),
     "-vf", `scale=${clip.width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4`,
     "-loop", "0", out,
   ]);
   rmSync(dir, { recursive: true });
-  console.log(`screenshots/${gif.file}.gif`);
+  save(out, `screenshots/${gif.file}.gif`);
 }
 
 for (const gif of gifs) await makeGif(browser, gif);
 await browser.close();
+rmSync(work, { recursive: true });

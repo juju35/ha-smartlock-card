@@ -5,7 +5,7 @@
 _2026-11-01_
 
 ### Fixes
-- Full card at its narrowest (6 columns): the lock name is no longer squeezed to a few letters by the state chip. The chip now gives way first and, on a narrow card, shows only its colored dot (the state stays written in big under the header and is read by screen readers); on wider cards it takes at most half of the header.
+- Full card at its narrowest (6 columns): the lock name is no longer squeezed to a few letters by the state chip. The chip now gives way first and, on a narrow card, shows only its colored dot (the state stays written in big under the header and is read by screen readers); from 9 columns of a phone (about 235 px) it shows its whole text again.
 - The header state chip is aligned with the lock name instead of floating between the name and the "Locked 5 minutes ago" line.
 - Mini card on phones and at 6 columns: the state ("Zablokowany", "Vergrendeld"…) is no longer cut in Polish, Dutch, German, Italian, Portuguese or Serbian. The "… ago" detail after it is shortened first, and the Open button moves behind the detail button on narrow cards.
 - State texts are readable in the light theme: "Unlocked", "Locked", "Locking", the door-open line and the highlighted button labels now reach a 4.5:1 contrast (orange text was 1.8:1 on white); dots, icons and bars keep the state colors.
@@ -13,6 +13,9 @@ _2026-11-01_
 - Activity: after a failed logbook read (connection lost), folding and unfolding the section tries again instead of showing the error until the lock changes.
 - Visual editor: picture options are hidden when the picture is off, and the Open and confirmation options when the buttons are off.
 - Transitions are turned off when the system asks for reduced motion.
+- Phones, 6 columns (about 156-178 px): the full card puts its picture above the state, so the state word ("Zablokowany", "Odblokowany") is no longer broken every few letters and the battery value is no longer cut; the mini card stacks its buttons under the detail button so its state stays whole, and the detail button of the zoomed-in mini card no longer sticks out of the card.
+- Cards placed in layout-card, a button-card or a grid column sized to its content no longer shrink to a thin strip, and two cards side by side in a grid or horizontal stack still share the row on a phone instead of overflowing it.
+- Pressing Enter on the mini card's detail button no longer scrolls the page back to the card.
 
 ## 1.5.6
 

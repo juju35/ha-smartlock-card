@@ -1188,37 +1188,48 @@ const describe = (hass, config, id) => {
 const BASE_STYLE = `
   :host { --sl-ok: var(--success-color, #43a047); --sl-warn: var(--warning-color, #ffa600); --sl-crit: var(--error-color, #db4437);
           --sl-idle: var(--disabled-text-color, #9e9e9e); --sl-active: var(--info-color, #039be5); --sl-accent: var(--primary-color, #03a9f4); }
-  ha-card { overflow: hidden; }
+  ha-card { overflow: hidden; container-type: inline-size; }
   .icon { width: 18px; height: 18px; fill: currentColor; flex: none; }
   .muted { color: var(--secondary-text-color); }
   .clickable { cursor: pointer; }
   .ok { --c: var(--sl-ok); } .warn { --c: var(--sl-warn); } .crit { --c: var(--sl-crit); } .idle { --c: var(--sl-idle); } .active { --c: var(--sl-active); }
+  /* Texts in a state color: the raw color is too light on a light card (orange 1.8:1 on white) and too dark for
+     red on a dark one. Mixed with the text color they stay tinted and read at 4.5:1 or more in both themes; dots,
+     icons and bars keep the raw color. */
+  .ok, .warn, .crit, .idle, .active { --ink: color-mix(in srgb, var(--c) 40%, var(--primary-text-color, #212121)); }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--sl-ok)); flex: none; display: inline-block; }
   .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap;
-          background: color-mix(in srgb, var(--c, var(--sl-ok)) 15%, transparent); color: var(--c, var(--sl-ok)); flex: none; }
+          background: color-mix(in srgb, var(--c, var(--sl-ok)) 15%, transparent); color: var(--ink, var(--c, var(--sl-ok)));
+          box-sizing: border-box; flex: 0 1 auto; min-width: 0; max-width: 50%; overflow: hidden; }
+  .chip .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .bar { height: 4px; border-radius: 3px; background: var(--divider-color, rgba(127,127,127,.25)); overflow: hidden; }
   .bar > div { height: 100%; border-radius: 3px; background: var(--c, var(--sl-ok)); transition: width .6s ease; }
   .header { display: flex; align-items: center; gap: 10px; padding: 12px 12px 0; }
   .badge { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center;
            background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); }
   .badge .icon { width: 24px; height: 24px; }
-  .titles { flex: 1; min-width: 0; }
+  /* The name gives way last: the chip shrinks first, then shows only its dot (see @container below). */
+  .titles { flex: 1 1 auto; min-width: 5ch; }
   .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sub { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .warning { padding: 16px; color: var(--sl-warn); }
+  .sub { font-size: 12px; line-height: 1.2; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* With a sub-line, the chip sits on the name line: lifted by half the sub-line (12px × 1.2). */
+  .header:has(.sub) > .chip { margin-bottom: 14.4px; }
+  .warning { padding: 16px; color: color-mix(in srgb, var(--sl-warn) 40%, var(--primary-text-color, #212121)); }
   .picture { flex: none; display: flex; align-items: center; justify-content: center; }
   .picture img { max-width: 100%; max-height: 100%; object-fit: contain; }
   .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
   .line { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--secondary-text-color); min-width: 0; }
   .line span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .line.warn, .line.crit { color: var(--c); }
-  .alert-line { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--c, var(--sl-crit)); }
-  .alert-line .icon { width: 16px; height: 16px; }
+  .line.warn, .line.crit { color: var(--ink); }
+  .line.warn .icon, .line.crit .icon { color: var(--c); }
+  .alert-line { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); }
+  .alert-line .icon { width: 16px; height: 16px; color: var(--c); }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: none; cursor: pointer; font: inherit; font-size: 13px;
          font-weight: 500; padding: 6px 12px; border-radius: 18px; background: var(--secondary-background-color, rgba(127,127,127,.12));
          color: var(--primary-text-color); min-width: 0; }
   .btn:hover { background: color-mix(in srgb, var(--sl-accent) 12%, var(--secondary-background-color, rgba(127,127,127,.12))); }
-  .btn.primary { background: color-mix(in srgb, var(--sl-accent) 16%, transparent); color: var(--sl-accent); }
+  .btn.primary { background: color-mix(in srgb, var(--sl-accent) 16%, transparent); color: color-mix(in srgb, var(--sl-accent) 40%, var(--primary-text-color, #212121)); }
+  .btn.primary .icon { color: var(--sl-accent); }
   .btn.primary:hover { background: color-mix(in srgb, var(--sl-accent) 24%, transparent); }
   .btn .icon { width: 18px; height: 18px; }
   .btn.round { width: 36px; height: 36px; padding: 0; border-radius: 50%; }
@@ -1228,6 +1239,14 @@ const BASE_STYLE = `
   .zoom .icon { width: 16px; height: 16px; }
   .zoom:hover { background: color-mix(in srgb, var(--sl-idle) 16%, transparent); color: var(--primary-text-color); }
   .zoom:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 1px; }
+  [role="button"]:focus-visible, .btn:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 2px; }
+  /* Narrow full card (6 columns, mini card zoomed in on a phone): the chip keeps only its dot, the state is in its
+     title / aria-label and in big under the header. */
+  @container (max-width: 300px) {
+    .header .chip { padding: 4px; }
+    .header .chip .t { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;
 
 // In-card popup, as in the other ha-* cards: a backdrop over the card with a small dialog at the top of the card,
@@ -1243,7 +1262,7 @@ const DIALOG_STYLE = `
                  border: 1px solid var(--divider-color, rgba(127,127,127,.35)); background: var(--secondary-background-color, rgba(127,127,127,.08));
                  color: var(--primary-text-color); outline: none; }
   .modal input:focus { border-color: var(--sl-accent); }
-  .modal .err { font-size: 12px; color: var(--sl-crit); }
+  .modal .err { font-size: 12px; color: color-mix(in srgb, var(--sl-crit) 40%, var(--primary-text-color, #212121)); }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 `;
 
@@ -1255,6 +1274,10 @@ const isOutside = (card, ev) => {
   const path = ev.composedPath();
   return !path.includes(card) && !path.some((n) => DIALOG_TAGS.has(n.tagName));
 };
+
+// What identifies a focusable part across re-renders: its kind (first class) and what it acts on. State classes
+// (ok, warn…) change with the lock and are left out.
+const focusKey = (n) => [n.classList?.[0], n.dataset?.action, n.dataset?.entity, n.dataset?.section].join("|");
 
 // After the popup closes, clicks on the card are ignored for this long: the second click of a double click on OK
 // would otherwise land on what lies under the button.
@@ -1381,9 +1404,17 @@ class SmartLockBase extends HTMLElement {
     }
     if (html === this._html) return;
     // The popup keeps its focus across the rewrite (the code field, OK, or Cancel when the user moved to it).
-    const focused = this._confirm && (this.shadowRoot.activeElement?.dataset?.action || this.shadowRoot.activeElement?.name);
+    const active = this.shadowRoot.activeElement;
+    const focused = this._confirm && (active?.dataset?.action || active?.name);
+    // Elsewhere, the focused part (a section title folded from the keyboard, a tile…) is found again in the new HTML.
+    const key = !this._confirm && active ? focusKey(active) : null;
+    const nth = key ? this._focusables(key).indexOf(active) : -1;
     this._html = html;
     this.shadowRoot.innerHTML = html;
+    if (key) {
+      const same = this._focusables(key);
+      (same[nth] || same[0])?.focus({ preventScroll: true });
+    }
     if (this._confirm) {
       const input = this.shadowRoot.querySelector('input[name="code"]');
       if (input) input.value = this._code || "";
@@ -1391,6 +1422,10 @@ class SmartLockBase extends HTMLElement {
       // preventScroll: an update while the popup is open must not bring a scrolled page back to the card.
       this.shadowRoot.querySelector(sel)?.focus({ preventScroll: true });
     }
+  }
+
+  _focusables(key) {
+    return [...this.shadowRoot.querySelectorAll('button, [tabindex="0"]')].filter((n) => focusKey(n) === key);
   }
 
   // --- Lock state -----------------------------------------------------------
@@ -1581,18 +1616,19 @@ class SmartLockBase extends HTMLElement {
   _header(lock, state, sub) {
     const c = this._config;
     const cls = statusClass(state);
+    const label = esc(this._fmtState(state));
     return `
       <div class="header">
         ${
           c.show_icon !== false
-            ? `<div class="badge clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" aria-label="${esc(this._fmtState(state))}">${svgIcon(state === "jammed" ? ICONS.alert : state === "locked" || state === "locking" ? ICONS.lock : ICONS.unlock)}</div>`
+            ? `<div class="badge clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" aria-label="${label}">${svgIcon(state === "jammed" ? ICONS.alert : state === "locked" || state === "locking" ? ICONS.lock : ICONS.unlock)}</div>`
             : ""
         }
         <div class="titles">
           <div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div>
           ${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
         </div>
-        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="dot"></span>${esc(this._fmtState(state))}</span>
+        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>
         ${this._zoomButton()}
       </div>`;
   }
@@ -1612,7 +1648,7 @@ class SmartLockBase extends HTMLElement {
       const [family, finish] = FAMILIES[img] ? [img] : autoImage(this._hass, lock.entity_id);
       src = svgUri(lockSvg(state, family, this._config.finish || finish));
     }
-    return `<div class="picture clickable" data-entity="${esc(lock.entity_id)}"><img src="${esc(src)}" alt=""></div>`;
+    return `<div class="picture clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" aria-label="${esc(this._config.title || name(this._hass, lock.entity_id))}"><img src="${esc(src)}" alt=""></div>`;
   }
 
   // Battery: percentage with a bar, or the "battery low" flag when the integration has no percentage.
@@ -1632,7 +1668,7 @@ class SmartLockBase extends HTMLElement {
   _batteryLine(b) {
     if (!b) return "";
     const value = b.v === null ? b.text : `${Math.round(b.v)} %`;
-    return `<div class="batt clickable ${b.cls}" data-entity="${esc(b.entity)}">${svgIcon(ICONS.battery)}${
+    return `<div class="batt clickable ${b.cls}" data-entity="${esc(b.entity)}" role="button" tabindex="0">${svgIcon(ICONS.battery)}${
       b.v !== null ? `<div class="bar ${b.cls}"><div style="width:${Math.min(100, Math.max(0, b.v))}%"></div></div>` : ""
     }<span class="v" title="${esc(value)}">${esc(value)}</span>${b.charging ? svgIcon(ICONS.bolt, "bolt") : ""}</div>`;
   }
@@ -1641,7 +1677,7 @@ class SmartLockBase extends HTMLElement {
     const d = this._s(m.door);
     if (!valid(d)) return "";
     const open = d.state === "on" || d.state === "open";
-    return `<div class="line clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}">${svgIcon(open ? ICONS.door_open : ICONS.door_closed)}<span>${esc(
+    return `<div class="line clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}" role="button" tabindex="0">${svgIcon(open ? ICONS.door_open : ICONS.door_closed)}<span>${esc(
       this._t(open ? "door_open" : "door_closed"),
     )}</span></div>`;
   }
@@ -1655,7 +1691,7 @@ class SmartLockBase extends HTMLElement {
       text = this._t("problem");
       entity = m.problem;
     }
-    return text ? `<div class="alert-line crit clickable" data-entity="${esc(entity)}">${svgIcon(ICONS.alert)}<span>${esc(text)}</span></div>` : "";
+    return text ? `<div class="alert-line crit clickable" data-entity="${esc(entity)}" role="button" tabindex="0">${svgIcon(ICONS.alert)}<span>${esc(text)}</span></div>` : "";
   }
 
   // Lock / Unlock / Open buttons. The useful one (Unlock when locked, Lock otherwise) is highlighted; `round` for
@@ -1689,7 +1725,7 @@ const FULL_STYLE = `
   .hero { display: flex; gap: 12px; align-items: center; }
   .picture { width: 88px; height: 102px; }
   .picture img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }
-  .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--c); overflow-wrap: anywhere; }
+  .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }
@@ -1715,11 +1751,12 @@ const FULL_STYLE = `
   .tile .k { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tile .k .icon { width: 14px; height: 14px; color: var(--c, var(--secondary-text-color)); }
   .tile .v { font-size: 14px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
-  .tile.warn .v, .tile.crit .v { color: var(--c); }
+  .tile.warn .v, .tile.crit .v { color: var(--ink); }
   .settings { display: flex; flex-wrap: wrap; gap: 6px; }
   .settings .btn { font-weight: 400; padding: 6px 12px 6px 8px; }
   .settings .btn .icon { color: var(--secondary-text-color); }
-  .settings .btn.on { background: color-mix(in srgb, var(--sl-accent) 16%, transparent); color: var(--sl-accent); }
+  .settings .btn.on { background: color-mix(in srgb, var(--sl-accent) 16%, transparent);
+                      color: color-mix(in srgb, var(--sl-accent) 40%, var(--primary-text-color, #212121)); }
   .settings .btn.on .icon { color: var(--sl-accent); }
   .settings .btn .val { color: var(--secondary-text-color); }
   .activity { display: flex; flex-direction: column; }
@@ -1796,6 +1833,9 @@ class SmartLockCard extends SmartLockBase {
   }
 
   _toggleSection(key) {
+    // A logbook read that failed (connection lost…) is tried again when the section is unfolded again; while it
+    // stays unfolded, re-renders keep the error instead of hammering a failing connection.
+    if (key === "activity" && this._activity?.error) this._activity = null;
     this._toggled = new Set(this._toggled);
     if (this._toggled.has(key)) this._toggled.delete(key);
     else this._toggled.add(key);
@@ -1813,7 +1853,7 @@ class SmartLockCard extends SmartLockBase {
   }
 
   _tile(id, icon, label, value, cls = "") {
-    return `<div class="tile clickable ${cls}" data-entity="${esc(id || "")}"><div class="k">${svgIcon(icon)}${esc(label)}</div><div class="v">${esc(value)}</div></div>`;
+    return `<div class="tile clickable ${cls}" data-entity="${esc(id || "")}" role="button" tabindex="0"><div class="k">${svgIcon(icon)}${esc(label)}</div><div class="v">${esc(value)}</div></div>`;
   }
 
   // Short label of a sibling entity: its friendly name without the device name in front.
@@ -1871,7 +1911,7 @@ class SmartLockCard extends SmartLockBase {
         const label = this._label(id);
         const d = domainOf(id);
         if (d === "switch" || d === "input_boolean")
-          return `<button class="btn ${s.state === "on" ? "on" : ""}" data-action="toggle" data-entity="${esc(id)}">${svgIcon(ICONS.toggle)}<span>${esc(label)}</span></button>`;
+          return `<button class="btn ${s.state === "on" ? "on" : ""}" data-action="toggle" data-entity="${esc(id)}" aria-pressed="${s.state === "on"}">${svgIcon(ICONS.toggle)}<span>${esc(label)}</span></button>`;
         if (d === "button") return `<button class="btn" data-action="press" data-entity="${esc(id)}" data-label="${esc(label)}">${svgIcon(ICONS.press)}<span>${esc(label)}</span></button>`;
         return `<button class="btn" data-entity="${esc(id)}">${svgIcon(ICONS.cog)}<span>${esc(label)}</span><span class="val">${esc(this._value(s))}</span></button>`;
       });
@@ -1892,7 +1932,7 @@ class SmartLockCard extends SmartLockBase {
     else
       body = `<div class="activity">${a.events
         .map(
-          (e) => `<div class="act clickable" data-entity="${esc(lock.entity_id)}"><span class="dot ${statusClass(e.state)}"></span>
+          (e) => `<div class="act clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="dot ${statusClass(e.state)}"></span>
             <span class="what">${esc(this._fmtState(e.state))}${e.who ? ` <span class="who">· ${esc(e.who)}</span>` : ""}</span>
             <span class="when">${esc(ago(this._hass, this._config, e.when) || "")}</span></div>`,
         )
@@ -1938,11 +1978,14 @@ const MINI_STYLE = `
   .mini { display: flex; align-items: center; gap: 10px; padding: 12px; }
   .mini .picture { width: 50px; height: 58px; flex: none; }
   .mini .picture img { filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
-  .mini .titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .mini .titles { flex: 1 1 auto; min-width: 5ch; display: flex; flex-direction: column; gap: 3px; }
   .mini .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mini .sub { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mini .sub .st { color: var(--c); font-weight: 500; }
-  .mini .sub .dot { margin-right: 4px; vertical-align: 1px; }
+  /* The state word keeps its room: the detail after it ("· 5 minutes ago") is cut first. */
+  .mini .sub { display: flex; align-items: center; font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; }
+  .mini .sub .st { display: inline-flex; align-items: center; flex: none; max-width: 100%; color: var(--ink); font-weight: 500; }
+  .mini .sub .t, .mini .sub .more { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .mini .sub .more { flex: 0 1 auto; white-space: pre; }
+  .mini .sub .dot { margin-right: 4px; }
   .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
   .mini .batt .icon { color: var(--c); width: 14px; height: 14px; }
   .mini .batt .bar { flex: 0 1 64px; min-width: 0; }
@@ -1953,14 +1996,18 @@ const MINI_STYLE = `
   .mini .controls .btn .icon { width: 16px; height: 16px; }
   /* Narrow cards (6 columns of a Sections view, phones): the battery keeps its value and drops its bar, then the
      picture shrinks and finally goes, so that the name, the state and the buttons always fit. */
-  ha-card { container-type: inline-size; }
   @container (max-width: 300px) {
     .mini { gap: 8px; }
     .mini .picture { width: 36px; height: 42px; }
     .mini .batt .bar { display: none; }
   }
+  /* 6 columns: Open (pulls the latch, rarely needed at a glance) leaves the room to the state; it stays one tap away
+     behind the detail button. Without the detail button it stays here. */
+  @container (max-width: 260px) {
+    .mini:has(.zoom) .controls .btn[data-action=open] { display: none; }
+  }
   @container (max-width: 220px) {
-    .mini { padding: 12px 10px; }
+    .mini { padding: 12px 8px; gap: 6px; }
     .mini .picture { display: none; }
     .mini .batt { gap: 4px; }
     /* While charging, the bolt stands in for the battery icon. */
@@ -2031,6 +2078,7 @@ class SmartLockMiniCard extends SmartLockCard {
     const m = describe(this._hass, this._config, id);
     const state = this._state(lock);
     const cls = statusClass(state);
+    const label = esc(this._fmtState(state));
     const controls = this._controls(lock, state, true);
     // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change).
     return `<style>${BASE_STYLE}${MINI_STYLE}</style>
@@ -2038,8 +2086,8 @@ class SmartLockMiniCard extends SmartLockCard {
         <div class="mini">
           ${this._picture(lock, state)}
           <div class="titles">
-            <div class="name clickable" data-entity="${esc(lock.entity_id)}">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            <div class="sub clickable" data-entity="${esc(lock.entity_id)}"><span class="st ${cls}"><span class="dot"></span>${esc(this._fmtState(state))}</span>${esc(this._miniDetail(m, lock))}</div>
+            <div class="name clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
+            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more">${esc(this._miniDetail(m, lock))}</span></div>
             ${this._batteryLine(this._battery(m))}
           </div>
           ${controls ? `<div class="controls">${controls}</div>` : ""}
@@ -2088,8 +2136,14 @@ class SmartLockEditorBase extends HTMLElement {
     this._render();
   }
 
+  // Options that would have no effect are left out: the picture ones without the picture, Open and the confirmations
+  // without the buttons. Their values stay in the config.
   _schema() {
     const tr = (k) => t(this._hass, this._config, k);
+    const picture = this._config.show_picture !== false;
+    const controls = this._config.show_controls !== false;
+    const drop = new Set([...(picture ? [] : ["image", "finish"]), ...(controls ? [] : ["show_open", "confirm"])]);
+    const keep = (f) => !drop.has(f.name);
     return [
       { name: "entity", selector: { entity: { domain: "lock" } } },
       { name: "title", selector: { text: {} } },
@@ -2119,6 +2173,10 @@ class SmartLockEditorBase extends HTMLElement {
         name: "",
         schema: this._toggles().map(([name]) => ({ name, selector: { boolean: {} } })),
       },
+    ]
+      .filter(keep)
+      .map((f) => (f.type === "grid" ? { ...f, schema: f.schema.filter(keep) } : f))
+      .concat([
       {
         type: "expandable",
         name: "entities",
@@ -2151,7 +2209,7 @@ class SmartLockEditorBase extends HTMLElement {
           },
         },
       },
-    ];
+    ]);
   }
 
   _toggles() {
@@ -2190,7 +2248,7 @@ class SmartLockEditorBase extends HTMLElement {
       this._dataDeps = dataDeps;
       this._form.data = data;
     }
-    const schemaDeps = [lang(h, this._config), h.entities];
+    const schemaDeps = [lang(h, this._config), h.entities, this._config.show_picture, this._config.show_controls];
     if (!same(this._schemaDeps, schemaDeps)) {
       this._schemaDeps = schemaDeps;
       this._form.schema = this._schema();

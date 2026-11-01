@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.7
+
+_2026-11-01_
+
+### Fixes
+- Full card at its narrowest (6 columns): the lock name is no longer squeezed to a few letters by the state chip. The chip now gives way first and, on a narrow card, shows only its colored dot (the state stays written in big under the header and is read by screen readers); on wider cards it takes at most half of the header.
+- The header state chip is aligned with the lock name instead of floating between the name and the "Locked 5 minutes ago" line.
+- Mini card on phones and at 6 columns: the state ("Zablokowany", "Vergrendeld"…) is no longer cut in Polish, Dutch, German, Italian, Portuguese or Serbian. The "… ago" detail after it is shortened first, and the Open button moves behind the detail button on narrow cards.
+- State texts are readable in the light theme: "Unlocked", "Locked", "Locking", the door-open line and the highlighted button labels now reach a 4.5:1 contrast (orange text was 1.8:1 on white); dots, icons and bars keep the state colors.
+- Keyboard: the picture, the battery and door lines, the alerts, the Details tiles, the Activity rows and the mini card name and state line can now be reached with Tab and opened with Enter / Space, with a visible focus ring; the focus stays in place when the card updates or a section is folded. Settings switches tell screen readers whether they are on.
+- Activity: after a failed logbook read (connection lost), folding and unfolding the section tries again instead of showing the error until the lock changes.
+- Visual editor: picture options are hidden when the picture is off, and the Open and confirmation options when the buttons are off.
+- Transitions are turned off when the system asks for reduced motion.
+
 ## 1.5.6
 
 _2026-11-01_

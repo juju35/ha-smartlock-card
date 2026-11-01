@@ -101,3 +101,22 @@ test("a lock without a device has no siblings", () => {
   assert.equal(m.door, undefined);
   assert.equal(m.details.length, 0);
 });
+
+test("intlLang: pt becomes pt-PT, pt-BR stays, the language option wins", () => {
+  const h = (l) => ({ language: l.split("-")[0], locale: { language: l } });
+  assert.equal(sl.intlLang(h("pt"), {}), "pt-PT");
+  assert.equal(sl.intlLang(h("pt-BR"), {}), "pt-BR");
+  assert.equal(sl.intlLang(h("en-GB"), {}), "en-GB");
+  assert.equal(sl.intlLang(h("pt-BR"), { language: "pt" }), "pt-PT");
+  assert.equal(sl.intlLang(h("pt-BR"), { language: "fr" }), "fr");
+  assert.equal(sl.intlLang(h("ja"), {}), "en");
+  assert.equal(sl.intlLang(h("sr"), { language: "sr-Latn" }), "sr-Latn");
+});
+
+test("ago: under a minute reads as now in every language", () => {
+  const expected = { en: "now", fr: "maintenant", de: "jetzt", es: "ahora", it: "ora", nl: "nu", pt: "agora", pl: "teraz" };
+  for (const [l, word] of Object.entries(expected)) {
+    assert.equal(sl.ago({ language: l, locale: { language: l } }, {}, Date.now() - 20e3), word, l);
+  }
+  assert.equal(sl.ago({ language: "nl" }, {}, Date.now() - 5 * 60e3), "5 minuten geleden");
+});

@@ -405,7 +405,7 @@ test("editor: Italian, Dutch, Portuguese and Polish language options", () => {
     const field = JSON.stringify(ed._schema().find((f) => f.name === "language"));
     assert.match(field, /"value":"it","label":"Italiano"/);
     assert.match(field, /"value":"nl","label":"Nederlands"/);
-    assert.match(field, /"value":"pt","label":"Português"/);
+    assert.match(field, /"value":"pt","label":"Português \(Portugal\)"/);
     assert.match(field, /"value":"pl","label":"Polski"/);
     assert.match(field, /"label":"Automatycznie"/);
   }

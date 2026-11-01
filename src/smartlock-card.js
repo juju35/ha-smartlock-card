@@ -1052,6 +1052,15 @@ const lang = (hass, config) => {
   return STRINGS[l] ? l : STRINGS[l.split("-")[0]] ? l.split("-")[0] : "en";
 };
 
+// Locale for Intl: the full Home Assistant locale (pt-BR, en-GB…) when it is the card language, else the card
+// language. A bare "pt" (Home Assistant's code for European Portuguese) becomes pt-PT, as Intl reads "pt" as Brazilian.
+const intlLang = (hass, config) => {
+  const l = lang(hass, config);
+  const ha = hass && (hass.locale?.language || hass.language);
+  const loc = !config?.language && ha && ha.split("-")[0] === l.split("-")[0] && l !== "sr-Latn" ? ha : l;
+  return loc === "pt" ? "pt-PT" : loc;
+};
+
 const t = (hass, config, key, vars = {}) =>
   String(STRINGS[lang(hass, config)][key] ?? STRINGS.en[key] ?? key).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
 
@@ -1074,10 +1083,12 @@ const ago = (hass, config, when) => {
   const d = typeof when === "number" ? when : Date.parse(when);
   if (!Number.isFinite(d)) return null;
   const diff = (d - Date.now()) / 1000;
-  const l = lang(hass, config);
+  const l = intlLang(hass, config);
   const rtf = (RTF[l] ??= new Intl.RelativeTimeFormat(l, { numeric: "auto" }));
   const abs = Math.abs(diff);
-  if (abs < 60) return rtf.format(0, "minute");
+  // 0 seconds with numeric: "auto" reads "now" / "maintenant" / "nu" / "teraz"; 0 minutes would give "in 1 minute"
+  // in Dutch ("binnen een minuut").
+  if (abs < 60) return rtf.format(0, "second");
   if (abs < 3600) return rtf.format(Math.round(diff / 60), "minute");
   if (abs < 86400) return rtf.format(Math.round(diff / 3600), "hour");
   return rtf.format(Math.round(diff / 86400), "day");
@@ -1623,7 +1634,7 @@ class SmartLockBase extends HTMLElement {
     const value = b.v === null ? b.text : `${Math.round(b.v)} %`;
     return `<div class="batt clickable ${b.cls}" data-entity="${esc(b.entity)}">${svgIcon(ICONS.battery)}${
       b.v !== null ? `<div class="bar ${b.cls}"><div style="width:${Math.min(100, Math.max(0, b.v))}%"></div></div>` : ""
-    }<span class="v">${esc(value)}</span>${b.charging ? svgIcon(ICONS.bolt, "bolt") : ""}</div>`;
+    }<span class="v" title="${esc(value)}">${esc(value)}</span>${b.charging ? svgIcon(ICONS.bolt, "bolt") : ""}</div>`;
   }
 
   _doorLine(m) {
@@ -1935,7 +1946,7 @@ const MINI_STYLE = `
   .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
   .mini .batt .icon { color: var(--c); width: 14px; height: 14px; }
   .mini .batt .bar { flex: 0 1 64px; min-width: 0; }
-  .mini .batt .v { font-weight: 500; white-space: nowrap; }
+  .mini .batt .v { font-weight: 500; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .mini .batt .bolt { color: var(--sl-ok); }
   .mini .controls { display: flex; gap: 6px; flex: none; }
   .mini .controls .btn.round { width: 32px; height: 32px; }
@@ -2134,7 +2145,7 @@ class SmartLockEditorBase extends HTMLElement {
               { value: "sr-Latn", label: "Srpski (latinica)" },
               { value: "it", label: "Italiano" },
               { value: "nl", label: "Nederlands" },
-              { value: "pt", label: "Português" },
+              { value: "pt", label: "Português (Portugal)" },
               { value: "pl", label: "Polski" },
             ],
           },

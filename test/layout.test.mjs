@@ -82,6 +82,9 @@ const cases = [
   // Charging (one more icon on the battery line), and a lock that has no zoom button.
   [175, {}, { "binary_sensor.porte_entree_charge": { state: "on" } }],
   [246, { zoom: false }],
+  // "Battery low" flag (no percentage), the longest battery text: cut with an ellipsis, never under the buttons.
+  ...[200, 246, 300].map((w) => [w, {}, { "sensor.porte_entree_batterie": { state: "unknown" }, "binary_sensor.porte_entree_batterie_critique": { state: "on" } }]),
+  [246, { language: "de" }, { "sensor.porte_entree_batterie": { state: "unknown" }, "binary_sensor.porte_entree_batterie_critique": { state: "on" } }],
 ];
 
 for (const [width, config, overrides] of cases) {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.5
+
+_2026-11-01_
+
+### Added
+- Added Serbian (Cyrillic and Latin) translations: the cards and the visual editor are available in Serbian Cyrillic (`language: sr`) and Serbian Latin (`language: sr-Latn`), and Serbian Latin is picked automatically when Home Assistant is set to it.
+
 ## 1.5.4
 
 _2026-11-01_

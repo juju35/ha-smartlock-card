@@ -67,7 +67,7 @@ export const load = () => {
   vm.createContext(sandbox);
   return vm.runInContext(
     `${source}
-    ({ STRINGS, statusClass, lockSvg, autoImage, FAMILIES, describe, findLock, locksOf, esc, ago, SmartLockCard: customElements.get("smartlock-card"),
+    ({ STRINGS, lang, statusClass, lockSvg, autoImage, FAMILIES, describe, findLock, locksOf, esc, ago, SmartLockCard: customElements.get("smartlock-card"),
        SmartLockMiniCard: customElements.get("smartlock-mini-card"), window })`,
     sandbox,
   );

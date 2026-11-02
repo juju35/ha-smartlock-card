@@ -41,6 +41,17 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Light and dark mode, English, French, German, Spanish, Serbian (Cyrillic and Latin), Italian, Dutch, European Portuguese and Polish
 - Single file, no external dependency
 
+## Supported integrations
+
+The cards work with **every lock integration** (the standard `lock` entity): Nuki, Tedee, Yale, August, Schlage, SwitchBot, Aqara, Ultraloq, LOQED, igloohome, Sesame, UniFi Access, Matter, Z-Wave, Zigbee (ZHA, Zigbee2MQTT), HomeKit, template locks…
+
+| Feature | Integrations |
+|---|---|
+| State, lock, unlock, code | Every lock integration |
+| **Open** (pull the latch) | Locks with the Open feature (Nuki, Tedee, Matter…) |
+| Who changed it | Integrations that report `changed_by` |
+| Door sensor, battery, keypad | Discovered on the lock's device; the keypad also by Nuki's translation key |
+
 ## Prerequisites
 
 A lock integration with at least one `lock.*` entity, with Home Assistant 2024.8 or later.

@@ -459,7 +459,7 @@ test("Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slova
     ["ro", />Încuiat</, /Ușă închisă/],
     ["da", />Låst</, /Dør lukket/],
     ["sv", />Låst</, /Dörr stängd/],
-    ["bg", />Заключено</, /Вратата е затворена/],
+    ["bg", />Заключено</, /Затворена врата/],
     ["ru", />Заперт</, /Дверь закрыта/],
     ["uk", />Замкнено</, /Двері зачинені/],
     ["hu", />Bezárva</, /Ajtó csukva/],

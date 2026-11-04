@@ -151,7 +151,7 @@ async function open(tag, width, config = {}, overrides = {}, theme = "light") {
   return page;
 }
 
-const LANGS = ["en", "pl", "sr-Latn", "nl", "de", "it", "pt"];
+const LANGS = ["en", "pl", "sr-Latn", "nl", "de", "it", "pt", "uk", "ru", "lv"];
 const UNLOCKING = { "lock.porte_entree": { state: "unlocking" } };
 
 // Widths of N columns of a Sections view: a phone section is ~320-364 px wide (6 columns: 156-178 px, 8: 208-243,
@@ -211,7 +211,7 @@ for (const [tag, zoom] of [
   ["smartlock-mini-card", true],
 ])
   for (const width of PHONE_6)
-    for (const language of ["en", "pl", "sr-Latn"])
+    for (const language of ["en", "pl", "sr-Latn", "uk", "ru", "lv"])
       for (const [what, overrides] of LOCK_STATES)
         test(`${zoom ? "mini card zoomed in" : "full card"} at ${width} px, ${language}, ${what}: nothing leaves the card or is cut`, async (t) => {
           if (skip) return t.skip(skip);
@@ -236,7 +236,7 @@ for (const [tag, zoom] of [
 // From 9 columns of a phone up: the chip shows its whole text, the name keeps its first letters and the hero its
 // whole words.
 for (const width of [245, 280, 320, 380, 500])
-  for (const language of ["en", "pl", "sr-Latn", "nl", "it"])
+  for (const language of ["en", "pl", "sr-Latn", "nl", "it", "uk", "ru", "lv"])
     test(`full card at ${width} px, ${language}: the chip shows its whole text, the name and the state stay readable`, async (t) => {
       if (skip) return t.skip(skip);
       for (const [what, overrides] of LOCK_STATES) {
@@ -259,7 +259,7 @@ for (const width of [245, 280, 320, 380, 500])
 // Mini card at 6 columns of a phone, with and without the detail button (without it, Open stays on the card):
 // nothing leaves the card, the state word is whole.
 for (const width of PHONE_6)
-  for (const language of ["en", "pl", "sr-Latn"])
+  for (const language of ["en", "pl", "sr-Latn", "uk", "ru", "lv"])
     for (const config of [{}, { zoom: false }])
       test(`mini card at ${width} px, ${language}, ${JSON.stringify(config)}: nothing leaves the card, the state is whole`, async (t) => {
         if (skip) return t.skip(skip);

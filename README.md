@@ -18,7 +18,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 
 | Smart Lock Card | Smart Lock Mini Card |
 |---|---|
-| ![smartlock-card](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card.png) | ![smartlock-mini-card](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card.png) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card.png" alt="smartlock-card" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card.png" alt="smartlock-mini-card" width="400"> |
 
 ## Features
 
@@ -173,88 +173,88 @@ As a lock unlocks, the bolt rotates and glows — here the Nuki front door:
 
 | Light | Dark |
 |---|---|
-| ![unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/unlocking.gif) | ![unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/unlocking.gif" alt="unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/unlocking-dark.gif" alt="unlocking animation dark" width="400"> |
 
 The same turn runs in reverse, with the glow, as it locks again:
 
 | Light | Dark |
 |---|---|
-| ![locking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/locking.gif) | ![locking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/locking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/locking.gif" alt="locking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/locking-dark.gif" alt="locking animation dark" width="400"> |
 
 Any lock integration gets the animation — here the matter garage lock mid-turn:
 
 | Light | Dark |
 |---|---|
-| ![garage unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/garage-unlocking.gif) | ![garage unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/garage-unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/garage-unlocking.gif" alt="garage unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/garage-unlocking-dark.gif" alt="garage unlocking animation dark" width="400"> |
 
 When a lock is jammed, the picture shakes:
 
 | Light | Dark |
 |---|---|
-| ![jammed animation light](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/jammed-light.gif) | ![jammed animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/jammed.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/jammed-light.gif" alt="jammed animation light" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/jammed.gif" alt="jammed animation" width="400"> |
 
 While a door is opening, waves ripple out from the light:
 
 | Light | Dark |
 |---|---|
-| ![opening animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/opening.gif) | ![opening animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/opening-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/opening.gif" alt="opening animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/opening-dark.gif" alt="opening animation dark" width="400"> |
 
 Every drawn family animates the part that moves on the real lock. The compact cylinder (Nuki Smart Lock Ultra, Tedee GO) turns its knurled knob while the light arc glows:
 
 | Light | Dark |
 |---|---|
-| ![compact cylinder unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/compact-unlocking.gif) | ![compact cylinder unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/compact-unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/compact-unlocking.gif" alt="compact cylinder unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/compact-unlocking-dark.gif" alt="compact cylinder unlocking animation dark" width="400"> |
 
 The keypad deadbolt (Yale Assure, Schlage, Kwikset, Ultraloq U-Bolt) turns its thumb turn under the glowing light bar:
 
 | Light | Dark |
 |---|---|
-| ![keypad deadbolt unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/keypad-unlocking.gif) | ![keypad deadbolt unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/keypad-unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/keypad-unlocking.gif" alt="keypad deadbolt unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/keypad-unlocking-dark.gif" alt="keypad deadbolt unlocking animation dark" width="400"> |
 
 The fingerprint lever (Ultraloq Latch, Aqara D100/A100, LOQED) dips its handle as the reader ring glows:
 
 | Light | Dark |
 |---|---|
-| ![fingerprint lever unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/lever-unlocking.gif) | ![fingerprint lever unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/lever-unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/lever-unlocking.gif" alt="fingerprint lever unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/lever-unlocking-dark.gif" alt="fingerprint lever unlocking animation dark" width="400"> |
 
 The access reader (UniFi Access, ekey, KIWI) flashes its light bar while the strike opens:
 
 | Light | Dark |
 |---|---|
-| ![access reader unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/reader-unlocking.gif) | ![access reader unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/reader-unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/reader-unlocking.gif" alt="access reader unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/reader-unlocking-dark.gif" alt="access reader unlocking animation dark" width="400"> |
 
 And the padlock (smart padlocks, and any lock with no drawn model) lifts its shackle:
 
 | Light | Dark |
 |---|---|
-| ![padlock unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/padlock-unlocking.gif) | ![padlock unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/padlock-unlocking-dark.gif) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/padlock-unlocking.gif" alt="padlock unlocking animation" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/padlock-unlocking-dark.gif" alt="padlock unlocking animation dark" width="400"> |
 
 Locked front door with its activity, then unlocked with the door open and its settings:
 
 | Light | Dark |
 |---|---|
-| ![card](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card.png) | ![card dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-dark.png) |
-| ![card unlocked, door open](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-open.png) | ![card unlocked, door open dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-open-dark.png) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card.png" alt="card" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-dark.png" alt="card dark" width="400"> |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-open.png" alt="card unlocked, door open" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-open-dark.png" alt="card unlocked, door open dark" width="400"> |
 
 Mini card for the front door and for the garage lock:
 
 | Light | Dark |
 |---|---|
-| ![mini card](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card.png) | ![mini card dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-dark.png) |
-| ![mini card garage](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-garage.png) | ![mini card garage dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-garage-dark.png) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card.png" alt="mini card" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-dark.png" alt="mini card dark" width="400"> |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-garage.png" alt="mini card garage" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-garage-dark.png" alt="mini card garage dark" width="400"> |
 
 Lock asking for a code, and jammed lock:
 
 | Light | Dark |
 |---|---|
-| ![code](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-code.png) | ![code dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-code-dark.png) |
-| ![jammed light](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-jammed-light.png) | ![jammed](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-jammed.png) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-code.png" alt="code" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-code-dark.png" alt="code dark" width="400"> |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-jammed-light.png" alt="jammed light" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-jammed.png" alt="jammed" width="400"> |
 
 Mini card zoomed in with its detail button (top right, click it again or anywhere outside the card to go back):
 
 | Light | Dark |
 |---|---|
-| ![mini card zoomed in](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-zoom.png) | ![mini card zoomed in dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-zoom-dark.png) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-zoom.png" alt="mini card zoomed in" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-zoom-dark.png" alt="mini card zoomed in dark" width="400"> |
 
 ## How it works
 

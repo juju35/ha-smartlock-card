@@ -76,8 +76,11 @@ test("describe finds the door, battery, keypad and settings on the lock device",
   assert.deepEqual([...m.settings], ["select.porte_entree_led", "switch.porte_entree_mode_nuit", "switch.porte_entree_verrouillage_auto"]);
 });
 
-test("a keypad named in German, Spanish, Italian, Dutch or Polish (no translation key) is still the keypad", () => {
-  for (const word of ["tastatur", "teclado", "tastierino", "toetsenbord", "klawiatura"]) {
+test("a keypad named in another language (no translation key) is still the keypad", () => {
+  // de/da, es, it, nl, pl, ro, sv, ru/uk/bg, hu, ga, sk, cs, sl, mt, lv, el (entity ids are slugified to ASCII).
+  const words = ["tastatur", "teclado", "tastierino", "toetsenbord", "klawiatura", "tastatura", "knappsats", "klaviatura", "billentyuzet"];
+  words.push("eochairchlar", "klavesnica", "klavesnice", "tipkovnica", "tastiera", "pliktrologio");
+  for (const word of words) {
     const id = `binary_sensor.porte_entree_${word}_batterie`;
     const old = "binary_sensor.porte_entree_clavier";
     const ents = { ...entities, [id]: { ...entities[old], entity_id: id, translation_key: null } };
@@ -115,6 +118,8 @@ test("intlLang: pt becomes pt-PT, pt-BR stays, the language option wins", () => 
 
 test("ago: under a minute reads as now in every language", () => {
   const expected = { en: "now", fr: "maintenant", de: "jetzt", es: "ahora", it: "ora", nl: "nu", pt: "agora", pl: "teraz" };
+  Object.assign(expected, { ro: "acum", da: "nu", sv: "nu", bg: "сега", ru: "сейчас", uk: "зараз", hu: "most", ga: "anois" });
+  Object.assign(expected, { sk: "teraz", cs: "nyní", sl: "zdaj", mt: "issa", lv: "tagad", el: "τώρα" });
   for (const [l, word] of Object.entries(expected)) {
     assert.equal(sl.ago({ language: l, locale: { language: l } }, {}, Date.now() - 20e3), word, l);
   }

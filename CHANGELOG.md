@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.8
+
+_2026-11-04_
+
+### Added
+- Added Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian and Greek translations: the cards and the visual editor are available in Romanian (`language: ro`), Danish (`da`), Swedish (`sv`), Bulgarian (`bg`), Russian (`ru`), Ukrainian (`uk`), Hungarian (`hu`), Irish (`ga`), Slovak (`sk`), Czech (`cs`), Slovenian (`sl`), Maltese (`mt`), Latvian (`lv`) and Greek (`el`), picked automatically from the Home Assistant language.
+- A keypad named `tastatura`, `knappsats`, `klaviatura`, `billentyuzet`, `eochairchlar`, `klavesnica`, `klavesnice`, `tipkovnica`, `tastiera` or `pliktrologio` in its entity id is recognised as the keypad.
+
 ## 1.5.7
 
 _2026-11-01_

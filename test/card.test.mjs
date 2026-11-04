@@ -326,8 +326,8 @@ test("French strings", () => {
 test("I18N parity: every language has exactly the keys, array lengths and placeholders of en", () => {
   const keys = Object.keys(sl.STRINGS.en).sort();
   const vars = (s) => (String(s).match(/\{\w+\}/g) || []).sort().join();
-  assert.deepEqual(Object.keys(sl.STRINGS).sort(), ["de", "en", "es", "fr", "it", "nl", "pl", "pt", "sr", "sr-Latn"]);
-  for (const l of ["fr", "de", "es", "sr", "sr-Latn", "it", "nl", "pt", "pl"]) {
+  assert.deepEqual(Object.keys(sl.STRINGS).sort(), ["bg", "cs", "da", "de", "el", "en", "es", "fr", "ga", "hu", "it", "lv", "mt", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sr-Latn", "sv", "uk"]);
+  for (const l of ["fr", "de", "es", "sr", "sr-Latn", "it", "nl", "pt", "pl", "ro", "da", "sv", "bg", "ru", "uk", "hu", "ga", "sk", "cs", "sl", "mt", "lv", "el"]) {
     assert.ok(sl.STRINGS[l], l);
     assert.deepEqual(Object.keys(sl.STRINGS[l]).sort(), keys, l);
     for (const k of keys) {
@@ -366,6 +366,13 @@ test("language resolution: full code, then the part before the dash, then en", (
   assert.equal(sl.lang(null, { language: "nl-BE" }), "nl");
   assert.equal(sl.lang(null, { language: "pt" }), "pt");
   assert.equal(sl.lang(null, { language: "pl-PL" }), "pl");
+  // Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese,
+  // Latvian and Greek, from Home Assistant and from the language option.
+  for (const l of ["ro", "da", "sv", "bg", "ru", "uk", "hu", "ga", "sk", "cs", "sl", "mt", "lv", "el"]) {
+    assert.equal(sl.lang(hassIn(l), {}), l);
+    assert.equal(sl.lang(hassIn(`${l}-XX`), {}), l);
+    assert.equal(sl.lang(null, { language: l }), l);
+  }
   assert.equal(sl.lang(hassIn("ja"), {}), "en");
   assert.equal(sl.lang(null, { language: "ja" }), "en");
   // The card option wins over Home Assistant.
@@ -417,6 +424,54 @@ test("Italian, Dutch, Portuguese and Polish strings", () => {
     ["nl-BE", />Vergrendeld</, /Deur dicht/],
     ["pt-PT", />Trancada</, /Porta fechada/],
     ["pl-PL", />Zablokowany</, /Drzwi zamknięte/],
+  ];
+  for (const [language, state, door] of cases) {
+    const html = newCard(makeHass({ ...states }, { language, locale: { language } })).shadowRoot.innerHTML;
+    assert.match(html, state, language);
+    assert.match(html, door, language);
+  }
+});
+
+test("editor: Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian and Greek language options", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    ed._config = { entity: "lock.porte_entree", language: "el" };
+    const field = JSON.stringify(ed._schema().find((f) => f.name === "language"));
+    assert.match(field, /"value":"ro","label":"Română"/);
+    assert.match(field, /"value":"da","label":"Dansk"/);
+    assert.match(field, /"value":"sv","label":"Svenska"/);
+    assert.match(field, /"value":"bg","label":"Български"/);
+    assert.match(field, /"value":"ru","label":"Русский"/);
+    assert.match(field, /"value":"uk","label":"Українська"/);
+    assert.match(field, /"value":"hu","label":"Magyar"/);
+    assert.match(field, /"value":"ga","label":"Gaeilge"/);
+    assert.match(field, /"value":"sk","label":"Slovenčina"/);
+    assert.match(field, /"value":"cs","label":"Čeština"/);
+    assert.match(field, /"value":"sl","label":"Slovenščina"/);
+    assert.match(field, /"value":"mt","label":"Malti"/);
+    assert.match(field, /"value":"lv","label":"Latviešu"/);
+    assert.match(field, /"value":"el","label":"Ελληνικά"/);
+    assert.match(field, /"label":"Αυτόματη"/);
+  }
+});
+
+test("Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian and Greek strings", () => {
+  const cases = [
+    ["ro", />Încuiat</, /Ușă închisă/],
+    ["da", />Låst</, /Dør lukket/],
+    ["sv", />Låst</, /Dörr stängd/],
+    ["bg", />Заключено</, /Вратата е затворена/],
+    ["ru", />Заперт</, /Дверь закрыта/],
+    ["uk", />Замкнено</, /Двері зачинені/],
+    ["hu", />Bezárva</, /Ajtó csukva/],
+    ["ga", />Faoi ghlas</, /Doras dúnta/],
+    ["sk", />Zamknuté</, /Dvere zatvorené/],
+    ["cs", />Zamčeno</, /Dveře zavřené/],
+    ["sl", />Zaklenjeno</, /Vrata zaprta/],
+    ["mt", />Imsakkra</, /Bieb magħluq/],
+    ["lv", />Aizslēgta</, /Durvis aizvērtas/],
+    ["el", />Κλειδωμένη</, /Πόρτα κλειστή/],
   ];
   for (const [language, state, door] of cases) {
     const html = newCard(makeHass({ ...states }, { language, locale: { language } })).shadowRoot.innerHTML;

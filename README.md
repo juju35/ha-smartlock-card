@@ -5,10 +5,10 @@
 [![Validate](https://github.com/juju35/ha-smartlock-card/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-smartlock-card/actions/workflows/validate.yml)
 [![Lint](https://github.com/juju35/ha-smartlock-card/actions/workflows/lint.yml/badge.svg)](https://github.com/juju35/ha-smartlock-card/actions/workflows/lint.yml)
 [![Release](https://img.shields.io/github/v/release/juju35/ha-smartlock-card)](https://github.com/juju35/ha-smartlock-card/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/juju35/ha-smartlock-card/blob/main/LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/julienstep9)
 
-<p align="center"><img src="images/logo.svg" alt="Smart Lock Card" width="80"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/images/logo.svg" alt="Smart Lock Card" width="80"></p>
 
 Lovelace cards for Home Assistant to monitor and control smart locks: state, door, battery, lock / unlock / open, settings and activity at a glance.
 
@@ -173,88 +173,88 @@ As a lock unlocks, the bolt rotates and glows — here the Nuki front door:
 
 | Light | Dark |
 |---|---|
-| ![unlocking animation](screenshots/unlocking.gif) | ![unlocking animation dark](screenshots/unlocking-dark.gif) |
+| ![unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/unlocking.gif) | ![unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/unlocking-dark.gif) |
 
 The same turn runs in reverse, with the glow, as it locks again:
 
 | Light | Dark |
 |---|---|
-| ![locking animation](screenshots/locking.gif) | ![locking animation dark](screenshots/locking-dark.gif) |
+| ![locking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/locking.gif) | ![locking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/locking-dark.gif) |
 
 Any lock integration gets the animation — here the matter garage lock mid-turn:
 
 | Light | Dark |
 |---|---|
-| ![garage unlocking animation](screenshots/garage-unlocking.gif) | ![garage unlocking animation dark](screenshots/garage-unlocking-dark.gif) |
+| ![garage unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/garage-unlocking.gif) | ![garage unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/garage-unlocking-dark.gif) |
 
 When a lock is jammed, the picture shakes:
 
 | Light | Dark |
 |---|---|
-| ![jammed animation light](screenshots/jammed-light.gif) | ![jammed animation](screenshots/jammed.gif) |
+| ![jammed animation light](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/jammed-light.gif) | ![jammed animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/jammed.gif) |
 
 While a door is opening, waves ripple out from the light:
 
 | Light | Dark |
 |---|---|
-| ![opening animation](screenshots/opening.gif) | ![opening animation dark](screenshots/opening-dark.gif) |
+| ![opening animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/opening.gif) | ![opening animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/opening-dark.gif) |
 
 Every drawn family animates the part that moves on the real lock. The compact cylinder (Nuki Smart Lock Ultra, Tedee GO) turns its knurled knob while the light arc glows:
 
 | Light | Dark |
 |---|---|
-| ![compact cylinder unlocking animation](screenshots/compact-unlocking.gif) | ![compact cylinder unlocking animation dark](screenshots/compact-unlocking-dark.gif) |
+| ![compact cylinder unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/compact-unlocking.gif) | ![compact cylinder unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/compact-unlocking-dark.gif) |
 
 The keypad deadbolt (Yale Assure, Schlage, Kwikset, Ultraloq U-Bolt) turns its thumb turn under the glowing light bar:
 
 | Light | Dark |
 |---|---|
-| ![keypad deadbolt unlocking animation](screenshots/keypad-unlocking.gif) | ![keypad deadbolt unlocking animation dark](screenshots/keypad-unlocking-dark.gif) |
+| ![keypad deadbolt unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/keypad-unlocking.gif) | ![keypad deadbolt unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/keypad-unlocking-dark.gif) |
 
 The fingerprint lever (Ultraloq Latch, Aqara D100/A100, LOQED) dips its handle as the reader ring glows:
 
 | Light | Dark |
 |---|---|
-| ![fingerprint lever unlocking animation](screenshots/lever-unlocking.gif) | ![fingerprint lever unlocking animation dark](screenshots/lever-unlocking-dark.gif) |
+| ![fingerprint lever unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/lever-unlocking.gif) | ![fingerprint lever unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/lever-unlocking-dark.gif) |
 
 The access reader (UniFi Access, ekey, KIWI) flashes its light bar while the strike opens:
 
 | Light | Dark |
 |---|---|
-| ![access reader unlocking animation](screenshots/reader-unlocking.gif) | ![access reader unlocking animation dark](screenshots/reader-unlocking-dark.gif) |
+| ![access reader unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/reader-unlocking.gif) | ![access reader unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/reader-unlocking-dark.gif) |
 
 And the padlock (smart padlocks, and any lock with no drawn model) lifts its shackle:
 
 | Light | Dark |
 |---|---|
-| ![padlock unlocking animation](screenshots/padlock-unlocking.gif) | ![padlock unlocking animation dark](screenshots/padlock-unlocking-dark.gif) |
+| ![padlock unlocking animation](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/padlock-unlocking.gif) | ![padlock unlocking animation dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/padlock-unlocking-dark.gif) |
 
 Locked front door with its activity, then unlocked with the door open and its settings:
 
 | Light | Dark |
 |---|---|
-| ![card](screenshots/card.png) | ![card dark](screenshots/card-dark.png) |
-| ![card unlocked, door open](screenshots/card-open.png) | ![card unlocked, door open dark](screenshots/card-open-dark.png) |
+| ![card](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card.png) | ![card dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-dark.png) |
+| ![card unlocked, door open](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-open.png) | ![card unlocked, door open dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-open-dark.png) |
 
 Mini card for the front door and for the garage lock:
 
 | Light | Dark |
 |---|---|
-| ![mini card](screenshots/mini-card.png) | ![mini card dark](screenshots/mini-card-dark.png) |
-| ![mini card garage](screenshots/mini-card-garage.png) | ![mini card garage dark](screenshots/mini-card-garage-dark.png) |
+| ![mini card](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card.png) | ![mini card dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-dark.png) |
+| ![mini card garage](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-garage.png) | ![mini card garage dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-garage-dark.png) |
 
 Lock asking for a code, and jammed lock:
 
 | Light | Dark |
 |---|---|
-| ![code](screenshots/card-code.png) | ![code dark](screenshots/card-code-dark.png) |
-| ![jammed light](screenshots/card-jammed-light.png) | ![jammed](screenshots/card-jammed.png) |
+| ![code](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-code.png) | ![code dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-code-dark.png) |
+| ![jammed light](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-jammed-light.png) | ![jammed](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/card-jammed.png) |
 
 Mini card zoomed in with its detail button (top right, click it again or anywhere outside the card to go back):
 
 | Light | Dark |
 |---|---|
-| ![mini card zoomed in](screenshots/mini-card-zoom.png) | ![mini card zoomed in dark](screenshots/mini-card-zoom-dark.png) |
+| ![mini card zoomed in](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-zoom.png) | ![mini card zoomed in dark](https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/screenshots/mini-card-zoom-dark.png) |
 
 ## How it works
 
@@ -262,7 +262,7 @@ The cards use the standard `lock` entity, so every lock integration works: the s
 
 The other entities of the lock are found through the entity and device registries: everything on the same device as the lock, matched by its domain and device class (`door` / `opening` / `garage_door` for the door, `battery`, `battery_charging`, `problem`). Entity ids can therefore be in any language or renamed without breaking the cards. The keypad is the exception: it is found by its name (`keypad`, `clavier`, `Tastatur`, `teclado`, `tastierino`, `toetsenbord`, `klawiatura`, `tastatura`, `knappsats`, `klaviatura`, `billentyuzet`, `klavesnica` / `klavesnice`, `tipkovnica` or `pliktrologio` in the entity id) or by the integration's translation key (Nuki), so a keypad entity renamed to something else shows under Details. When the door sensor or the battery belongs to another device, set `door_entity` or `battery_entity`.
 
-<p align="center"><img src="images/states.svg" alt="Lock states" width="760"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/juju35/ha-smartlock-card/main/images/states.svg" alt="Lock states" width="760"></p>
 
 The picture is drawn for the family of the lock, picked from its integration, manufacturer, model and name: retrofit case (Nuki Smart Lock 3/4/5, SwitchBot Lock), rotary knob (Tedee Pro, Yale Linus, Sesame, Aqara U100/U200, August), compact cylinder (Nuki Smart Lock Ultra, Tedee GO), keypad deadbolt (Yale Assure, Schlage, Kwikset, Ultraloq U-Bolt), fingerprint lever (Ultraloq Latch, Aqara D100/A100, LOQED), access reader (UniFi Access, ekey, KIWI) and padlock for anything else. These are generic drawings of each kind of lock, not pictures of the products. Use `image` and `finish` to pick another one, or your own picture.
 
@@ -287,7 +287,7 @@ npm run screenshots  # renders the cards (and the animation gifs, needs ffmpeg) 
 ### Releasing
 
 1. Bump `version` in `package.json`
-2. Add a `## <version>` section at the top of [CHANGELOG.md](CHANGELOG.md)
+2. Add a `## <version>` section at the top of [CHANGELOG.md](https://github.com/juju35/ha-smartlock-card/blob/main/CHANGELOG.md)
 3. Push to `main`: the **Release** workflow builds the card, creates the tag and the GitHub release with the changelog section as notes, and attaches `smartlock-card.js`
 
 ## Translations
@@ -327,7 +327,7 @@ Lock brands and logos are trademarks of their respective owners. This project is
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/juju35/ha-smartlock-card/blob/main/LICENSE)
 
 ## Support
 

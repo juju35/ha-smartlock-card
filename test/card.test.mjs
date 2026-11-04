@@ -326,8 +326,8 @@ test("French strings", () => {
 test("I18N parity: every language has exactly the keys, array lengths and placeholders of en", () => {
   const keys = Object.keys(sl.STRINGS.en).sort();
   const vars = (s) => (String(s).match(/\{\w+\}/g) || []).sort().join();
-  assert.deepEqual(Object.keys(sl.STRINGS).sort(), ["bg", "cs", "da", "de", "el", "en", "es", "fr", "ga", "hu", "it", "lv", "mt", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sr-Latn", "sv", "uk"]);
-  for (const l of ["fr", "de", "es", "sr", "sr-Latn", "it", "nl", "pt", "pl", "ro", "da", "sv", "bg", "ru", "uk", "hu", "ga", "sk", "cs", "sl", "mt", "lv", "el"]) {
+  assert.deepEqual(Object.keys(sl.STRINGS).sort(), ["bg", "cs", "da", "de", "el", "en", "es", "fr", "hu", "it", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sr-Latn", "sv", "uk"]);
+  for (const l of ["fr", "de", "es", "sr", "sr-Latn", "it", "nl", "pt", "pl", "ro", "da", "sv", "bg", "ru", "uk", "hu", "sk", "cs", "sl", "lv", "el"]) {
     assert.ok(sl.STRINGS[l], l);
     assert.deepEqual(Object.keys(sl.STRINGS[l]).sort(), keys, l);
     for (const k of keys) {
@@ -366,9 +366,9 @@ test("language resolution: full code, then the part before the dash, then en", (
   assert.equal(sl.lang(null, { language: "nl-BE" }), "nl");
   assert.equal(sl.lang(null, { language: "pt" }), "pt");
   assert.equal(sl.lang(null, { language: "pl-PL" }), "pl");
-  // Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese,
-  // Latvian and Greek, from Home Assistant and from the language option.
-  for (const l of ["ro", "da", "sv", "bg", "ru", "uk", "hu", "ga", "sk", "cs", "sl", "mt", "lv", "el"]) {
+  // Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slovak, Czech, Slovenian, Latvian
+  // and Greek, from Home Assistant and from the language option.
+  for (const l of ["ro", "da", "sv", "bg", "ru", "uk", "hu", "sk", "cs", "sl", "lv", "el"]) {
     assert.equal(sl.lang(hassIn(l), {}), l);
     assert.equal(sl.lang(hassIn(`${l}-XX`), {}), l);
     assert.equal(sl.lang(null, { language: l }), l);
@@ -432,7 +432,7 @@ test("Italian, Dutch, Portuguese and Polish strings", () => {
   }
 });
 
-test("editor: Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian and Greek language options", () => {
+test("editor: Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slovak, Czech, Slovenian, Latvian and Greek language options", () => {
   for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
     const ed = Cls.getConfigElement();
     ed._hass = makeHass();
@@ -445,18 +445,16 @@ test("editor: Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungaria
     assert.match(field, /"value":"ru","label":"Русский"/);
     assert.match(field, /"value":"uk","label":"Українська"/);
     assert.match(field, /"value":"hu","label":"Magyar"/);
-    assert.match(field, /"value":"ga","label":"Gaeilge"/);
     assert.match(field, /"value":"sk","label":"Slovenčina"/);
     assert.match(field, /"value":"cs","label":"Čeština"/);
     assert.match(field, /"value":"sl","label":"Slovenščina"/);
-    assert.match(field, /"value":"mt","label":"Malti"/);
     assert.match(field, /"value":"lv","label":"Latviešu"/);
     assert.match(field, /"value":"el","label":"Ελληνικά"/);
     assert.match(field, /"label":"Αυτόματη"/);
   }
 });
 
-test("Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian and Greek strings", () => {
+test("Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slovak, Czech, Slovenian, Latvian and Greek strings", () => {
   const cases = [
     ["ro", />Încuiat</, /Ușă închisă/],
     ["da", />Låst</, /Dør lukket/],
@@ -465,11 +463,9 @@ test("Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish
     ["ru", />Заперт</, /Дверь закрыта/],
     ["uk", />Замкнено</, /Двері зачинені/],
     ["hu", />Bezárva</, /Ajtó csukva/],
-    ["ga", />Faoi ghlas</, /Doras dúnta/],
     ["sk", />Zamknuté</, /Dvere zatvorené/],
     ["cs", />Zamčeno</, /Dveře zavřené/],
     ["sl", />Zaklenjeno</, /Vrata zaprta/],
-    ["mt", />Imsakkra</, /Bieb magħluq/],
     ["lv", />Aizslēgta</, /Durvis aizvērtas/],
     ["el", />Κλειδωμένη</, /Πόρτα κλειστή/],
   ];

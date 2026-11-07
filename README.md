@@ -30,7 +30,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Confirmation popup at the top of the card before unlocking and opening (configurable, also for locking)
 - Code entry when the lock asks for one (`code_format`), checked against the lock's format; the code is never stored
 - Automatic discovery of the entities of the lock device: door sensor, battery (percentage or "battery low"), charging, keypad battery, problem sensor
-- Door open / closed, jammed lock and problem alerts
+- Door open / closed, jammed lock and problem alerts, and a warning when the door is open while the lock is unlocked
 - Last change ("Locked 5 minutes ago · by Keypad" when the integration reports who)
 - Details: the other sensors of the lock (signal strength, firmware…)
 - Settings: switches toggle in place (auto-lock, night mode…), buttons ask before being pressed, selects and numbers open their dialog

@@ -317,6 +317,29 @@ test("jammed lock: red state and alert", () => {
   assert.match(html, /The lock is jammed/);
 });
 
+test("door open while the lock is unlocked: warning on the full and mini cards", () => {
+  const set = (lock, door) => ({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: lock }, "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: door } });
+  const full = (st) => newCard(makeHass(st)).shadowRoot.innerHTML;
+  const mini = (st) => newCard(makeHass(st), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  for (const lock of ["unlocked", "open"]) {
+    const html = full(set(lock, "on"));
+    assert.match(html, /class="alert-line warn clickable" data-entity="binary_sensor\.porte_entree_porte"/, lock);
+    assert.match(html, /The door is open while the lock is unlocked\./, lock);
+    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\."> · Door open</, lock);
+  }
+  // Locked with the door open, or unlocked with the door closed: no warning.
+  for (const [lock, door] of [["locked", "on"], ["unlocked", "off"]]) {
+    assert.doesNotMatch(full(set(lock, door)), /class="alert-line/, `${lock}/${door}`);
+    assert.doesNotMatch(mini(set(lock, door)), /more warn/, `${lock}/${door}`);
+  }
+  // A jammed lock keeps its own alert.
+  assert.match(full(set("jammed", "on")), /class="alert-line crit[\s\S]*The lock is jammed/);
+  // No door sensor: nothing to warn about.
+  const noDoor = { ...set("unlocked", "on") };
+  delete noDoor["binary_sensor.porte_entree_porte"];
+  assert.doesNotMatch(full(noDoor), /class="alert-line/);
+});
+
 test("French strings", () => {
   const html = newCard(makeHass(), { language: "fr" }).shadowRoot.innerHTML;
   assert.match(html, />Verrouillée</);

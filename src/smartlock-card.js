@@ -275,6 +275,7 @@ const STRINGS = {
     door_closed: "Door closed",
     problem: "Problem reported",
     jammed: "The lock is jammed: check the door and try again.",
+    door_unlocked: "The door is open while the lock is unlocked.",
     changed: "{state} {when}",
     by: "by {who}",
     by_user: "from Home Assistant",
@@ -353,6 +354,7 @@ const STRINGS = {
     door_closed: "Porte fermée",
     problem: "Problème signalé",
     jammed: "La serrure est bloquée : vérifiez la porte et réessayez.",
+    door_unlocked: "La porte est ouverte alors que la serrure est déverrouillée.",
     changed: "{state} {when}",
     by: "par {who}",
     by_user: "depuis Home Assistant",
@@ -431,6 +433,7 @@ const STRINGS = {
     door_closed: "Tür geschlossen",
     problem: "Problem gemeldet",
     jammed: "Das Schloss ist blockiert: Prüfe die Tür und versuche es erneut.",
+    door_unlocked: "Die Tür ist offen, während das Schloss entriegelt ist.",
     changed: "{state} {when}",
     by: "von {who}",
     by_user: "über Home Assistant",
@@ -509,6 +512,7 @@ const STRINGS = {
     door_closed: "Puerta cerrada",
     problem: "Problema detectado",
     jammed: "La cerradura está atascada: revisa la puerta y vuelve a intentarlo.",
+    door_unlocked: "La puerta está abierta y la cerradura, desbloqueada.",
     changed: "{state} {when}",
     by: "por {who}",
     by_user: "desde Home Assistant",
@@ -587,6 +591,7 @@ const STRINGS = {
     door_closed: "Врата затворена",
     problem: "Пријављен проблем",
     jammed: "Брава је заглављена: проверите врата и покушајте поново.",
+    door_unlocked: "Врата су отворена, а брава је откључана.",
     changed: "{state} {when}",
     by: "корисник: {who}",
     by_user: "из Home Assistant-а",
@@ -665,6 +670,7 @@ const STRINGS = {
     door_closed: "Vrata zatvorena",
     problem: "Prijavljen problem",
     jammed: "Brava je zaglavljena: proverite vrata i pokušajte ponovo.",
+    door_unlocked: "Vrata su otvorena, a brava je otključana.",
     changed: "{state} {when}",
     by: "korisnik: {who}",
     by_user: "iz Home Assistant-a",
@@ -743,6 +749,7 @@ const STRINGS = {
     door_closed: "Porta chiusa",
     problem: "Problema segnalato",
     jammed: "La serratura è inceppata: controlla la porta e riprova.",
+    door_unlocked: "La porta è aperta e la serratura è sbloccata.",
     changed: "{state} {when}",
     by: "da {who}",
     by_user: "da Home Assistant",
@@ -821,6 +828,7 @@ const STRINGS = {
     door_closed: "Deur dicht",
     problem: "Probleem gemeld",
     jammed: "Het slot zit vast: controleer de deur en probeer het opnieuw.",
+    door_unlocked: "De deur staat open terwijl het slot ontgrendeld is.",
     changed: "{state} {when}",
     by: "door {who}",
     by_user: "vanuit Home Assistant",
@@ -899,6 +907,7 @@ const STRINGS = {
     door_closed: "Porta fechada",
     problem: "Problema assinalado",
     jammed: "A fechadura está encravada: verifique a porta e tente novamente.",
+    door_unlocked: "A porta está aberta e a fechadura está destrancada.",
     changed: "{state} {when}",
     by: "por {who}",
     by_user: "a partir do Home Assistant",
@@ -977,6 +986,7 @@ const STRINGS = {
     door_closed: "Drzwi zamknięte",
     problem: "Zgłoszono problem",
     jammed: "Zamek jest zacięty: sprawdź drzwi i spróbuj ponownie.",
+    door_unlocked: "Drzwi są otwarte, a zamek jest odblokowany.",
     changed: "{state} {when}",
     by: "przez {who}",
     by_user: "z Home Assistant",
@@ -1055,6 +1065,7 @@ const STRINGS = {
     door_closed: "Ușă închisă",
     problem: "Problemă semnalată",
     jammed: "Încuietoarea este blocată: verificați ușa și încercați din nou.",
+    door_unlocked: "Ușa este deschisă, iar încuietoarea este descuiată.",
     changed: "{state} {when}",
     by: "de {who}",
     by_user: "din Home Assistant",
@@ -1133,6 +1144,7 @@ const STRINGS = {
     door_closed: "Dør lukket",
     problem: "Problem rapporteret",
     jammed: "Låsen sidder fast: kontrollér døren, og prøv igen.",
+    door_unlocked: "Døren står åben, mens låsen er låst op.",
     changed: "{state} {when}",
     by: "af {who}",
     by_user: "fra Home Assistant",
@@ -1211,6 +1223,7 @@ const STRINGS = {
     door_closed: "Dörr stängd",
     problem: "Problem rapporterat",
     jammed: "Låset har fastnat: kontrollera dörren och försök igen.",
+    door_unlocked: "Dörren är öppen medan låset är upplåst.",
     changed: "{state} {when}",
     by: "av {who}",
     by_user: "från Home Assistant",
@@ -1289,6 +1302,7 @@ const STRINGS = {
     door_closed: "Затворена врата",
     problem: "Съобщен проблем",
     jammed: "Бравата е заседнала: проверете вратата и опитайте отново.",
+    door_unlocked: "Вратата е отворена, а бравата е отключена.",
     changed: "{state} {when}",
     by: "от {who}",
     by_user: "от Home Assistant",
@@ -1367,6 +1381,7 @@ const STRINGS = {
     door_closed: "Дверь закрыта",
     problem: "Обнаружена проблема",
     jammed: "Замок заклинило: проверьте дверь и повторите попытку.",
+    door_unlocked: "Дверь открыта, а замок отперт.",
     changed: "{state} {when}",
     by: "пользователь: {who}",
     by_user: "из Home Assistant",
@@ -1445,6 +1460,7 @@ const STRINGS = {
     door_closed: "Двері зачинені",
     problem: "Виявлено проблему",
     jammed: "Замок заклинило: перевірте двері та спробуйте ще раз.",
+    door_unlocked: "Двері відчинені, а замок відімкнено.",
     changed: "{state} {when}",
     by: "користувач: {who}",
     by_user: "з Home Assistant",
@@ -1523,6 +1539,7 @@ const STRINGS = {
     door_closed: "Ajtó csukva",
     problem: "Probléma jelezve",
     jammed: "A zár elakadt: ellenőrizze az ajtót, és próbálja újra.",
+    door_unlocked: "Az ajtó nyitva van, a zár pedig nincs bezárva.",
     changed: "{state} {when}",
     by: "{who} által",
     by_user: "a Home Assistantból",
@@ -1601,6 +1618,7 @@ const STRINGS = {
     door_closed: "Dvere zatvorené",
     problem: "Nahlásený problém",
     jammed: "Zámok sa zasekol: skontrolujte dvere a skúste to znova.",
+    door_unlocked: "Dvere sú otvorené a zámok je odomknutý.",
     changed: "{state} {when}",
     by: "používateľ: {who}",
     by_user: "z Home Assistantu",
@@ -1679,6 +1697,7 @@ const STRINGS = {
     door_closed: "Dveře zavřené",
     problem: "Nahlášen problém",
     jammed: "Zámek se zasekl: zkontrolujte dveře a zkuste to znovu.",
+    door_unlocked: "Dveře jsou otevřené a zámek je odemčený.",
     changed: "{state} {when}",
     by: "uživatel: {who}",
     by_user: "z Home Assistantu",
@@ -1757,6 +1776,7 @@ const STRINGS = {
     door_closed: "Vrata zaprta",
     problem: "Prijavljena težava",
     jammed: "Ključavnica se je zataknila: preverite vrata in poskusite znova.",
+    door_unlocked: "Vrata so odprta, ključavnica pa je odklenjena.",
     changed: "{state} {when}",
     by: "uporabnik: {who}",
     by_user: "iz Home Assistanta",
@@ -1835,6 +1855,7 @@ const STRINGS = {
     door_closed: "Durvis aizvērtas",
     problem: "Ziņots par problēmu",
     jammed: "Slēdzene ir iestrēgusi: pārbaudiet durvis un mēģiniet vēlreiz.",
+    door_unlocked: "Durvis ir atvērtas, un slēdzene ir atslēgta.",
     changed: "{state} {when}",
     by: "lietotājs: {who}",
     by_user: "no Home Assistant",
@@ -1913,6 +1934,7 @@ const STRINGS = {
     door_closed: "Πόρτα κλειστή",
     problem: "Αναφέρθηκε πρόβλημα",
     jammed: "Η κλειδαριά έχει κολλήσει: ελέγξτε την πόρτα και δοκιμάστε ξανά.",
+    door_unlocked: "Η πόρτα είναι ανοιχτή ενώ η κλειδαριά είναι ξεκλείδωτη.",
     changed: "{state} {when}",
     by: "από {who}",
     by_user: "από το Home Assistant",
@@ -2625,10 +2647,20 @@ class SmartLockBase extends HTMLElement {
     }<span class="v" title="${esc(value)}">${esc(value)}</span>${b.charging ? svgIcon(ICONS.bolt, "bolt") : ""}</div>`;
   }
 
+  _doorOpen(m) {
+    const d = this._s(m.door);
+    return valid(d) && (d.state === "on" || d.state === "open");
+  }
+
+  // Door left open while the lock is unlocked (or unlatched): the door cannot be locked as it is.
+  _doorUnlocked(m, state) {
+    return (state === "unlocked" || state === "open") && this._doorOpen(m);
+  }
+
   _doorLine(m) {
     const d = this._s(m.door);
     if (!valid(d)) return "";
-    const open = d.state === "on" || d.state === "open";
+    const open = this._doorOpen(m);
     return `<div class="line clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}" role="button" tabindex="0">${svgIcon(open ? ICONS.door_open : ICONS.door_closed)}<span>${esc(
       this._t(open ? "door_open" : "door_closed"),
     )}</span></div>`;
@@ -2638,12 +2670,17 @@ class SmartLockBase extends HTMLElement {
   _alertLine(m, state) {
     let text = null;
     let entity = this._lockId;
+    let cls = "crit";
     if (state === "jammed") text = this._t("jammed");
     else if (this._s(m.problem)?.state === "on") {
       text = this._t("problem");
       entity = m.problem;
+    } else if (this._doorUnlocked(m, state)) {
+      text = this._t("door_unlocked");
+      entity = m.door;
+      cls = "warn";
     }
-    return text ? `<div class="alert-line crit clickable" data-entity="${esc(entity)}" role="button" tabindex="0">${svgIcon(ICONS.alert)}<span>${esc(text)}</span></div>` : "";
+    return text ? `<div class="alert-line ${cls} clickable" data-entity="${esc(entity)}" role="button" tabindex="0">${svgIcon(ICONS.alert)}<span>${esc(text)}</span></div>` : "";
   }
 
   // Lock / Unlock / Open buttons. The useful one (Unlock when locked, Lock otherwise) is highlighted; `round` for
@@ -2950,6 +2987,7 @@ const MINI_STYLE = `
   .mini .sub .st { display: inline-flex; align-items: center; flex: none; max-width: 100%; color: var(--ink); font-weight: 500; }
   .mini .sub .t, .mini .sub .more { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .mini .sub .more { flex: 0 1 auto; white-space: pre; }
+  .mini .sub .more.warn { color: var(--ink); font-weight: 500; }
   .mini .sub .dot { margin-right: 4px; }
   .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
   .mini .batt .icon { color: var(--c); width: 14px; height: 14px; }
@@ -3055,14 +3093,16 @@ class SmartLockMiniCard extends SmartLockCard {
     const cls = statusClass(state);
     const label = esc(this._fmtState(state));
     const controls = this._controls(lock, state, true);
-    // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change).
+    // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change). A door
+    // left open while the lock is unlocked shows in the warning color.
+    const warn = this._doorUnlocked(m, state);
     return `<style>${BASE_STYLE}${MINI_STYLE}</style>
       <ha-card>
         <div class="mini">
           ${this._picture(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more">${esc(this._miniDetail(m, lock))}</span></div>
+            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${warn ? ` warn" title="${esc(this._t("door_unlocked"))}` : ""}">${esc(this._miniDetail(m, lock))}</span></div>
             ${this._batteryLine(this._battery(m))}
           </div>
           ${controls ? `<div class="controls">${controls}</div>` : ""}
@@ -3073,8 +3113,7 @@ class SmartLockMiniCard extends SmartLockCard {
 
   // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>".
   _miniDetail(m, lock) {
-    const door = this._s(m.door);
-    if (valid(door) && (door.state === "on" || door.state === "open")) return ` · ${this._t("door_open")}`;
+    if (this._doorOpen(m)) return ` · ${this._t("door_open")}`;
     if (!valid(lock)) return "";
     const when = ago(this._hass, this._config, lock.last_changed);
     if (!when) return "";

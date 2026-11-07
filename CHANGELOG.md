@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0
+
+_2026-11-07_
+
+### Added
+- When the door is open while the lock is unlocked or unlatched, the full card shows a warning line under the door line and the mini card shows "Door open" in the warning color.
+
 ## 1.5.9
 
 ### Documentation

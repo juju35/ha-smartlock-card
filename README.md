@@ -30,7 +30,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Confirmation popup at the top of the card before unlocking and opening (configurable, also for locking)
 - Code entry when the lock asks for one (`code_format`), checked against the lock's format; the code is never stored
 - Automatic discovery of the entities of the lock device: door sensor, battery (percentage or "battery low"), charging, keypad battery, problem sensor
-- Door open / closed, jammed lock and problem alerts, and a warning when the door is open while the lock is unlocked
+- Door open / closed, jammed lock and problem alerts, a warning when the door is open while the lock is unlocked, and an optional warning when the lock stays unlocked too long (`unlocked_alert`)
 - Last change ("Locked 5 minutes ago · by Keypad" when the integration reports who)
 - Details: the other sensors of the lock (signal strength, firmware…)
 - Settings: switches toggle in place (auto-lock, night mode…), buttons ask before being pressed, selects and numbers open their dialog
@@ -150,12 +150,13 @@ language: fr
 | `title` | both | Lock name | Card title |
 | `image` | both | `auto` | Lock picture: `auto` (per model), `retrofit`, `knob`, `compact`, `keypad`, `lever`, `reader`, `padlock`, `none`, or the URL of your own picture (e.g. `/local/my-lock.png`) |
 | `finish` | both | Per model | Finish of the drawn picture: `white`, `black` or `steel` |
-| `show_icon` | both | `true` | State icon at the left of the header, on the full card and the zoomed-in mini card (the compact mini view has no header icon) |
+| `show_icon` | both | `true` | 40 px state icon at the left of the header, on the full card and on the mini card (compact and zoomed in). On the compact mini card it takes the place of the picture below 300 px, and leaves its room to the state at 6 columns of a phone |
 | `show_picture` | both | `true` | Lock picture (same as `image: none` when `false`) |
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
 | `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…). On a narrow mini card (6 columns), it moves behind the detail button so that the state stays readable; without the detail button (`zoom: false`) it stays on the card |
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |
 | `code` | both | — | Code sent with every action, for locks that need one and when you don't want to type it. It is stored in the dashboard configuration in clear text: prefer typing it |
+| `unlocked_alert` | both | — | Minutes: once the lock has stayed unlocked (or open) longer than that, the full card shows a warning line and the mini card shows its detail in the warning color. Counted from the lock's last change |
 | `door_entity` | both | Found on the lock device | Door sensor (`binary_sensor`), when it belongs to another device (a contact sensor on the door) |
 | `battery_entity` | both | Found on the lock device | Battery: a percentage `sensor`, or a "battery low" `binary_sensor` |
 | `zoom` | mini | `true` | Detail button at the top right of the mini card: it shows the full card's content (with the same options, so `show_settings`, `collapsed`… can be set on the mini card too) and switches back to the compact view; a click outside the card also brings the compact view back. `false` removes the button |

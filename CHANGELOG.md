@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.7.0
+
+_2026-11-07_
+
+### Added
+- New `unlocked_alert` option (minutes, also in the visual editor): once the lock has stayed unlocked longer than that, the full card shows a warning line and the mini card shows its detail in the warning color.
+- The mini card shows the 40 px state icon at the left, like the other ha-* mini cards, and its detail button sits at the top right; the header icon is no longer shrunk on narrow cards.
+- Both cards let a Sections view size their height to their content (`rows: auto`).
+
+### Fixes
+- A lock in the `unknown` state (integration restarted, lock not polled yet) keeps its Lock / Unlock buttons; they are hidden only when the lock is unavailable.
+
 ## 1.6.0
 
 _2026-11-07_

@@ -340,6 +340,89 @@ test("door open while the lock is unlocked: warning on the full and mini cards",
   assert.doesNotMatch(full(noDoor), /class="alert-line/);
 });
 
+test("a lock in an unknown state keeps its Lock / Unlock buttons; an unavailable one has none", () => {
+  const set = (state) => ({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state } });
+  const full = (st) => newCard(makeHass(st)).shadowRoot.innerHTML;
+  const mini = (st) => newCard(makeHass(st), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  assert.match(full(set("unknown")), /data-action="lock"[\s\S]*data-action="unlock"/);
+  assert.match(mini(set("unknown")), /btn round primary" data-action="lock"/);
+  assert.doesNotMatch(full(set("unavailable")), /data-action="(lock|unlock|open)"/);
+  assert.doesNotMatch(mini(set("unavailable")), /data-action="(lock|unlock|open)"/);
+});
+
+test("unlocked_alert: warning once the lock has stayed unlocked longer than the delay", () => {
+  const at = (state, min) => ({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state, last_changed: new Date(Date.now() - min * 60e3).toISOString() } });
+  // No door sensor: the door warning does not take the place of this one.
+  const noDoor = (st) => {
+    const out = { ...st };
+    delete out["binary_sensor.porte_entree_porte"];
+    return out;
+  };
+  // Each card is detached once read, which stops the timer it armed for the end of the delay.
+  const html = (st, config, Cls) => {
+    const card = newCard(makeHass(noDoor(st)), config, Cls);
+    card.disconnectedCallback();
+    return card.shadowRoot.innerHTML;
+  };
+  const full = (st, config) => html(st, config);
+  const mini = (st, config) => html(st, config, sl.SmartLockMiniCard);
+  const config = { unlocked_alert: 10 };
+  for (const state of ["unlocked", "open"]) {
+    assert.match(full(at(state, 12), config), /class="alert-line warn clickable" data-entity="lock\.porte_entree"[^>]*>[\s\S]*Unlocked for more than 10 min\./, state);
+    assert.match(mini(at(state, 12), config), /class="more warn" title="Unlocked for more than 10 min\."/, state);
+  }
+  // Not yet, locked, or the option is off: nothing.
+  for (const [st, cfg] of [
+    [at("unlocked", 5), config],
+    [at("locked", 60), config],
+    [at("unlocked", 60), {}],
+  ]) {
+    assert.doesNotMatch(full(st, cfg), /class="alert-line/);
+    assert.doesNotMatch(mini(st, cfg), /more warn/);
+  }
+  // Translated.
+  assert.match(full(at("unlocked", 30), { ...config, language: "fr" }), /Déverrouillée depuis plus de 10 min\./);
+});
+
+test("unlocked_alert: the card re-renders when the delay runs out, and stops its timer when removed", () => {
+  const st = { ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked", last_changed: new Date(Date.now() - 9 * 60e3).toISOString() } };
+  delete st["binary_sensor.porte_entree_porte"];
+  const card = newCard(makeHass(st), { unlocked_alert: 10 });
+  assert.ok(card._alertTimer, "a timer is armed for the end of the delay");
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /Unlocked for more than/);
+  // The delay runs out: the timer's re-render shows the warning.
+  st["lock.porte_entree"].last_changed = new Date(Date.now() - 11 * 60e3).toISOString();
+  card._update();
+  assert.match(card.shadowRoot.innerHTML, /Unlocked for more than 10 min\./);
+  card.disconnectedCallback();
+  // Locked: no timer.
+  const locked = newCard(makeHass(), { unlocked_alert: 10 });
+  assert.equal(locked._alertTimer, undefined);
+});
+
+test("mini card: 40 px state badge, detail button at the top right, rows auto in both views", () => {
+  const card = newCard(makeHass(), {}, sl.SmartLockMiniCard);
+  const html = card.shadowRoot.innerHTML;
+  assert.match(html, /<div class="badge clickable ok" data-entity="lock\.porte_entree" role="button" tabindex="0" aria-label="Locked">/);
+  assert.match(html, /\.badge \{ width: 40px; height: 40px;/);
+  assert.doesNotMatch(html, /\.badge \{ width: 3\dpx/, "the badge is never shrunk");
+  assert.match(html, /\.mini \.zoom \{ align-self: flex-start; \}/);
+  assert.deepEqual(plain(card.getGridOptions()), { columns: 6, min_columns: 6, rows: "auto" });
+  click(card, { action: "zoom" });
+  assert.deepEqual(plain(card.getGridOptions()), { columns: 12, min_columns: 6, rows: "auto" });
+  assert.doesNotMatch(newCard(makeHass(), { show_icon: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML, /class="badge/);
+});
+
+test("editor: unlocked_alert is a number of minutes on both cards", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    ed._config = { entity: "lock.porte_entree" };
+    const field = ed._schema().find((f) => f.name === "unlocked_alert");
+    assert.equal(field.selector.number.unit_of_measurement, "min");
+  }
+});
+
 test("French strings", () => {
   const html = newCard(makeHass(), { language: "fr" }).shadowRoot.innerHTML;
   assert.match(html, />Verrouillée</);

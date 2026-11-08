@@ -276,6 +276,7 @@ const STRINGS = {
     problem: "Problem reported",
     jammed: "The lock is jammed: check the door and try again.",
     door_unlocked: "The door is open while the lock is unlocked.",
+    unlocked_long: "Unlocked for more than {n} min.",
     changed: "{state} {when}",
     by: "by {who}",
     by_user: "from Home Assistant",
@@ -324,6 +325,7 @@ const STRINGS = {
     lang_auto: "Automatic",
     zoom: "Detail button",
     zoom_helper: "Button at the top right that switches the mini card to the full card and back",
+    unlocked_alert: "Warn when unlocked for longer than",
     zoom_in: "Show the full card",
     zoom_out: "Back to the compact view",
     // States
@@ -355,6 +357,7 @@ const STRINGS = {
     problem: "Problème signalé",
     jammed: "La serrure est bloquée : vérifiez la porte et réessayez.",
     door_unlocked: "La porte est ouverte alors que la serrure est déverrouillée.",
+    unlocked_long: "Déverrouillée depuis plus de {n} min.",
     changed: "{state} {when}",
     by: "par {who}",
     by_user: "depuis Home Assistant",
@@ -403,6 +406,7 @@ const STRINGS = {
     lang_auto: "Automatique",
     zoom: "Bouton détail",
     zoom_helper: "Bouton en haut à droite qui bascule la mini-carte vers la carte complète et inversement",
+    unlocked_alert: "Alerter si déverrouillée depuis plus de",
     zoom_in: "Afficher la carte complète",
     zoom_out: "Revenir à la vue compacte",
     // States
@@ -434,6 +438,7 @@ const STRINGS = {
     problem: "Problem gemeldet",
     jammed: "Das Schloss ist blockiert: Prüfe die Tür und versuche es erneut.",
     door_unlocked: "Die Tür ist offen, während das Schloss entriegelt ist.",
+    unlocked_long: "Seit über {n} Min. entriegelt.",
     changed: "{state} {when}",
     by: "von {who}",
     by_user: "über Home Assistant",
@@ -482,6 +487,7 @@ const STRINGS = {
     lang_auto: "Automatisch",
     zoom: "Detail-Schaltfläche",
     zoom_helper: "Schaltfläche oben rechts, die zwischen der Mini-Karte und der vollständigen Karte wechselt",
+    unlocked_alert: "Warnen, wenn länger entriegelt als",
     zoom_in: "Vollständige Karte anzeigen",
     zoom_out: "Zurück zur kompakten Ansicht",
     // States
@@ -513,6 +519,7 @@ const STRINGS = {
     problem: "Problema detectado",
     jammed: "La cerradura está atascada: revisa la puerta y vuelve a intentarlo.",
     door_unlocked: "La puerta está abierta y la cerradura, desbloqueada.",
+    unlocked_long: "Desbloqueada desde hace más de {n} min.",
     changed: "{state} {when}",
     by: "por {who}",
     by_user: "desde Home Assistant",
@@ -561,6 +568,7 @@ const STRINGS = {
     lang_auto: "Automático",
     zoom: "Botón de detalle",
     zoom_helper: "Botón arriba a la derecha que cambia de la minitarjeta a la tarjeta completa y viceversa",
+    unlocked_alert: "Avisar si está desbloqueada más de",
     zoom_in: "Mostrar la tarjeta completa",
     zoom_out: "Volver a la vista compacta",
     // States
@@ -592,6 +600,7 @@ const STRINGS = {
     problem: "Пријављен проблем",
     jammed: "Брава је заглављена: проверите врата и покушајте поново.",
     door_unlocked: "Врата су отворена, а брава је откључана.",
+    unlocked_long: "Откључана дуже од {n} мин.",
     changed: "{state} {when}",
     by: "корисник: {who}",
     by_user: "из Home Assistant-а",
@@ -640,6 +649,7 @@ const STRINGS = {
     lang_auto: "Аутоматски",
     zoom: "Дугме за детаље",
     zoom_helper: "Дугме у горњем десном углу које пребацује мини картицу на пун приказ и назад",
+    unlocked_alert: "Упозори ако је откључана дуже од",
     zoom_in: "Прикажи целу картицу",
     zoom_out: "Назад на компактни приказ",
     // States
@@ -671,6 +681,7 @@ const STRINGS = {
     problem: "Prijavljen problem",
     jammed: "Brava je zaglavljena: proverite vrata i pokušajte ponovo.",
     door_unlocked: "Vrata su otvorena, a brava je otključana.",
+    unlocked_long: "Otključana duže od {n} min.",
     changed: "{state} {when}",
     by: "korisnik: {who}",
     by_user: "iz Home Assistant-a",
@@ -719,6 +730,7 @@ const STRINGS = {
     lang_auto: "Automatski",
     zoom: "Dugme za detalje",
     zoom_helper: "Dugme u gornjem desnom uglu koje prebacuje mini karticu na pun prikaz i nazad",
+    unlocked_alert: "Upozori ako je otključana duže od",
     zoom_in: "Prikaži celu karticu",
     zoom_out: "Nazad na kompaktni prikaz",
     // States
@@ -750,6 +762,7 @@ const STRINGS = {
     problem: "Problema segnalato",
     jammed: "La serratura è inceppata: controlla la porta e riprova.",
     door_unlocked: "La porta è aperta e la serratura è sbloccata.",
+    unlocked_long: "Sbloccata da più di {n} min.",
     changed: "{state} {when}",
     by: "da {who}",
     by_user: "da Home Assistant",
@@ -798,6 +811,7 @@ const STRINGS = {
     lang_auto: "Automatica",
     zoom: "Pulsante dettaglio",
     zoom_helper: "Pulsante in alto a destra che passa dalla mini scheda alla scheda completa e viceversa",
+    unlocked_alert: "Avvisa se sbloccata da più di",
     zoom_in: "Mostra la scheda completa",
     zoom_out: "Torna alla vista compatta",
     // States
@@ -829,6 +843,7 @@ const STRINGS = {
     problem: "Probleem gemeld",
     jammed: "Het slot zit vast: controleer de deur en probeer het opnieuw.",
     door_unlocked: "De deur staat open terwijl het slot ontgrendeld is.",
+    unlocked_long: "Al meer dan {n} min ontgrendeld.",
     changed: "{state} {when}",
     by: "door {who}",
     by_user: "vanuit Home Assistant",
@@ -877,6 +892,7 @@ const STRINGS = {
     lang_auto: "Automatisch",
     zoom: "Detailknop",
     zoom_helper: "Knop rechtsboven die wisselt tussen de minikaart en de volledige kaart",
+    unlocked_alert: "Waarschuwen als langer ontgrendeld dan",
     zoom_in: "Volledige kaart tonen",
     zoom_out: "Terug naar de compacte weergave",
     // States
@@ -908,6 +924,7 @@ const STRINGS = {
     problem: "Problema assinalado",
     jammed: "A fechadura está encravada: verifique a porta e tente novamente.",
     door_unlocked: "A porta está aberta e a fechadura está destrancada.",
+    unlocked_long: "Destrancada há mais de {n} min.",
     changed: "{state} {when}",
     by: "por {who}",
     by_user: "a partir do Home Assistant",
@@ -956,6 +973,7 @@ const STRINGS = {
     lang_auto: "Automático",
     zoom: "Botão de detalhe",
     zoom_helper: "Botão no canto superior direito que alterna entre o minicartão e o cartão completo",
+    unlocked_alert: "Avisar se destrancada há mais de",
     zoom_in: "Mostrar o cartão completo",
     zoom_out: "Voltar à vista compacta",
     // States
@@ -987,6 +1005,7 @@ const STRINGS = {
     problem: "Zgłoszono problem",
     jammed: "Zamek jest zacięty: sprawdź drzwi i spróbuj ponownie.",
     door_unlocked: "Drzwi są otwarte, a zamek jest odblokowany.",
+    unlocked_long: "Odblokowany od ponad {n} min.",
     changed: "{state} {when}",
     by: "przez {who}",
     by_user: "z Home Assistant",
@@ -1035,6 +1054,7 @@ const STRINGS = {
     lang_auto: "Automatycznie",
     zoom: "Przycisk szczegółów",
     zoom_helper: "Przycisk w prawym górnym rogu przełączający między minikartą a pełną kartą",
+    unlocked_alert: "Ostrzegaj, gdy odblokowany dłużej niż",
     zoom_in: "Pokaż pełną kartę",
     zoom_out: "Powrót do widoku kompaktowego",
     // States
@@ -1066,6 +1086,7 @@ const STRINGS = {
     problem: "Problemă semnalată",
     jammed: "Încuietoarea este blocată: verificați ușa și încercați din nou.",
     door_unlocked: "Ușa este deschisă, iar încuietoarea este descuiată.",
+    unlocked_long: "Descuiată de peste {n} min.",
     changed: "{state} {when}",
     by: "de {who}",
     by_user: "din Home Assistant",
@@ -1114,6 +1135,7 @@ const STRINGS = {
     lang_auto: "Automată",
     zoom: "Buton de detalii",
     zoom_helper: "Buton din dreapta sus care comută între mini-card și cardul complet",
+    unlocked_alert: "Avertizează dacă e descuiată de mai mult de",
     zoom_in: "Afișează cardul complet",
     zoom_out: "Înapoi la vizualizarea compactă",
     // States
@@ -1145,6 +1167,7 @@ const STRINGS = {
     problem: "Problem rapporteret",
     jammed: "Låsen sidder fast: kontrollér døren, og prøv igen.",
     door_unlocked: "Døren står åben, mens låsen er låst op.",
+    unlocked_long: "Låst op i mere end {n} min.",
     changed: "{state} {when}",
     by: "af {who}",
     by_user: "fra Home Assistant",
@@ -1193,6 +1216,7 @@ const STRINGS = {
     lang_auto: "Automatisk",
     zoom: "Detaljeknap",
     zoom_helper: "Knap øverst til højre, der skifter mellem minikortet og det fulde kort",
+    unlocked_alert: "Advar, når låsen er låst op i mere end",
     zoom_in: "Vis det fulde kort",
     zoom_out: "Tilbage til kompakt visning",
     // States
@@ -1224,6 +1248,7 @@ const STRINGS = {
     problem: "Problem rapporterat",
     jammed: "Låset har fastnat: kontrollera dörren och försök igen.",
     door_unlocked: "Dörren är öppen medan låset är upplåst.",
+    unlocked_long: "Upplåst i mer än {n} min.",
     changed: "{state} {when}",
     by: "av {who}",
     by_user: "från Home Assistant",
@@ -1272,6 +1297,7 @@ const STRINGS = {
     lang_auto: "Automatiskt",
     zoom: "Detaljknapp",
     zoom_helper: "Knapp uppe till höger som växlar mellan minikortet och hela kortet",
+    unlocked_alert: "Varna när låset är upplåst längre än",
     zoom_in: "Visa hela kortet",
     zoom_out: "Tillbaka till kompakt vy",
     // States
@@ -1303,6 +1329,7 @@ const STRINGS = {
     problem: "Съобщен проблем",
     jammed: "Бравата е заседнала: проверете вратата и опитайте отново.",
     door_unlocked: "Вратата е отворена, а бравата е отключена.",
+    unlocked_long: "Отключена от над {n} мин.",
     changed: "{state} {when}",
     by: "от {who}",
     by_user: "от Home Assistant",
@@ -1351,6 +1378,7 @@ const STRINGS = {
     lang_auto: "Автоматично",
     zoom: "Бутон за подробности",
     zoom_helper: "Бутон горе вдясно, който превключва между мини картата и пълната карта",
+    unlocked_alert: "Предупреждение, ако е отключена повече от",
     zoom_in: "Показване на пълната карта",
     zoom_out: "Обратно към компактния изглед",
     // States
@@ -1382,6 +1410,7 @@ const STRINGS = {
     problem: "Обнаружена проблема",
     jammed: "Замок заклинило: проверьте дверь и повторите попытку.",
     door_unlocked: "Дверь открыта, а замок отперт.",
+    unlocked_long: "Отперт более {n} мин.",
     changed: "{state} {when}",
     by: "пользователь: {who}",
     by_user: "из Home Assistant",
@@ -1430,6 +1459,7 @@ const STRINGS = {
     lang_auto: "Автоматически",
     zoom: "Кнопка подробностей",
     zoom_helper: "Кнопка в правом верхнем углу, переключающая между мини-карточкой и полной карточкой",
+    unlocked_alert: "Предупреждать, если замок отперт дольше",
     zoom_in: "Показать полную карточку",
     zoom_out: "Вернуться к компактному виду",
     // States
@@ -1461,6 +1491,7 @@ const STRINGS = {
     problem: "Виявлено проблему",
     jammed: "Замок заклинило: перевірте двері та спробуйте ще раз.",
     door_unlocked: "Двері відчинені, а замок відімкнено.",
+    unlocked_long: "Відімкнено понад {n} хв.",
     changed: "{state} {when}",
     by: "користувач: {who}",
     by_user: "з Home Assistant",
@@ -1509,6 +1540,7 @@ const STRINGS = {
     lang_auto: "Автоматично",
     zoom: "Кнопка подробиць",
     zoom_helper: "Кнопка у верхньому правому куті, що перемикає між міні-карткою та повною карткою",
+    unlocked_alert: "Попереджати, якщо замок відімкнено довше ніж",
     zoom_in: "Показати повну картку",
     zoom_out: "Повернутися до компактного вигляду",
     // States
@@ -1540,6 +1572,7 @@ const STRINGS = {
     problem: "Probléma jelezve",
     jammed: "A zár elakadt: ellenőrizze az ajtót, és próbálja újra.",
     door_unlocked: "Az ajtó nyitva van, a zár pedig nincs bezárva.",
+    unlocked_long: "Több mint {n} perce nincs bezárva.",
     changed: "{state} {when}",
     by: "{who} által",
     by_user: "a Home Assistantból",
@@ -1588,6 +1621,7 @@ const STRINGS = {
     lang_auto: "Automatikus",
     zoom: "Részletek gomb",
     zoom_helper: "A jobb felső sarokban lévő gomb, amely a mini kártya és a teljes kártya között vált",
+    unlocked_alert: "Figyelmeztetés, ha ennél tovább nincs bezárva",
     zoom_in: "Teljes kártya megjelenítése",
     zoom_out: "Vissza a kompakt nézethez",
     // States
@@ -1619,6 +1653,7 @@ const STRINGS = {
     problem: "Nahlásený problém",
     jammed: "Zámok sa zasekol: skontrolujte dvere a skúste to znova.",
     door_unlocked: "Dvere sú otvorené a zámok je odomknutý.",
+    unlocked_long: "Odomknutý viac ako {n} min.",
     changed: "{state} {when}",
     by: "používateľ: {who}",
     by_user: "z Home Assistantu",
@@ -1667,6 +1702,7 @@ const STRINGS = {
     lang_auto: "Automaticky",
     zoom: "Tlačidlo podrobností",
     zoom_helper: "Tlačidlo vpravo hore, ktoré prepína medzi mini kartou a celou kartou",
+    unlocked_alert: "Upozorniť, ak je odomknutý dlhšie ako",
     zoom_in: "Zobraziť celú kartu",
     zoom_out: "Späť na kompaktné zobrazenie",
     // States
@@ -1698,6 +1734,7 @@ const STRINGS = {
     problem: "Nahlášen problém",
     jammed: "Zámek se zasekl: zkontrolujte dveře a zkuste to znovu.",
     door_unlocked: "Dveře jsou otevřené a zámek je odemčený.",
+    unlocked_long: "Odemčený déle než {n} min.",
     changed: "{state} {when}",
     by: "uživatel: {who}",
     by_user: "z Home Assistantu",
@@ -1746,6 +1783,7 @@ const STRINGS = {
     lang_auto: "Automaticky",
     zoom: "Tlačítko podrobností",
     zoom_helper: "Tlačítko vpravo nahoře, které přepíná mezi mini kartou a celou kartou",
+    unlocked_alert: "Upozornit, pokud je odemčený déle než",
     zoom_in: "Zobrazit celou kartu",
     zoom_out: "Zpět na kompaktní zobrazení",
     // States
@@ -1777,6 +1815,7 @@ const STRINGS = {
     problem: "Prijavljena težava",
     jammed: "Ključavnica se je zataknila: preverite vrata in poskusite znova.",
     door_unlocked: "Vrata so odprta, ključavnica pa je odklenjena.",
+    unlocked_long: "Odklenjena več kot {n} min.",
     changed: "{state} {when}",
     by: "uporabnik: {who}",
     by_user: "iz Home Assistanta",
@@ -1825,6 +1864,7 @@ const STRINGS = {
     lang_auto: "Samodejno",
     zoom: "Gumb za podrobnosti",
     zoom_helper: "Gumb zgoraj desno, ki preklaplja med mini kartico in celotno kartico",
+    unlocked_alert: "Opozori, če je odklenjena dlje kot",
     zoom_in: "Prikaži celotno kartico",
     zoom_out: "Nazaj na strnjeni pogled",
     // States
@@ -1856,6 +1896,7 @@ const STRINGS = {
     problem: "Ziņots par problēmu",
     jammed: "Slēdzene ir iestrēgusi: pārbaudiet durvis un mēģiniet vēlreiz.",
     door_unlocked: "Durvis ir atvērtas, un slēdzene ir atslēgta.",
+    unlocked_long: "Atslēgta ilgāk par {n} min.",
     changed: "{state} {when}",
     by: "lietotājs: {who}",
     by_user: "no Home Assistant",
@@ -1904,6 +1945,7 @@ const STRINGS = {
     lang_auto: "Automātiski",
     zoom: "Detaļu poga",
     zoom_helper: "Poga augšējā labajā stūrī, kas pārslēdz starp mini karti un pilno karti",
+    unlocked_alert: "Brīdināt, ja atslēgta ilgāk par",
     zoom_in: "Rādīt pilno karti",
     zoom_out: "Atpakaļ uz kompakto skatu",
     // States
@@ -1935,6 +1977,7 @@ const STRINGS = {
     problem: "Αναφέρθηκε πρόβλημα",
     jammed: "Η κλειδαριά έχει κολλήσει: ελέγξτε την πόρτα και δοκιμάστε ξανά.",
     door_unlocked: "Η πόρτα είναι ανοιχτή ενώ η κλειδαριά είναι ξεκλείδωτη.",
+    unlocked_long: "Ξεκλείδωτη για πάνω από {n} λεπτά.",
     changed: "{state} {when}",
     by: "από {who}",
     by_user: "από το Home Assistant",
@@ -1983,6 +2026,7 @@ const STRINGS = {
     lang_auto: "Αυτόματη",
     zoom: "Κουμπί λεπτομερειών",
     zoom_helper: "Κουμπί πάνω δεξιά που εναλλάσσει μεταξύ της μίνι κάρτας και της πλήρους κάρτας",
+    unlocked_alert: "Προειδοποίηση αν μένει ξεκλείδωτη πάνω από",
     zoom_in: "Εμφάνιση της πλήρους κάρτας",
     zoom_out: "Επιστροφή στη συμπαγή προβολή",
     // States
@@ -2213,12 +2257,10 @@ const BASE_STYLE = `
     .header .chip { padding: 4px; flex: none; }
     .header .chip .t { display: none; }
   }
-  /* 6 columns of a phone (156-178 px): tighter header, smaller badge, so that the name, the dot and the detail
-     button all fit. */
+  /* 6 columns of a phone (156-178 px): tighter header, so that the name, the dot and the detail button all fit
+     next to the badge, which keeps its 40 px. */
   @container (max-width: 200px) {
     .header { gap: 6px; padding: 10px 8px 0; }
-    .badge { width: 32px; height: 32px; }
-    .badge .icon { width: 20px; height: 20px; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;
@@ -2337,6 +2379,7 @@ class SmartLockBase extends HTMLElement {
     if (this._pending) this._pendingTimer = setTimeout(() => this._update(), Math.max(0, this._pending.until - Date.now()) + 100);
     // Reattached with the popup still open (view switch, editor): Escape keeps closing it.
     if (this._confirm) window.addEventListener("keydown", this._onKey);
+    this._armAlertTimer();
   }
 
   disconnectedCallback() {
@@ -2344,6 +2387,7 @@ class SmartLockBase extends HTMLElement {
     window.removeEventListener("keydown", this._onKey);
     clearInterval(this._agoTimer);
     clearTimeout(this._pendingTimer);
+    clearTimeout(this._alertTimer);
   }
 
   // Service call whose failure is already reported by Home Assistant (toast): the rejection is handled here so
@@ -2373,6 +2417,7 @@ class SmartLockBase extends HTMLElement {
   _update() {
     if (!this._hass || !this._config) return;
     let html = this._render();
+    this._armAlertTimer();
     if (this._confirm) {
       html = html.replace(/<ha-card>([\s\S]*)<\/ha-card>\s*$/, (_, inner) => `<ha-card class="dialog-open">${inner}${this._confirmHtml()}</ha-card>`);
     }
@@ -2593,11 +2638,7 @@ class SmartLockBase extends HTMLElement {
     const label = esc(this._fmtState(state));
     return `
       <div class="header">
-        ${
-          c.show_icon !== false
-            ? `<div class="badge clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" aria-label="${label}">${svgIcon(state === "jammed" ? ICONS.alert : state === "locked" || state === "locking" ? ICONS.lock : ICONS.unlock)}</div>`
-            : ""
-        }
+        ${this._badge(lock, state)}
         <div class="titles">
           <div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div>
           ${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
@@ -2605,6 +2646,13 @@ class SmartLockBase extends HTMLElement {
         <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>
         ${this._zoomButton()}
       </div>`;
+  }
+
+  // State icon at the left of the header (`show_icon`), 40 px on both cards.
+  _badge(lock, state) {
+    if (this._config.show_icon === false) return "";
+    const icon = state === "jammed" ? ICONS.alert : state === "locked" || state === "locking" ? ICONS.lock : ICONS.unlock;
+    return `<div class="badge clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" aria-label="${esc(this._fmtState(state))}">${svgIcon(icon)}</div>`;
   }
 
   // Detail button at the far right of the header (mini card only).
@@ -2657,6 +2705,29 @@ class SmartLockBase extends HTMLElement {
     return (state === "unlocked" || state === "open") && this._doorOpen(m);
   }
 
+  // `unlocked_alert` (minutes): the lock has been unlocked (or unlatched) for longer than that, from its
+  // last_changed. Not while the card shows a request it sent (locking…).
+  _unlockedTooLong(lock, state) {
+    const n = Number(this._config.unlocked_alert);
+    if (!(n > 0) || !["unlocked", "open"].includes(state) || lock?.state !== state) return false;
+    const since = Date.parse(lock.last_changed);
+    return Number.isFinite(since) && Date.now() - since >= n * 60e3;
+  }
+
+  _unlockedText() {
+    return this._t("unlocked_long", { n: Number(this._config.unlocked_alert) });
+  }
+
+  // Re-render right when the lock crosses its `unlocked_alert` delay, rather than up to a minute later.
+  _armAlertTimer() {
+    clearTimeout(this._alertTimer);
+    const n = Number(this._config?.unlocked_alert);
+    const lock = this._hass && this._s(this._lockId);
+    if (!(n > 0) || !["unlocked", "open"].includes(lock?.state)) return;
+    const left = Date.parse(lock.last_changed) + n * 60e3 - Date.now();
+    if (left > 0) this._alertTimer = setTimeout(() => this._update(), left + 100);
+  }
+
   _doorLine(m) {
     const d = this._s(m.door);
     if (!valid(d)) return "";
@@ -2679,6 +2750,9 @@ class SmartLockBase extends HTMLElement {
       text = this._t("door_unlocked");
       entity = m.door;
       cls = "warn";
+    } else if (this._unlockedTooLong(this._s(this._lockId), state)) {
+      text = this._unlockedText();
+      cls = "warn";
     }
     return text ? `<div class="alert-line ${cls} clickable" data-entity="${esc(entity)}" role="button" tabindex="0">${svgIcon(ICONS.alert)}<span>${esc(text)}</span></div>` : "";
   }
@@ -2686,7 +2760,9 @@ class SmartLockBase extends HTMLElement {
   // Lock / Unlock / Open buttons. The useful one (Unlock when locked, Lock otherwise) is highlighted; `round` for
   // the mini card: a single toggle button, then Open.
   _controls(lock, state, round = false) {
-    if (this._config.show_controls === false || !valid(lock)) return "";
+    // An unknown state (integration restarted, lock not polled yet) keeps the buttons: only an unavailable lock
+    // cannot take a command.
+    if (this._config.show_controls === false || !lock || lock.state === "unavailable") return "";
     // A moving lock dims the buttons. They are disabled only while a request sent by the card runs (a double click
     // does not send the command twice): a lock left in locking / unlocking / opening by its integration keeps usable
     // buttons, so the command can be sent again.
@@ -2785,7 +2861,7 @@ class SmartLockCard extends SmartLockBase {
   }
 
   getGridOptions() {
-    return { columns: 12, min_columns: 6 };
+    return { columns: 12, min_columns: 6, rows: "auto" };
   }
 
   _render() {
@@ -2978,6 +3054,8 @@ class SmartLockCard extends SmartLockBase {
 
 const MINI_STYLE = `
   .mini { display: flex; align-items: center; gap: 10px; padding: 12px; }
+  /* The detail button sits at the top right, as on the other ha-* mini cards. */
+  .mini .zoom { align-self: flex-start; }
   .mini .picture { width: 50px; height: 58px; flex: none; }
   .mini .picture img { filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
   .mini .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; gap: 3px; }
@@ -3003,6 +3081,8 @@ const MINI_STYLE = `
     .mini { gap: 8px; }
     .mini .picture { width: 36px; height: 42px; }
     .mini .batt .bar { display: none; }
+    /* With the state badge (40 px, never shrunk), the picture leaves it the room. */
+    .mini .badge ~ .picture { display: none; }
   }
   /* 6 columns: Open (pulls the latch, rarely needed at a glance) leaves the room to the state; it stays one tap away
      behind the detail button. Without the detail button it stays here. */
@@ -3012,6 +3092,8 @@ const MINI_STYLE = `
   @container (max-width: 220px) {
     .mini { padding: 12px 8px; gap: 6px; }
     .mini .picture { display: none; }
+    /* 6 columns of a phone: the state word needs the whole width left by the buttons; the badge goes. */
+    .mini .badge { display: none; }
     .mini .batt { gap: 4px; }
     /* While charging, the bolt stands in for the battery icon. */
     .mini .batt:has(.bolt) > .icon:not(.bolt) { display: none; }
@@ -3059,7 +3141,7 @@ class SmartLockMiniCard extends SmartLockCard {
   }
 
   getGridOptions() {
-    return this._zoomed ? super.getGridOptions() : { columns: 6, min_columns: 6 };
+    return this._zoomed ? super.getGridOptions() : { columns: 6, min_columns: 6, rows: "auto" };
   }
 
   _zoomButton() {
@@ -3094,15 +3176,17 @@ class SmartLockMiniCard extends SmartLockCard {
     const label = esc(this._fmtState(state));
     const controls = this._controls(lock, state, true);
     // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change). A door
-    // left open while the lock is unlocked shows in the warning color.
-    const warn = this._doorUnlocked(m, state);
+    // left open while the lock is unlocked, or a lock unlocked for longer than `unlocked_alert`, shows in the
+    // warning color.
+    const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
     return `<style>${BASE_STYLE}${MINI_STYLE}</style>
       <ha-card>
         <div class="mini">
+          ${this._badge(lock, state)}
           ${this._picture(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${warn ? ` warn" title="${esc(this._t("door_unlocked"))}` : ""}">${esc(this._miniDetail(m, lock))}</span></div>
+            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}</span></div>
             ${this._batteryLine(this._battery(m))}
           </div>
           ${controls ? `<div class="controls">${controls}</div>` : ""}
@@ -3191,6 +3275,7 @@ class SmartLockEditorBase extends HTMLElement {
       .filter(keep)
       .map((f) => (f.type === "grid" ? { ...f, schema: f.schema.filter(keep) } : f))
       .concat([
+      { name: "unlocked_alert", selector: { number: { min: 1, max: 1440, step: 1, mode: "box", unit_of_measurement: "min" } } },
       {
         type: "expandable",
         name: "entities",

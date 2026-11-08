@@ -3066,6 +3066,8 @@ const MINI_STYLE = `
   .mini .sub .t, .mini .sub .more { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .mini .sub .more { flex: 0 1 auto; white-space: pre; }
   .mini .sub .more.warn { color: var(--ink); font-weight: 500; }
+  /* The warning in words for screen readers: the color alone does not say it. */
+  .mini .sub .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .mini .sub .dot { margin-right: 4px; }
   .mini .batt { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
   .mini .batt .icon { color: var(--c); width: 14px; height: 14px; }
@@ -3089,25 +3091,23 @@ const MINI_STYLE = `
   @container (max-width: 260px) {
     .mini:has(.zoom) .controls .btn[data-action=open] { display: none; }
   }
+  /* Up to 220 px (6 columns of a phone: 156-178 px): the detail button goes above the buttons, which stack, so that
+     the name and the state word keep the width of the card. The 40 px state badge (never shrunk nor hidden) shares
+     the name's line: the name gives way, the state word below keeps the whole width. */
   @container (max-width: 220px) {
-    .mini { padding: 12px 8px; gap: 6px; }
+    .mini { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 6px; row-gap: 4px; padding: 12px 8px; }
+    .mini .titles { grid-column: 1; grid-row: 1 / span 2; }
+    .mini .badge { grid-column: 1; grid-row: 1; align-self: start; position: relative; z-index: 1; }
+    .mini .badge ~ .titles .name { padding-left: 46px; line-height: 40px; }
+    .mini .zoom { grid-column: 2; grid-row: 1; justify-self: end; align-self: start; margin: -4px -4px 0 0; }
+    .mini .controls { grid-column: 2; grid-row: 2; flex-direction: column; align-self: start; }
+    .mini:not(:has(.zoom)) .controls { grid-row: 1 / span 2; align-self: center; }
     .mini .picture { display: none; }
-    /* 6 columns of a phone: the state word needs the whole width left by the buttons; the badge goes. */
-    .mini .badge { display: none; }
     .mini .batt { gap: 4px; }
     /* While charging, the bolt stands in for the battery icon. */
     .mini .batt:has(.bolt) > .icon:not(.bolt) { display: none; }
     .mini .controls { gap: 4px; }
     .mini .controls .btn.round { width: 28px; height: 28px; }
-  }
-  /* 6 columns of a phone (156-178 px): the detail button goes above the buttons, which stack, so that the name and
-     the state word keep the width of the card. */
-  @container (max-width: 200px) {
-    .mini { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 6px; row-gap: 4px; }
-    .mini .titles { grid-column: 1; grid-row: 1 / span 2; }
-    .mini .zoom { grid-column: 2; grid-row: 1; justify-self: end; align-self: start; margin: -4px -4px 0 0; }
-    .mini .controls { grid-column: 2; grid-row: 2; flex-direction: column; align-self: start; }
-    .mini:not(:has(.zoom)) .controls { grid-row: 1 / span 2; align-self: center; }
   }
 `;
 
@@ -3186,7 +3186,7 @@ class SmartLockMiniCard extends SmartLockCard {
           ${this._picture(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}</span></div>
+            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}${alert ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>
             ${this._batteryLine(this._battery(m))}
           </div>
           ${controls ? `<div class="controls">${controls}</div>` : ""}

@@ -325,7 +325,8 @@ test("door open while the lock is unlocked: warning on the full and mini cards",
     const html = full(set(lock, "on"));
     assert.match(html, /class="alert-line warn clickable" data-entity="binary_sensor\.porte_entree_porte"/, lock);
     assert.match(html, /The door is open while the lock is unlocked\./, lock);
-    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\."> · Door open</, lock);
+    // Not by color only: the warning is also in words, for screen readers.
+    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\."> · Door open<span class="sr"> · The door is open while the lock is unlocked\.<\/span>/, lock);
   }
   // Locked with the door open, or unlocked with the door closed: no warning.
   for (const [lock, door] of [["locked", "on"], ["unlocked", "off"]]) {
@@ -369,7 +370,7 @@ test("unlocked_alert: warning once the lock has stayed unlocked longer than the 
   const config = { unlocked_alert: 10 };
   for (const state of ["unlocked", "open"]) {
     assert.match(full(at(state, 12), config), /class="alert-line warn clickable" data-entity="lock\.porte_entree"[^>]*>[\s\S]*Unlocked for more than 10 min\./, state);
-    assert.match(mini(at(state, 12), config), /class="more warn" title="Unlocked for more than 10 min\."/, state);
+    assert.match(mini(at(state, 12), config), /class="more warn" title="Unlocked for more than 10 min\.">[^<]*<span class="sr"> · Unlocked for more than 10 min\.<\/span>/, state);
   }
   // Not yet, locked, or the option is off: nothing.
   for (const [st, cfg] of [
@@ -378,7 +379,7 @@ test("unlocked_alert: warning once the lock has stayed unlocked longer than the 
     [at("unlocked", 60), {}],
   ]) {
     assert.doesNotMatch(full(st, cfg), /class="alert-line/);
-    assert.doesNotMatch(mini(st, cfg), /more warn/);
+    assert.doesNotMatch(mini(st, cfg), /more warn|class="sr"/);
   }
   // Translated.
   assert.match(full(at("unlocked", 30), { ...config, language: "fr" }), /Déverrouillée depuis plus de 10 min\./);
@@ -406,6 +407,7 @@ test("mini card: 40 px state badge, detail button at the top right, rows auto in
   assert.match(html, /<div class="badge clickable ok" data-entity="lock\.porte_entree" role="button" tabindex="0" aria-label="Locked">/);
   assert.match(html, /\.badge \{ width: 40px; height: 40px;/);
   assert.doesNotMatch(html, /\.badge \{ width: 3\dpx/, "the badge is never shrunk");
+  assert.doesNotMatch(html, /\.badge \{ display: none/, "nor hidden on narrow cards");
   assert.match(html, /\.mini \.zoom \{ align-self: flex-start; \}/);
   assert.deepEqual(plain(card.getGridOptions()), { columns: 6, min_columns: 6, rows: "auto" });
   click(card, { action: "zoom" });

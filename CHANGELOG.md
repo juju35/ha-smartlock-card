@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.7.1
+
+_2026-11-08_
+
+### Fixes
+- Mini card: the warnings (door open while unlocked, unlocked for too long) are also given in words to screen readers, not by color only.
+- Mini card: the 40 px state badge stays on narrow cards (6 columns of a phone); it shares the name's line so that the state word keeps the width of the card.
+
+### Documentation
+- README: `unlocked_alert` counts from the lock's last change, which Home Assistant resets on restart.
+
 ## 1.7.0
 
 _2026-11-07_

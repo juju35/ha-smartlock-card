@@ -257,8 +257,8 @@ for (const width of [245, 280, 320, 380, 500])
     });
 
 // Mini card at 6 columns of a phone, with and without the detail button (without it, Open stays on the card):
-// nothing leaves the card, the state word is whole.
-for (const width of PHONE_6)
+// nothing leaves the card, the state word is whole (next to the 40 px badge, which stays).
+for (const width of [...PHONE_6, 210])
   for (const language of ["en", "pl", "sr-Latn", "uk", "ru", "lv"])
     for (const config of [{}, { zoom: false }])
       test(`mini card at ${width} px, ${language}, ${JSON.stringify(config)}: nothing leaves the card, the state is whole`, async (t) => {
@@ -541,9 +541,9 @@ test("prefers-reduced-motion: no transition on the battery bar and the chevrons"
   assert.deepEqual(d, ["0s", "0s"]);
 });
 
-// Mini card from 6 columns of a 500 px section up: the state badge keeps the 40 px of the full card's header icon,
-// and the detail button sits at the top right, not centred on the row.
-for (const width of [246, 300, 380])
+// Mini card at every width, 6 columns of a phone included: the state badge keeps the 40 px of the full card's
+// header icon (never shrunk nor hidden), and the detail button sits at the top right, not centred on the row.
+for (const width of [...PHONE_6, 210, 246, 300, 380])
   test(`mini card at ${width} px: 40 px state badge, detail button at the top right`, async (t) => {
     if (skip) return t.skip(skip);
     const page = await open("smartlock-mini-card", width);
@@ -553,6 +553,7 @@ for (const width of [246, 300, 380])
       return { badge: box(".badge"), zoom: box(".zoom"), card: box("ha-card"), controls: box(".controls") };
     });
     await page.close();
+    assert.ok(r.badge.left >= r.card.left && r.badge.right <= r.zoom.left, "the badge stays inside the card, left of the detail button");
     assert.equal(r.badge.width, 40);
     assert.equal(r.badge.height, 40);
     assert.ok(r.zoom.top < r.controls.top, `zoom at ${r.zoom.top}, buttons at ${r.controls.top}`);

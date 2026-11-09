@@ -401,6 +401,54 @@ test("unlocked_alert: the card re-renders when the delay runs out, and stops its
   assert.equal(locked._alertTimer, undefined);
 });
 
+// Unlocked `secs` seconds ago, with a 3-minute auto-lock delay entity on the Nuki device.
+const relockHass = (secs, extra = {}) => {
+  const ents = { ...entities, "number.porte_entree_auto_lock_delay": { entity_id: "number.porte_entree_auto_lock_delay", device_id: "nuki", platform: "nuki", translation_key: "auto_lock_delay" } };
+  const st = {
+    ...states,
+    "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked", last_changed: new Date(Date.now() - secs * 1e3).toISOString() },
+    "number.porte_entree_auto_lock_delay": { entity_id: "number.porte_entree_auto_lock_delay", state: "3", attributes: { unit_of_measurement: "min" } },
+    ...extra,
+  };
+  return makeHass(st, { entities: ents });
+};
+
+test("auto-lock: countdown from the device's delay while unlocked, ticking every second", (t) => {
+  const card = newCard(relockHass(40));
+  const mini = newCard(relockHass(40), {}, sl.SmartLockMiniCard);
+  t.after(() => {
+    card.disconnectedCallback();
+    mini.disconnectedCallback();
+  });
+  assert.match(card.shadowRoot.innerHTML, /class="line relock">.*Locks again in 2:(19|20)</);
+  assert.ok(card._relockTimer, "a one-second timer is armed");
+  // The delay entity stays among the settings.
+  assert.ok(sl.describe(card._hass, {}, "lock.porte_entree").settings.includes("number.porte_entree_auto_lock_delay"));
+  assert.match(mini.shadowRoot.innerHTML, /· Locks again in 2:(19|20)/);
+});
+
+test("auto-lock: nothing while locked, with the switch off, or once the delay is past; auto_lock_delay overrides", (t) => {
+  const none = (card) => {
+    assert.doesNotMatch(card.shadowRoot.innerHTML, /Locks again/);
+    assert.equal(card._relockTimer, undefined);
+  };
+  none(newCard(makeHass()));
+  none(newCard(relockHass(400)));
+  const sw = "switch.porte_entree_verrouillage_auto";
+  none(newCard(relockHass(40, { [sw]: { ...states[sw], state: "off" } })));
+  // No delay entity on the device: the configured delay (seconds) counts, whatever the switch says.
+  const card = newCard(makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked", last_changed: new Date(Date.now() - 10e3).toISOString() } }), { auto_lock_delay: 3725 });
+  t.after(() => card.disconnectedCallback());
+  assert.match(card.shadowRoot.innerHTML, /Locks again in 1:01:(54|55)</);
+});
+
+test("editor: auto_lock_delay is a number of seconds", () => {
+  const ed = sl.SmartLockCard.getConfigElement();
+  ed._hass = makeHass();
+  ed._config = { entity: "lock.porte_entree" };
+  assert.equal(ed._schema().find((f) => f.name === "auto_lock_delay").selector.number.unit_of_measurement, "s");
+});
+
 test("mini card: 40 px state badge, detail button at the top right, rows auto in both views", () => {
   const card = newCard(makeHass(), {}, sl.SmartLockMiniCard);
   const html = card.shadowRoot.innerHTML;

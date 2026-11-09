@@ -31,6 +31,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Code entry when the lock asks for one (`code_format`), checked against the lock's format; the code is never stored
 - Automatic discovery of the entities of the lock device: door sensor, battery (percentage or "battery low"), charging, keypad battery, problem sensor
 - Door open / closed, jammed lock and problem alerts, a warning when the door is open while the lock is unlocked, and an optional warning when the lock stays unlocked too long (`unlocked_alert`)
+- Auto-lock countdown: *Locks again in 2:40* while unlocked, from the device's auto-lock delay or `auto_lock_delay`
 - Last change ("Locked 5 minutes ago · by Keypad" when the integration reports who)
 - Details: the other sensors of the lock (signal strength, firmware…)
 - Settings: switches toggle in place (auto-lock, night mode…), buttons ask before being pressed, selects and numbers open their dialog
@@ -157,6 +158,7 @@ language: fr
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |
 | `code` | both | — | Code sent with every action, for locks that need one and when you don't want to type it. It is stored in the dashboard configuration in clear text: prefer typing it |
 | `unlocked_alert` | both | — | Minutes: once the lock has stayed unlocked (or open) longer than that, the full card shows a warning line and the mini card shows its detail in the warning color. Counted from the lock's last change (`last_changed`), which Home Assistant resets when it restarts: after a restart the delay starts again from then |
+| `auto_lock_delay` | both | from the device | Seconds: while the lock is unlocked, show *Locks again in m:ss* until it should lock itself. Without it, the card reads the auto-lock delay of the lock's device (a `number` entity in s or min) and its auto-lock switch, when it has them |
 | `door_entity` | both | Found on the lock device | Door sensor (`binary_sensor`), when it belongs to another device (a contact sensor on the door) |
 | `battery_entity` | both | Found on the lock device | Battery: a percentage `sensor`, or a "battery low" `binary_sensor` |
 | `zoom` | mini | `true` | Detail button at the top right of the mini card: it shows the full card's content (with the same options, so `show_settings`, `collapsed`… can be set on the mini card too) and switches back to the compact view; a click outside the card also brings the compact view back. `false` removes the button |

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 - 2026-11-09
+
+### Features
+- Auto-lock countdown: while the lock is unlocked, both cards show *Locks again in m:ss* (full card: a line under the door; mini card: the sub-line detail), ticking every second. The delay comes from `auto_lock_delay` (seconds, new editor field) or from the device's auto-lock delay entity (`number` in s or min), and the countdown only shows while the device's auto-lock switch, when it has one, is on. Nothing counts once the delay is past.
+
 ## 1.8.1 - 2026-11-09
 
 ### Fixes

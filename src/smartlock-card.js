@@ -296,6 +296,8 @@ const STRINGS = {
     entity: "Lock",
     title: "Title (optional, defaults to the lock name)",
     show_icon: "Show the state icon in the header",
+    show_title: "Show title",
+    show_subtitle: "Show subtitle",
     show_picture: "Show the lock picture",
     image: "Lock picture",
     image_auto: "Automatic (per model)",
@@ -379,6 +381,8 @@ const STRINGS = {
     entity: "Serrure",
     title: "Titre (facultatif, nom de la serrure par défaut)",
     show_icon: "Afficher l'icône d'état dans l'en-tête",
+    show_title: "Afficher le titre",
+    show_subtitle: "Afficher le sous-titre",
     show_picture: "Afficher l'illustration de la serrure",
     image: "Illustration de la serrure",
     image_auto: "Automatique (selon le modèle)",
@@ -462,6 +466,8 @@ const STRINGS = {
     entity: "Schloss",
     title: "Titel (optional, standardmäßig der Name des Schlosses)",
     show_icon: "Zustandssymbol in der Kopfzeile anzeigen",
+    show_title: "Titel anzeigen",
+    show_subtitle: "Untertitel anzeigen",
     show_picture: "Bild des Schlosses anzeigen",
     image: "Bild des Schlosses",
     image_auto: "Automatisch (je nach Modell)",
@@ -545,6 +551,8 @@ const STRINGS = {
     entity: "Cerradura",
     title: "Título (opcional, nombre de la cerradura por defecto)",
     show_icon: "Mostrar el icono de estado en el encabezado",
+    show_title: "Mostrar el título",
+    show_subtitle: "Mostrar el subtítulo",
     show_picture: "Mostrar la ilustración de la cerradura",
     image: "Ilustración de la cerradura",
     image_auto: "Automática (según el modelo)",
@@ -628,6 +636,8 @@ const STRINGS = {
     entity: "Брава",
     title: "Наслов (опционо, подразумевано је назив браве)",
     show_icon: "Прикажи иконицу стања у заглављу",
+    show_title: "Прикажи наслов",
+    show_subtitle: "Прикажи поднаслов",
     show_picture: "Прикажи слику браве",
     image: "Слика браве",
     image_auto: "Аутоматски (према моделу)",
@@ -711,6 +721,8 @@ const STRINGS = {
     entity: "Brava",
     title: "Naslov (opciono, podrazumevano je naziv brave)",
     show_icon: "Prikaži ikonicu stanja u zaglavlju",
+    show_title: "Prikaži naslov",
+    show_subtitle: "Prikaži podnaslov",
     show_picture: "Prikaži sliku brave",
     image: "Slika brave",
     image_auto: "Automatski (prema modelu)",
@@ -794,6 +806,8 @@ const STRINGS = {
     entity: "Serratura",
     title: "Titolo (facoltativo, per impostazione predefinita il nome della serratura)",
     show_icon: "Mostra l'icona di stato nell'intestazione",
+    show_title: "Mostra il titolo",
+    show_subtitle: "Mostra il sottotitolo",
     show_picture: "Mostra l'illustrazione della serratura",
     image: "Illustrazione della serratura",
     image_auto: "Automatica (in base al modello)",
@@ -877,6 +891,8 @@ const STRINGS = {
     entity: "Slot",
     title: "Titel (optioneel, standaard de naam van het slot)",
     show_icon: "Statuspictogram in de koptekst tonen",
+    show_title: "Titel tonen",
+    show_subtitle: "Ondertitel tonen",
     show_picture: "Afbeelding van het slot tonen",
     image: "Afbeelding van het slot",
     image_auto: "Automatisch (per model)",
@@ -960,6 +976,8 @@ const STRINGS = {
     entity: "Fechadura",
     title: "Título (opcional, por predefinição o nome da fechadura)",
     show_icon: "Mostrar o ícone de estado no cabeçalho",
+    show_title: "Mostrar o título",
+    show_subtitle: "Mostrar o subtítulo",
     show_picture: "Mostrar a ilustração da fechadura",
     image: "Ilustração da fechadura",
     image_auto: "Automática (conforme o modelo)",
@@ -1043,6 +1061,8 @@ const STRINGS = {
     entity: "Zamek",
     title: "Tytuł (opcjonalny, domyślnie nazwa zamka)",
     show_icon: "Pokaż ikonę stanu w nagłówku",
+    show_title: "Pokaż tytuł",
+    show_subtitle: "Pokaż podtytuł",
     show_picture: "Pokaż ilustrację zamka",
     image: "Ilustracja zamka",
     image_auto: "Automatycznie (według modelu)",
@@ -1126,6 +1146,8 @@ const STRINGS = {
     entity: "Încuietoare",
     title: "Titlu (opțional, implicit numele încuietorii)",
     show_icon: "Afișează pictograma de stare în antet",
+    show_title: "Afișează titlul",
+    show_subtitle: "Afișează subtitlul",
     show_picture: "Afișează imaginea încuietorii",
     image: "Imaginea încuietorii",
     image_auto: "Automată (după model)",
@@ -1209,6 +1231,8 @@ const STRINGS = {
     entity: "Lås",
     title: "Titel (valgfri, som standard låsens navn)",
     show_icon: "Vis statusikonet i overskriften",
+    show_title: "Vis titel",
+    show_subtitle: "Vis undertitel",
     show_picture: "Vis billede af låsen",
     image: "Billede af låsen",
     image_auto: "Automatisk (efter model)",
@@ -1292,6 +1316,8 @@ const STRINGS = {
     entity: "Lås",
     title: "Titel (valfri, låsets namn som standard)",
     show_icon: "Visa statusikonen i sidhuvudet",
+    show_title: "Visa rubrik",
+    show_subtitle: "Visa underrubrik",
     show_picture: "Visa bild av låset",
     image: "Bild av låset",
     image_auto: "Automatisk (efter modell)",
@@ -1375,6 +1401,8 @@ const STRINGS = {
     entity: "Брава",
     title: "Заглавие (по избор, по подразбиране името на бравата)",
     show_icon: "Показване на иконата на състоянието в заглавката",
+    show_title: "Показване на заглавието",
+    show_subtitle: "Показване на подзаглавието",
     show_picture: "Показване на изображение на бравата",
     image: "Изображение на бравата",
     image_auto: "Автоматично (според модела)",
@@ -1458,6 +1486,8 @@ const STRINGS = {
     entity: "Замок",
     title: "Заголовок (необязательно, по умолчанию название замка)",
     show_icon: "Показывать значок состояния в заголовке",
+    show_title: "Показывать заголовок",
+    show_subtitle: "Показывать подзаголовок",
     show_picture: "Показывать изображение замка",
     image: "Изображение замка",
     image_auto: "Автоматически (по модели)",
@@ -1541,6 +1571,8 @@ const STRINGS = {
     entity: "Замок",
     title: "Заголовок (необов’язково, типово назва замка)",
     show_icon: "Показувати значок стану в заголовку",
+    show_title: "Показувати заголовок",
+    show_subtitle: "Показувати підзаголовок",
     show_picture: "Показувати зображення замка",
     image: "Зображення замка",
     image_auto: "Автоматично (за моделлю)",
@@ -1624,6 +1656,8 @@ const STRINGS = {
     entity: "Zár",
     title: "Cím (nem kötelező, alapértelmezés szerint a zár neve)",
     show_icon: "Állapotikon megjelenítése a fejlécben",
+    show_title: "Cím megjelenítése",
+    show_subtitle: "Alcím megjelenítése",
     show_picture: "A zár képének megjelenítése",
     image: "A zár képe",
     image_auto: "Automatikus (modell szerint)",
@@ -1707,6 +1741,8 @@ const STRINGS = {
     entity: "Zámok",
     title: "Názov (voliteľný, predvolene názov zámku)",
     show_icon: "Zobraziť ikonu stavu v hlavičke",
+    show_title: "Zobraziť názov",
+    show_subtitle: "Zobraziť podnázov",
     show_picture: "Zobraziť obrázok zámku",
     image: "Obrázok zámku",
     image_auto: "Automaticky (podľa modelu)",
@@ -1790,6 +1826,8 @@ const STRINGS = {
     entity: "Zámek",
     title: "Název (volitelný, ve výchozím nastavení název zámku)",
     show_icon: "Zobrazit ikonu stavu v záhlaví",
+    show_title: "Zobrazit název",
+    show_subtitle: "Zobrazit podnázev",
     show_picture: "Zobrazit obrázek zámku",
     image: "Obrázek zámku",
     image_auto: "Automaticky (podle modelu)",
@@ -1873,6 +1911,8 @@ const STRINGS = {
     entity: "Ključavnica",
     title: "Naslov (neobvezno, privzeto ime ključavnice)",
     show_icon: "Prikaži ikono stanja v glavi",
+    show_title: "Prikaži naslov",
+    show_subtitle: "Prikaži podnaslov",
     show_picture: "Prikaži sliko ključavnice",
     image: "Slika ključavnice",
     image_auto: "Samodejno (glede na model)",
@@ -1956,6 +1996,8 @@ const STRINGS = {
     entity: "Slēdzene",
     title: "Virsraksts (neobligāts, pēc noklusējuma slēdzenes nosaukums)",
     show_icon: "Rādīt stāvokļa ikonu galvenē",
+    show_title: "Rādīt virsrakstu",
+    show_subtitle: "Rādīt apakšvirsrakstu",
     show_picture: "Rādīt slēdzenes attēlu",
     image: "Slēdzenes attēls",
     image_auto: "Automātiski (pēc modeļa)",
@@ -2039,6 +2081,8 @@ const STRINGS = {
     entity: "Κλειδαριά",
     title: "Τίτλος (προαιρετικός, από προεπιλογή το όνομα της κλειδαριάς)",
     show_icon: "Εμφάνιση του εικονιδίου κατάστασης στην κεφαλίδα",
+    show_title: "Εμφάνιση τίτλου",
+    show_subtitle: "Εμφάνιση υπότιτλου",
     show_picture: "Εμφάνιση της εικόνας της κλειδαριάς",
     image: "Εικόνα της κλειδαριάς",
     image_auto: "Αυτόματη (ανά μοντέλο)",
@@ -2270,6 +2314,7 @@ const BASE_STYLE = `
   /* The name block takes what the badge, the chip and the buttons leave (basis 0: its long name never squeezes the
      chip), down to its first letters; only then does the chip shrink. Narrower, the chip shows only its dot. */
   .titles { flex: 1 1 0; min-width: 5ch; }
+  :host([hide-title]) .titles > .name, :host([hide-subtitle]) .titles > .sub { display: none; }
   .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sub { font-size: 12px; line-height: 1.2; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* With a sub-line, the chip sits on the name line: lifted by half the sub-line (12px × 1.2). */
@@ -2450,6 +2495,9 @@ class SmartLockBase extends HTMLElement {
     if (!config) throw new Error("Invalid configuration");
     if (config.entity && domainOf(config.entity) !== "lock") throw new Error("`entity` must be a lock entity (lock.*)");
     this._config = { ...config };
+    // show_title / show_subtitle: the header's title / subtitle, hidden by the stylesheet
+    this.toggleAttribute?.("hide-title", config.show_title === false);
+    this.toggleAttribute?.("hide-subtitle", config.show_subtitle === false);
     this._html = "";
     this._lastDeps = null;
     this._activity = null;
@@ -3460,6 +3508,8 @@ class SmartLockEditorBase extends HTMLElement {
 class SmartLockCardEditor extends SmartLockEditorBase {
   static get toggles() {
     return [
+      ["show_title", true],
+      ["show_subtitle", true],
       ["show_details", true],
       ["show_settings", true],
       ["show_activity", true],
@@ -3486,7 +3536,7 @@ class SmartLockCardEditor extends SmartLockEditorBase {
 
 class SmartLockMiniCardEditor extends SmartLockEditorBase {
   static get toggles() {
-    return [["zoom", true]];
+    return [["show_title", true], ["show_subtitle", true], ["zoom", true]];
   }
 
   static get selects() {

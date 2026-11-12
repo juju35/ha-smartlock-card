@@ -149,6 +149,8 @@ language: fr
 |---|---|---|---|
 | `entity` | both | First lock | Lock entity (`lock.*`) |
 | `title` | both | Lock name | Card title |
+| `show_title` | both | `true` | Show the title in the header (e.g. `false` under a section heading of your own) |
+| `show_subtitle` | both | `true` | Show the subtitle under the title |
 | `image` | both | `auto` | Lock picture: `auto` (per model), `retrofit`, `knob`, `compact`, `keypad`, `lever`, `reader`, `padlock`, `none`, or the URL of your own picture (e.g. `/local/my-lock.png`) |
 | `finish` | both | Per model | Finish of the drawn picture: `white`, `black` or `steel` |
 | `show_icon` | both | `true` | 40 px state icon at the left of the header, on the full card and on the mini card (compact and zoomed in). On the compact mini card it takes the place of the picture below 300 px, and leaves its room to the state at 6 columns of a phone |

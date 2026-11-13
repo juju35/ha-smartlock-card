@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.2 - 2026-11-14
+
+### Fixes
+- Mini card visual editor: it now offers the full card's options that its detail view uses (details, settings and activity sections, folded sections), not only the detail button and the confirmations.
+- README: `code` is YAML only (the visual editor keeps it), as it is stored in clear text.
+
 ## 1.10.1 - 2026-11-13
 
 ### Fixes

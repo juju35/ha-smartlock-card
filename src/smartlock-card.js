@@ -3632,17 +3632,12 @@ class SmartLockCardEditor extends SmartLockEditorBase {
   }
 }
 
-class SmartLockMiniCardEditor extends SmartLockEditorBase {
+// The mini card's detail button shows the full card: its editor offers the full card's options as well (its
+// sections and the folded ones), plus the detail button.
+class SmartLockMiniCardEditor extends SmartLockCardEditor {
   static get toggles() {
-    return [["show_title", true], ["show_subtitle", true], ["zoom", true]];
-  }
-
-  static get selects() {
-    return { confirm: DEFAULT_CONFIRM };
-  }
-
-  static extraFields(tr) {
-    return SmartLockCardEditor.extraFields(tr).slice(0, 1);
+    const [title, subtitle, ...sections] = SmartLockCardEditor.toggles;
+    return [title, subtitle, ["zoom", true], ...sections];
   }
 }
 

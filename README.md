@@ -158,16 +158,16 @@ language: fr
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
 | `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…). On a narrow mini card (6 columns), it moves behind the detail button so that the state stays readable; without the detail button (`zoom: false`) it stays on the card |
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |
-| `code` | both | — | Code sent with every action, for locks that need one and when you don't want to type it. It is stored in the dashboard configuration in clear text: prefer typing it |
+| `code` | both | — | Code sent with every action, for locks that need one and when you don't want to type it. It is stored in the dashboard configuration in clear text: prefer typing it. YAML only (the visual editor keeps it) |
 | `unlocked_alert` | both | — | Minutes: once the lock has stayed unlocked (or open) longer than that, the full card shows a warning line and the mini card shows its detail in the warning color. Counted from the lock's last change (`last_changed`), which Home Assistant resets when it restarts: after a restart the delay starts again from then |
 | `auto_lock_delay` | both | from the device | Seconds: while the lock is unlocked, show *Locks again in m:ss* until it should lock itself. Without it, the card reads the auto-lock delay of the lock's device (a `number` entity in s or min) and its auto-lock switch, when it has them |
 | `door_entity` | both | Found on the lock device | Door sensor (`binary_sensor`), when it belongs to another device (a contact sensor on the door) |
 | `battery_entity` | both | Found on the lock device | Battery: a percentage `sensor`, or a "battery low" `binary_sensor` |
-| `zoom` | mini | `true` | Detail button at the top right of the mini card: it shows the full card's content (with the same options, so `show_settings`, `collapsed`… can be set on the mini card too) and switches back to the compact view; a click outside the card also brings the compact view back. `false` removes the button |
-| `show_details` | full | `true` | Other sensors of the lock device (keypad battery, signal strength…) |
-| `show_settings` | full | `true` | Switches, selects, numbers and buttons of the lock device |
-| `show_activity` | full | `true` | Last events of the lock in the logbook |
-| `collapsed` | full | `[settings, activity]` | Sections folded by default, among `details`, `settings` and `activity` (`[]` to unfold everything). Click a section title to fold or unfold it |
+| `zoom` | mini | `true` | Detail button at the top right of the mini card: it shows the full card's content (with the same options, so `show_settings`, `collapsed`… can be set on the mini card too, in YAML or in its visual editor) and switches back to the compact view; a click outside the card also brings the compact view back. `false` removes the button |
+| `show_details` | both | `true` | Other sensors of the lock device (keypad battery, signal strength…) |
+| `show_settings` | both | `true` | Switches, selects, numbers and buttons of the lock device |
+| `show_activity` | both | `true` | Last events of the lock in the logbook |
+| `collapsed` | both | `[settings, activity]` | Sections folded by default, among `details`, `settings` and `activity` (`[]` to unfold everything). Click a section title to fold or unfold it |
 | `language` | both | Auto | Force language: `en`, `fr`, `de`, `es`, `sr` (Serbian Cyrillic), `sr-Latn` (Serbian Latin), `it`, `nl`, `pt` (European Portuguese, also used for Brazilian Portuguese), `pl`, `ro`, `da`, `sv`, `bg`, `ru`, `uk`, `hu`, `sk`, `cs`, `sl`, `lv` or `el` (auto-detects from HA settings) |
 
 ## Screenshots

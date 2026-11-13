@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.10.1 - 2026-11-13
+
+### Fixes
+- Folding back on a tap elsewhere now works on iOS (Safari and the companion app): a tap on something that is not clickable sent no click to the page, so the detailed view of the mini card, the unfolded sections and the popup stayed open. The press and the release are caught instead; a slider dragged out of the card and a scroll do not fold anything.
+- Leaving the card (another dashboard view, a conditional card hidden) brings it back in its default state.
+- Clicks lost under an update: Home Assistant updates the card several times a second, and an update that rewrote the card between the press and the release replaced the element pressed, so that the click landed on the card itself and did nothing. The card is no longer rewritten while a press is in progress; the pending update is drawn at the click, or right after the release.
+- Focus ring after a mouse click: the focus was put back on the clicked element after each update, which drew the focus ring. It is now kept across updates only for the keyboard (and in a text field).
+
 ## 1.10.0 - 2026-11-12
 
 ### Features

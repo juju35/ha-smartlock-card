@@ -799,3 +799,25 @@ test("folding: a press in the card does not fold; leaving the page brings the de
   assert.doesNotMatch(mini.shadowRoot.innerHTML, /class="hero"/);
   mini.disconnectedCallback();
 });
+
+test("no rewrite under a press: drawn after its release, and at once by its click", async () => {
+  const card = newCard(makeHass());
+  card.connectedCallback();
+  const before = card.shadowRoot.innerHTML;
+  // A press in the card, then an update: the card is not rewritten under the pointer.
+  card._pressing = true;
+  card._toggled = new Set(["settings"]);
+  card._update();
+  assert.equal(card.shadowRoot.innerHTML, before, "no rewrite under the pointer");
+  // Released with no click (a drag, a scroll): the pending render is drawn right after.
+  card._onPressEnd();
+  await new Promise((r) => setTimeout(r, 0));
+  assert.match(card.shadowRoot.innerHTML, />Auto lock</);
+  // A press ended by its click: what the click changes is drawn at once.
+  card._pressing = true;
+  card._pressClick({ detail: 1 });
+  click(card, { action: "toggle_section", section: "settings" });
+  assert.doesNotMatch(card.shadowRoot.innerHTML, />Auto lock</);
+  card.disconnectedCallback();
+  assert.equal(card._pressing, false);
+});

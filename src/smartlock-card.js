@@ -2385,6 +2385,42 @@ const isOutside = (card, ev) => {
   return !path.includes(card) && !path.some((n) => DIALOG_TAGS.has(n.tagName));
 };
 
+// "A click elsewhere" is caught on the pointer, not only on the click event: on iOS (Safari and the companion app)
+// a tap on something that is not clickable (the background, an empty spot, a card with no action) sends no click to
+// the page. It counts when the press and the release are both outside the card (a slider dragged out of the card
+// does not fold it), and a scroll does not count (the browser cancels the pointer). Keyboard clicks still go through
+// the click event.
+const watchOutside = (card, handler) => {
+  let downOutside = false;
+  const onDown = (ev) => {
+    downOutside = isOutside(card, ev);
+  };
+  const onUp = (ev) => {
+    if (downOutside && isOutside(card, ev)) handler(ev);
+    downOutside = false;
+  };
+  const onClick = (ev) => {
+    if (ev.detail === 0 && isOutside(card, ev)) handler(ev);
+  };
+  return {
+    on() {
+      document.addEventListener("pointerdown", onDown, true);
+      document.addEventListener("pointerup", onUp, true);
+      document.addEventListener("click", onClick, true);
+    },
+    // A tap (press and release at the same spot), for the tests.
+    tap(ev) {
+      onDown(ev);
+      onUp(ev);
+    },
+    off() {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("pointerup", onUp, true);
+      document.removeEventListener("click", onClick, true);
+    },
+  };
+};
+
 // What identifies a focusable part across re-renders: its kind (first class) and what it acts on. State classes
 // (ok, warn…) change with the lock and are left out.
 const focusKey = (n) => [n.classList?.[0], n.dataset?.action, n.dataset?.entity, n.dataset?.section].join("|");
@@ -2453,16 +2489,18 @@ class SmartLockBase extends HTMLElement {
     return [h.entities, h.devices, h.language, h.locale, h.formatEntityState, this._changedText(h.states[id]), ...ids.map((e) => h.states[e])];
   }
 
-  // A click elsewhere on the page folds the sections back to their defaults (as in ha-carburants-france) and closes
-  // the popup. A click, not a pointerdown: folding on press would shift the layout under the pointer before the click.
+  // A tap or click elsewhere on the page folds the sections back to their defaults (as in ha-carburants-france) and
+  // closes the popup. On the release, not the press: folding on press would shift the layout under the pointer.
   connectedCallback() {
-    this._onOutside ??= (ev) => {
-      if ((!this._toggled?.size && !this._confirm) || !isOutside(this, ev)) return;
+    this._outside ??= watchOutside(this, () => {
+      if ((!this._toggled?.size && !this._confirm)) return;
       this._toggled = new Set();
       if (this._confirm) this._closeConfirm();
       else this._update();
-    };
-    document.addEventListener("click", this._onOutside, true);
+    });
+    this._outside.on();
+    // Back on the page after leaving it: rendered again in its default state.
+    if (this._hass && this._config) this._update();
     // The relative "changed … ago" text moves on its own: re-render once a minute so it does not stay frozen on a
     // quiet instance (no new hass pushed). _update only touches the DOM when the rendered text actually changed.
     clearInterval(this._agoTimer);
@@ -2477,7 +2515,11 @@ class SmartLockBase extends HTMLElement {
   }
 
   disconnectedCallback() {
-    document.removeEventListener("click", this._onOutside, true);
+    this._outside?.off();
+    // Left (another dashboard view, a conditional card hidden): back to the defaults, so that the card does not
+    // come back unfolded or with its popup open.
+    this._toggled = new Set();
+    this._confirm = null;
     window.removeEventListener("keydown", this._onKey);
     clearInterval(this._agoTimer);
     clearTimeout(this._pendingTimer);
@@ -3252,9 +3294,9 @@ class SmartLockMiniCard extends SmartLockCard {
   constructor() {
     super();
     // Clicks inside a dialog (the more-info opened from the card) leave it zoomed in.
-    this._onUnzoom = (ev) => {
-      if (this._zoomed && isOutside(this, ev)) this._setZoom(false);
-    };
+    this._unzoom = watchOutside(this, () => {
+      if (this._zoomed) this._setZoom(false);
+    });
   }
 
   static getConfigElement() {
@@ -3263,12 +3305,14 @@ class SmartLockMiniCard extends SmartLockCard {
 
   connectedCallback() {
     super.connectedCallback();
-    document.addEventListener("click", this._onUnzoom, true);
+    this._unzoom.on();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener("click", this._onUnzoom, true);
+    this._unzoom.off();
+    // Back to the compact view once off the screen.
+    this._zoomed = false;
   }
 
   getCardSize() {

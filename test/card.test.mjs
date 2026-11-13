@@ -284,9 +284,9 @@ test("sections fold back on a click outside, not inside the more-info dialog", (
   assert.doesNotMatch(card.shadowRoot.innerHTML, />Auto lock</);
   click(card, { action: "toggle_section", section: "settings" });
   assert.match(card.shadowRoot.innerHTML, />Auto lock</);
-  card._onOutside({ composedPath: () => [{ tagName: "DIV" }, { tagName: "HA-MORE-INFO-DIALOG" }] });
+  card._outside.tap({ composedPath: () => [{ tagName: "DIV" }, { tagName: "HA-MORE-INFO-DIALOG" }] });
   assert.equal(card._toggled.size, 1);
-  card._onOutside({ composedPath: () => [{ tagName: "DIV" }] });
+  card._outside.tap({ composedPath: () => [{ tagName: "DIV" }] });
   assert.equal(card._toggled.size, 0);
   assert.doesNotMatch(card.shadowRoot.innerHTML, />Auto lock</);
 });
@@ -652,7 +652,7 @@ test("mini card: one toggle button, Open, and the detail button switches to the 
   html = card.shadowRoot.innerHTML;
   assert.match(html, /class="hero"/);
   assert.equal(card.getCardSize(), 6);
-  card._onUnzoom({ composedPath: () => [{ tagName: "DIV" }] });
+  card._unzoom.tap({ composedPath: () => [{ tagName: "DIV" }] });
   assert.doesNotMatch(card.shadowRoot.innerHTML, /class="hero"/);
 });
 
@@ -778,4 +778,24 @@ test("editor: turning the picture off updates the form schema", () => {
   assert.match(JSON.stringify(ed._form.schema), /"name":"finish"/);
   ed.setConfig({ entity: "lock.porte_entree", show_picture: false });
   assert.doesNotMatch(JSON.stringify(ed._form.schema), /"name":"finish"/);
+});
+
+test("folding: a press in the card does not fold; leaving the page brings the defaults and the compact view back", () => {
+  const card = newCard(makeHass());
+  card.connectedCallback();
+  click(card, { action: "toggle_section", section: "settings" });
+  card._outside.tap({ composedPath: () => [card] });
+  assert.match(card.shadowRoot.innerHTML, />Auto lock</, "a slider pressed in the card and released outside does not fold it");
+  card.disconnectedCallback();
+  card.connectedCallback();
+  assert.doesNotMatch(card.shadowRoot.innerHTML, />Auto lock</);
+  card.disconnectedCallback();
+  const mini = newCard(makeHass(), {}, sl.SmartLockMiniCard);
+  mini.connectedCallback();
+  click(mini, { action: "zoom" });
+  assert.match(mini.shadowRoot.innerHTML, /class="hero"/);
+  mini.disconnectedCallback();
+  mini.connectedCallback();
+  assert.doesNotMatch(mini.shadowRoot.innerHTML, /class="hero"/);
+  mini.disconnectedCallback();
 });

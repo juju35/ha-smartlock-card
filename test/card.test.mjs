@@ -473,6 +473,21 @@ test("editor: unlocked_alert is a number of minutes on both cards", () => {
   }
 });
 
+test("editor: the mini card offers the full card's options its detail view uses, and code stays YAML only", () => {
+  const names = (schema) => schema.flatMap((f) => (f.schema ? names(f.schema) : [f.name]));
+  const fields = (Cls) => {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    ed._config = { entity: "lock.porte_entree" };
+    return names(ed._schema());
+  };
+  const full = fields(sl.SmartLockCard);
+  const mini = fields(sl.SmartLockMiniCard);
+  for (const n of full) assert.ok(mini.includes(n), n);
+  for (const n of ["zoom", "show_details", "show_settings", "show_activity", "collapsed"]) assert.ok(mini.includes(n), n);
+  assert.ok(!full.includes("code") && !mini.includes("code"));
+});
+
 test("French strings", () => {
   const html = newCard(makeHass(), { language: "fr" }).shadowRoot.innerHTML;
   assert.match(html, />Verrouillée</);

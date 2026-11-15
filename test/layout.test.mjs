@@ -541,21 +541,20 @@ test("prefers-reduced-motion: no transition on the battery bar and the chevrons"
   assert.deepEqual(d, ["0s", "0s"]);
 });
 
-// Mini card at every width, 6 columns of a phone included: the state badge keeps the 40 px of the full card's
-// header icon (never shrunk nor hidden), and the detail button sits at the top right, not centred on the row.
+// Mini card at every width, 6 columns of a phone included: the model picture is the header icon (shown at every
+// width, never dropped), inside the card and left of the detail button, which sits at the top right.
 for (const width of [...PHONE_6, 210, 246, 300, 380])
-  test(`mini card at ${width} px: 40 px state badge, detail button at the top right`, async (t) => {
+  test(`mini card at ${width} px: model picture icon, detail button at the top right`, async (t) => {
     if (skip) return t.skip(skip);
     const page = await open("smartlock-mini-card", width);
     const r = await page.evaluate(() => {
       const root = document.getElementById("card").shadowRoot;
       const box = (s) => root.querySelector(s).getBoundingClientRect().toJSON();
-      return { badge: box(".badge"), zoom: box(".zoom"), card: box("ha-card"), controls: box(".controls") };
+      return { icon: box(".picture"), zoom: box(".zoom"), card: box("ha-card"), controls: box(".controls") };
     });
     await page.close();
-    assert.ok(r.badge.left >= r.card.left && r.badge.right <= r.zoom.left, "the badge stays inside the card, left of the detail button");
-    assert.equal(r.badge.width, 40);
-    assert.equal(r.badge.height, 40);
+    assert.ok(r.icon.left >= r.card.left && r.icon.right <= r.zoom.left, "the icon stays inside the card, left of the detail button");
+    assert.ok(r.icon.width > 0 && r.icon.height > 0, "the model picture is shown at every width");
     assert.ok(r.zoom.top < r.controls.top, `zoom at ${r.zoom.top}, buttons at ${r.controls.top}`);
     assert.ok(r.card.right - r.zoom.right <= 16, `zoom ${r.card.right - r.zoom.right} px from the right edge`);
   });

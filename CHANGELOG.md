@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.0 - 2026-11-15
+
+### Features
+- **Compact mini card icon**: the compact mini card now shows the model lock picture (animated, in the state colour) as its header icon instead of the mdi state badge — the picture is kept at every width, shrinking to the icon slot on narrow cards rather than dropping. Set `show_picture: false` to fall back to the mdi badge.
+
 ## 1.10.2 - 2026-11-14
 
 ### Fixes

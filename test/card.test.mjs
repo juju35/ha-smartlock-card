@@ -449,18 +449,24 @@ test("editor: auto_lock_delay is a number of seconds", () => {
   assert.equal(ed._schema().find((f) => f.name === "auto_lock_delay").selector.number.unit_of_measurement, "s");
 });
 
-test("mini card: 40 px state badge, detail button at the top right, rows auto in both views", () => {
+test("mini card: the model picture is the icon, the mdi badge only a fallback, detail button at the top right", () => {
   const card = newCard(makeHass(), {}, sl.SmartLockMiniCard);
   const html = card.shadowRoot.innerHTML;
-  assert.match(html, /<div class="badge clickable ok" data-entity="lock\.porte_entree" role="button" tabindex="0" aria-label="Locked">/);
-  assert.match(html, /\.badge \{ width: 40px; height: 40px;/);
-  assert.doesNotMatch(html, /\.badge \{ width: 3\dpx/, "the badge is never shrunk");
-  assert.doesNotMatch(html, /\.badge \{ display: none/, "nor hidden on narrow cards");
+  assert.match(html, /class="picture clickable"/, "the compact mini shows the model picture as its icon");
+  assert.doesNotMatch(html, /class="badge/, "no mdi badge when the picture is shown");
   assert.match(html, /\.mini \.zoom \{ align-self: flex-start; \}/);
   assert.deepEqual(plain(card.getGridOptions()), { columns: 6, min_columns: 6, rows: "auto" });
   click(card, { action: "zoom" });
   assert.deepEqual(plain(card.getGridOptions()), { columns: 12, min_columns: 6, rows: "auto" });
-  assert.doesNotMatch(newCard(makeHass(), { show_icon: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML, /class="badge/);
+  // With the picture off, the mdi badge comes back as the icon (40 px, never shrunk).
+  const noPic = newCard(makeHass(), { show_picture: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  assert.match(noPic, /<div class="badge clickable ok" data-entity="lock\.porte_entree" role="button" tabindex="0" aria-label="Locked">/);
+  assert.match(noPic, /\.badge \{ width: 40px; height: 40px;/);
+  // Neither picture nor badge: no icon at all.
+  assert.doesNotMatch(
+    newCard(makeHass(), { show_picture: false, show_icon: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML,
+    /class="(badge|picture)/,
+  );
 });
 
 test("editor: unlocked_alert is a number of minutes on both cards", () => {

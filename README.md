@@ -153,8 +153,8 @@ language: fr
 | `show_subtitle` | both | `true` | Show the subtitle under the title |
 | `image` | both | `auto` | Lock picture: `auto` (per model), `retrofit`, `knob`, `compact`, `keypad`, `lever`, `reader`, `padlock`, `none`, or the URL of your own picture (e.g. `/local/my-lock.png`) |
 | `finish` | both | Per model | Finish of the drawn picture: `white`, `black` or `steel` |
-| `show_icon` | both | `true` | 40 px state icon at the left of the header, on the full card and on the mini card (compact and zoomed in). On the compact mini card it takes the place of the picture below 300 px, and leaves its room to the state at 6 columns of a phone |
-| `show_picture` | both | `true` | Lock picture (same as `image: none` when `false`) |
+| `show_icon` | both | `true` | 40 px mdi state icon in the header. On the full card and the zoomed-in mini it sits at the left of the title; on the **compact** mini card it is only a fallback, shown when the picture is off |
+| `show_picture` | both | `true` | The model lock picture (same as `image: none` when `false`). On the **compact** mini card the picture is the header icon; turn it off to fall back to the mdi state icon |
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
 | `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…). On a narrow mini card (6 columns), it moves behind the detail button so that the state stays readable; without the detail button (`zoom: false`) it stays on the card |
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |

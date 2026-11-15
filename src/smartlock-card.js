@@ -3314,8 +3314,6 @@ const MINI_STYLE = `
     .mini { gap: 8px; }
     .mini .picture { width: 36px; height: 42px; }
     .mini .batt .bar { display: none; }
-    /* With the state badge (40 px, never shrunk), the picture leaves it the room. */
-    .mini .badge ~ .picture { display: none; }
   }
   /* 6 columns: Open (pulls the latch, rarely needed at a glance) leaves the room to the state; it stays one tap away
      behind the detail button. Without the detail button it stays here. */
@@ -3328,12 +3326,14 @@ const MINI_STYLE = `
   @container (max-width: 220px) {
     .mini { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 6px; row-gap: 4px; padding: 12px 8px; }
     .mini .titles { grid-column: 1; grid-row: 1 / span 2; }
-    .mini .badge { grid-column: 1; grid-row: 1; align-self: start; position: relative; z-index: 1; }
-    .mini .badge ~ .titles .name { padding-left: 46px; line-height: 40px; }
+    /* The icon (model picture, or the mdi badge when the picture is off) shares the name's line; it shrinks to the
+       40 px slot instead of dropping, so the compact mini keeps the illustration at phone width. */
+    .mini .badge, .mini .picture { grid-column: 1; grid-row: 1; align-self: start; position: relative; z-index: 1; }
+    .mini .picture { width: 40px; height: 40px; }
+    .mini .badge ~ .titles .name, .mini .picture ~ .titles .name { padding-left: 46px; line-height: 40px; }
     .mini .zoom { grid-column: 2; grid-row: 1; justify-self: end; align-self: start; margin: -4px -4px 0 0; }
     .mini .controls { grid-column: 2; grid-row: 2; flex-direction: column; align-self: start; }
     .mini:not(:has(.zoom)) .controls { grid-row: 1 / span 2; align-self: center; }
-    .mini .picture { display: none; }
     .mini .batt { gap: 4px; }
     /* While charging, the bolt stands in for the battery icon. */
     .mini .batt:has(.bolt) > .icon:not(.bolt) { display: none; }
@@ -3415,8 +3415,7 @@ class SmartLockMiniCard extends SmartLockCard {
     return `<style>${BASE_STYLE}${MINI_STYLE}</style>
       <ha-card>
         <div class="mini">
-          ${this._badge(lock, state)}
-          ${this._picture(lock, state)}
+          ${this._picture(lock, state) || this._badge(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
             <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}${alert ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>

@@ -234,14 +234,12 @@ const svgUri = (svg) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
 // Illustrated header: the inside of the entrance door, the lock drawn big in the middle of the door
 // ---------------------------------------------------------------------------
 
-// Night picture: forced by illustration_theme, else the sun below the horizon, else Home Assistant's dark mode.
+// Night picture: forced by illustration_theme, else the sun below the horizon or Home Assistant's dark mode.
 const isNight = (hass, config) => {
   const theme = config.illustration_theme;
   if (theme === "night") return true;
   if (theme === "day") return false;
-  const sun = hass?.states?.["sun.sun"];
-  if (sun && !["unknown", "unavailable", ""].includes(String(sun.state))) return sun.state === "below_horizon";
-  return !!hass?.themes?.darkMode;
+  return hass?.states?.["sun.sun"]?.state === "below_horizon" || !!hass?.themes?.darkMode;
 };
 
 // The lock picture (lockSvg) inlined in the scene, so that its animations run with the card's and can be paused:

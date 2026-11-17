@@ -57,7 +57,13 @@ const page_html = (theme, width) => `<!doctype html><html><head><meta charset="u
 </style></head><body><div id="root"></div></body></html>`;
 
 async function openCard(browser, s) {
-  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 1000, height: 2000 }, locale: "en-US", timezoneId: "UTC" });
+  const page = await browser.newPage({
+    deviceScaleFactor: 2,
+    viewport: { width: 1000, height: 2000 },
+    locale: "en-US",
+    timezoneId: "UTC",
+    colorScheme: s.theme,
+  });
   await page.clock.install({ time: NOW - 1000 });
   await page.clock.pauseAt(NOW);
   page.on("pageerror", (err) => console.error(`pageerror (${s.file}): ${err.message}`));
@@ -65,13 +71,15 @@ async function openCard(browser, s) {
   await page.addScriptTag({ content: HA_CARD });
   await page.addScriptTag({ content: cardJs });
   await page.evaluate(
-    ({ type, config, states, entities, devices, overrides, logbook }) => {
+    ({ type, config, states, entities, devices, overrides, logbook, dark }) => {
       for (const [id, o] of Object.entries(overrides || {})) states[id] = { ...states[id], ...o };
       const el = document.createElement(type);
       el.setConfig({ type: `custom:${type}`, ...config });
       el.hass = {
         states, entities, devices, language: "en", locale: { language: "en" }, callService: () => {},
         callWS: async () => logbook,
+        // Home Assistant's dark mode: the dark theme variables of the page, and themes.darkMode (night header).
+        themes: { darkMode: dark },
       };
       document.getElementById("root").appendChild(el);
     },
@@ -83,6 +91,7 @@ async function openCard(browser, s) {
       devices: { ...devices, ...s.extra?.devices },
       overrides: s.overrides,
       logbook,
+      dark: s.theme === "dark",
     },
   );
   return page;

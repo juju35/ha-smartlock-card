@@ -43,7 +43,7 @@ async function boxes(width, config, overrides = {}) {
   const out = await page.evaluate(
     ({ config, states, entities, devices, logbook }) => {
       const el = document.createElement("smartlock-mini-card");
-      el.setConfig({ type: "custom:smartlock-mini-card", ...config });
+      el.setConfig({ type: "custom:smartlock-mini-card", illustration: false, ...config });
       el.hass = { states, entities, devices, language: "en", locale: { language: "en" }, callService() {}, callWS: async () => logbook };
       document.getElementById("root").appendChild(el);
       const root = el.shadowRoot;
@@ -138,7 +138,7 @@ async function open(tag, width, config = {}, overrides = {}, theme = "light") {
     async ({ tag, config, states, entities, devices, logbook }) => {
       const el = document.createElement(tag);
       el.id = "card";
-      el.setConfig({ type: `custom:${tag}`, ...config });
+      el.setConfig({ type: `custom:${tag}`, illustration: false, ...config });
       el.hass = { states, entities, devices, language: "en", locale: { language: "en" }, callService() {}, callWS: async () => logbook };
       window.events = [];
       el.addEventListener("hass-more-info", (ev) => window.events.push(ev.detail.entityId));
@@ -558,3 +558,122 @@ for (const width of [...PHONE_6, 210, 246, 300, 380])
     assert.ok(r.zoom.top < r.controls.top, `zoom at ${r.zoom.top}, buttons at ${r.controls.top}`);
     assert.ok(r.card.right - r.zoom.right <= 16, `zoom ${r.card.right - r.zoom.right} px from the right edge`);
   });
+
+// ---------------------------------------------------------------------------
+// Illustrated header (the classic header is tested above with illustration: false)
+// ---------------------------------------------------------------------------
+
+const BANNER = { illustration: true };
+
+// The banner parts, measured in the page.
+function measureBanner() {
+  const root = document.getElementById("card").shadowRoot;
+  const q = (s) => root.querySelector(s);
+  const box = (n) => {
+    if (!n) return null;
+    const r = n.getBoundingClientRect();
+    return r.width || r.height ? r.toJSON() : null;
+  };
+  const card = q("ha-card").getBoundingClientRect();
+  const out = [...root.querySelectorAll("ha-card *")]
+    .filter((n) => !n.closest("svg") || n.tagName === "svg")
+    .filter((n) => {
+      const b = n.getBoundingClientRect();
+      return (b.width || b.height) && (b.right > card.right + 0.5 || b.left < card.left - 0.5);
+    })
+    .map((n) => String(n.className?.baseVal ?? n.className));
+  const t = q(".banner .sub .st .t");
+  return {
+    out,
+    banner: box(q(".banner")),
+    ground: box(q(".banner .ground")),
+    scene: box(q(".banner .sl-scene")),
+    lock: box(q(".banner .sl-lock")),
+    leaf: box(q(".banner .sl-leaf")),
+    htext: box(q(".banner .htext")),
+    badge: box(q(".banner .badge")),
+    titles: box(q(".banner .titles")) || box(q(".banner .name")),
+    name: box(q(".banner .name")),
+    zoom: box(q(".banner .zoom")),
+    cut: t.scrollWidth > t.clientWidth + 0.5,
+    state: t.textContent,
+    card: card.toJSON(),
+  };
+}
+
+for (const tag of ["smartlock-card", "smartlock-mini-card"])
+  for (const width of [...PHONE_6, 210, 246, 300, 303, 340, 380, 500])
+    test(`${tag} illustrated at ${width} px: 90 px banner, 10 px ground, nothing cut or overlapping`, async (t) => {
+      if (skip) return t.skip(skip);
+      for (const language of ["en", "pl", "ru", "lv"])
+        for (const [what, overrides] of [...LOCK_STATES, ["jammed", { "lock.porte_entree": { state: "jammed" } }]]) {
+          const page = await open(tag, width, { ...BANNER, language }, overrides);
+          const r = await page.evaluate(measureBanner);
+          assert.deepEqual(page.errors, []);
+          await page.close();
+          const at = `${language} ${what}`;
+          assert.deepEqual(r.out, [], `${at}: parts leave the card`);
+          assert.equal(Math.round(r.banner.height), 90, `${at}: banner ${r.banner.height} px high`);
+          assert.equal(Math.round(r.ground.height), 10, `${at}: ground ${r.ground.height} px high`);
+          assert.ok(Math.abs(r.ground.bottom - r.banner.bottom) < 0.5 && r.ground.width >= r.banner.width - 0.5, `${at}: the ground is not edge to edge at the bottom`);
+          assert.equal(r.cut, false, `${at}: state "${r.state}" cut`);
+          assert.ok(r.titles.width >= 40, `${at}: the name block is ${r.titles.width} px wide`);
+          assert.ok(r.badge.width === 40 && r.badge.height === 40, `${at}: badge ${r.badge.width}×${r.badge.height}`);
+          if (r.zoom) {
+            assert.ok(r.zoom.top - r.banner.top <= 8 && r.card.right - r.zoom.right <= 10, `${at}: the detail button is not at the top right`);
+            assert.ok(r.name.right <= r.zoom.left + 0.5 || r.name.top >= r.zoom.bottom, `${at}: the name runs under the detail button`);
+          }
+          if (width > 300) {
+            assert.ok(r.scene, `${at}: the door is hidden`);
+            assert.ok(r.htext.right <= r.scene.left + 0.5, `${at}: the text runs over the door`);
+            // The lock is big and centred on the door leaf, inside the banner, above the ground.
+            assert.ok(Math.abs((r.lock.left + r.lock.right) / 2 - (r.leaf.left + r.leaf.right) / 2) < 1, `${at}: the lock is not centred on the door`);
+            assert.ok(r.lock.height >= 60, `${at}: the lock is ${r.lock.height} px high`);
+            assert.ok(r.lock.top >= r.banner.top && r.lock.bottom <= r.ground.top + 0.5, `${at}: the lock leaves the wall`);
+            assert.ok(Math.abs(r.leaf.bottom - r.ground.top) < 0.5, `${at}: the door does not stand on the ground`);
+          } else assert.equal(r.scene, null, `${at}: the door is drawn on a narrow card`);
+        }
+    });
+
+// The banner keeps its own day / night colors whatever the theme: its texts must read on it in all four cases.
+for (const theme of ["light", "dark"])
+  for (const illustration_theme of ["day", "night"])
+    for (const [what, overrides] of STATE_CASES)
+      test(`illustrated header texts readable (4.5:1), ${theme} theme, ${illustration_theme}, ${what}`, async (t) => {
+        if (skip) return t.skip(skip);
+        const results = {};
+        for (const tag of ["smartlock-card", "smartlock-mini-card"]) {
+          const page = await open(tag, 500, { ...BANNER, illustration_theme, unlocked_alert: 1 }, overrides, theme);
+          Object.assign(
+            results,
+            await page.evaluate(
+              ({ fn, tag }) => {
+                const contrast = new Function(`return ${fn}`)();
+                const root = document.getElementById("card").shadowRoot;
+                const out = {};
+                for (const s of [".banner .name", ".banner .sub .st", ".banner .sub .more"]) {
+                  const n = root.querySelector(s);
+                  if (n && n.textContent.trim()) out[`${tag} ${s}`] = Math.round(contrast(n) * 100) / 100;
+                }
+                return out;
+              },
+              { fn: contrastIn.toString(), tag },
+            ),
+          );
+          await page.close();
+        }
+        assert.ok(Object.keys(results).length >= 4, JSON.stringify(results));
+        for (const [s, r] of Object.entries(results)) assert.ok(r >= 4.5, `${s}: ${r}:1 (${JSON.stringify(results)})`);
+      });
+
+test("illustrated header: prefers-reduced-motion stops the lock animations", async (t) => {
+  if (skip) return t.skip(skip);
+  const page = await open("smartlock-card", 500, BANNER, UNLOCKING);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const names = await page.evaluate(() =>
+    [...document.getElementById("card").shadowRoot.querySelectorAll(".banner .part, .banner .glow")].map((n) => getComputedStyle(n).animationName),
+  );
+  await page.close();
+  assert.ok(names.length > 0);
+  assert.deepEqual([...new Set(names)], ["none"]);
+});

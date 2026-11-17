@@ -26,6 +26,7 @@ The cards work with **any lock entity**, whatever the integration: Nuki, Tedee, 
 - Works with every lock integration of Home Assistant (the standard `lock` entity)
 - Drawn lock picture that follows the model: retrofit, rotary knob, compact cylinder, keypad deadbolt, fingerprint lever, access reader or padlock, in white, black or steel; or a picture of your own
 - The picture follows the state: locked, unlocked, open, jammed, animated while locking, unlocking or opening
+- Illustrated header on both cards: the inside of the entrance door with the lock drawn big in its middle, the state icon in the state color, a day and a night picture (follows the sun, or the dark mode; `illustration_theme` forces one), `illustration: false` for the classic header
 - Lock, Unlock and Open buttons; Open (pull the latch) only for locks that support it
 - Confirmation popup at the top of the card before unlocking and opening (configurable, also for locking)
 - Code entry when the lock asks for one (`code_format`), checked against the lock's format; the code is never stored
@@ -109,6 +110,8 @@ entity: lock.front_door
 title: Front door
 image: auto
 finish: white
+illustration: true
+illustration_theme: auto
 show_icon: true
 show_picture: true
 show_controls: true
@@ -132,6 +135,8 @@ type: custom:smartlock-mini-card
 entity: lock.garage
 title: Garage
 image: knob
+illustration: true
+illustration_theme: auto
 show_icon: true
 show_picture: true
 show_controls: true
@@ -153,8 +158,10 @@ language: fr
 | `show_subtitle` | both | `true` | Show the subtitle under the title |
 | `image` | both | `auto` | Lock picture: `auto` (per model), `retrofit`, `knob`, `compact`, `keypad`, `lever`, `reader`, `padlock`, `none`, or the URL of your own picture (e.g. `/local/my-lock.png`) |
 | `finish` | both | Per model | Finish of the drawn picture: `white`, `black` or `steel` |
-| `show_icon` | both | `true` | 40 px mdi state icon in the header. On the full card and the zoomed-in mini it sits at the left of the title; on the **compact** mini card it is only a fallback, shown when the picture is off |
-| `show_picture` | both | `true` | The model lock picture (same as `image: none` when `false`). On the **compact** mini card the picture is the header icon; turn it off to fall back to the mdi state icon |
+| `illustration` | both | `true` | Illustrated header, 90 px high: the name and the state on the wall at the left, the door with the lock picture centred on it at the right, a floor strip under the whole width. The mini card shows the battery and the buttons under it. On a narrow card (300 px or less) the door gives its room to the text, and the full card shows the picture in its body. `false`: classic header |
+| `illustration_theme` | both | `auto` | `auto` (night when `sun.sun` is below the horizon, else when Home Assistant is in dark mode), `day` or `night` |
+| `show_icon` | both | `true` | 40 px mdi state icon in the header, in the state color (green locked, amber unlocked, blue while moving, red jammed, grey unknown). On the full card, the zoomed-in mini and the illustrated mini it sits at the left of the title; on the **compact** classic mini card (`illustration: false`) it is only a fallback, shown when the picture is off |
+| `show_picture` | both | `true` | The model lock picture (same as `image: none` when `false`). In the illustrated header it is drawn on the door; on the **compact** classic mini card (`illustration: false`) it is the header icon, turn it off to fall back to the mdi state icon |
 | `show_controls` | both | `true` | Lock / Unlock buttons (a single toggle button on the mini card) |
 | `show_open` | both | `true` | Open button, for locks that can pull the latch (Nuki, Tedee, Matter…). On a narrow mini card (6 columns), it moves behind the detail button so that the state stays readable; without the detail button (`zoom: false`) it stays on the card |
 | `confirm` | both | `[unlock, open]` | Actions that ask for confirmation, among `lock`, `unlock` and `open` (`[]` to never ask). A lock that needs a code always asks for it |

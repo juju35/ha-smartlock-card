@@ -312,9 +312,13 @@ test("activity reads the logbook when unfolded", async () => {
 
 test("jammed lock: red state and alert", () => {
   const st = { ...states, "lock.garage": { ...states["lock.garage"], state: "jammed" } };
-  const html = newCard(makeHass(st), { entity: "lock.garage" }).shadowRoot.innerHTML;
+  const html = newCard(makeHass(st), { entity: "lock.garage", illustration: false }).shadowRoot.innerHTML;
   assert.match(html, /chip clickable crit/);
   assert.match(html, /The lock is jammed/);
+  // Illustrated header: the icon and the state word in red, the alert icon.
+  const banner = newCard(makeHass(st), { entity: "lock.garage" }).shadowRoot.innerHTML;
+  assert.match(banner, /class="badge clickable crit"[^>]*><svg class="icon "[^>]*><path d="M13 14H11V9H13/);
+  assert.match(banner, /class="st crit"/);
 });
 
 test("door open while the lock is unlocked: warning on the full and mini cards", () => {
@@ -450,7 +454,7 @@ test("editor: auto_lock_delay is a number of seconds", () => {
 });
 
 test("mini card: the model picture is the icon, the mdi badge only a fallback, detail button at the top right", () => {
-  const card = newCard(makeHass(), {}, sl.SmartLockMiniCard);
+  const card = newCard(makeHass(), { illustration: false }, sl.SmartLockMiniCard);
   const html = card.shadowRoot.innerHTML;
   assert.match(html, /class="picture clickable"/, "the compact mini shows the model picture as its icon");
   assert.doesNotMatch(html, /class="badge/, "no mdi badge when the picture is shown");
@@ -459,12 +463,12 @@ test("mini card: the model picture is the icon, the mdi badge only a fallback, d
   click(card, { action: "zoom" });
   assert.deepEqual(plain(card.getGridOptions()), { columns: 12, min_columns: 6, rows: "auto" });
   // With the picture off, the mdi badge comes back as the icon (40 px, never shrunk).
-  const noPic = newCard(makeHass(), { show_picture: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  const noPic = newCard(makeHass(), { show_picture: false, illustration: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML;
   assert.match(noPic, /<div class="badge clickable ok" data-entity="lock\.porte_entree" role="button" tabindex="0" aria-label="Locked">/);
   assert.match(noPic, /\.badge \{ width: 40px; height: 40px;/);
   // Neither picture nor badge: no icon at all.
   assert.doesNotMatch(
-    newCard(makeHass(), { show_picture: false, show_icon: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML,
+    newCard(makeHass(), { show_picture: false, show_icon: false, illustration: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML,
     /class="(badge|picture)/,
   );
 });
@@ -734,7 +738,7 @@ const clickables = (html) => [...html.matchAll(/<(\w+)([^>]*class="[^"]*\bclicka
 
 test("keyboard: every clickable part of the full card is a focusable button", () => {
   const st = { ...states, "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" } };
-  const card = newCard(makeHass(st, { callWS: async () => logbook }), { collapsed: [] });
+  const card = newCard(makeHass(st, { callWS: async () => logbook }), { collapsed: [], illustration: false });
   return new Promise((r) => setTimeout(r, 0)).then(() => {
     const html = card.shadowRoot.innerHTML;
     const tags = clickables(html);
@@ -841,4 +845,90 @@ test("no rewrite under a press: drawn after its release, and at once by its clic
   assert.doesNotMatch(card.shadowRoot.innerHTML, />Auto lock</);
   card.disconnectedCallback();
   assert.equal(card._pressing, false);
+});
+
+// ---------------------------------------------------------------------------
+// Illustrated header
+// ---------------------------------------------------------------------------
+
+test("illustrated header: door scene with the lock's own picture on it, state icon, name and state, on both cards", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const html = newCard(makeHass(), {}, Cls).shadowRoot.innerHTML;
+    assert.match(html, /<div class="banner">/);
+    assert.match(html, /<svg class="sl-scene" viewBox="0 0 160 80"/);
+    assert.match(html, /<div class="ground"><\/div>/);
+    // The Nuki front door: the retrofit family, inlined on the door leaf, its gradients with the card's uid.
+    assert.match(html, /<svg class="sl-lock" x="50\.9" y="9\.5" width="58\.3" height="68" viewBox="0 0 120 140"/);
+    assert.match(html, /fill="url\(#sl\d+-g\)"/);
+    assert.doesNotMatch(html, /id="g"/);
+    assert.match(html, /class="badge clickable ok"/);
+    assert.match(html, /class="name clickable"[^>]*>Front door</);
+    assert.match(html, /class="st ok" title="Locked"/);
+    assert.doesNotMatch(html, /class="header"/);
+    assert.match(html, /\.banner \{ position: relative; overflow: hidden; height: 90px;/);
+  }
+});
+
+test("illustrated header: the icon color and shape follow the state", () => {
+  const icon = (state) => {
+    const st = { ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state } };
+    return newCard(makeHass(st), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML.match(/class="badge clickable (\w+)"/)[1];
+  };
+  assert.deepEqual(["locked", "unlocked", "unlocking", "jammed", "unavailable"].map(icon), ["ok", "warn", "active", "crit", "crit"]);
+});
+
+test("illustrated header: two cards never share an id", () => {
+  const ids = (card) => [...card.shadowRoot.innerHTML.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+  const a = ids(newCard(makeHass()));
+  const b = ids(newCard(makeHass()));
+  assert.ok(a.length > 0);
+  assert.deepEqual(a.filter((id) => b.includes(id)), []);
+});
+
+test("illustrated header: night from illustration_theme, then sun.sun, then the dark mode", () => {
+  const night = (config, st = states, extra = {}) => /class="banner night"/.test(newCard(makeHass(st, extra), config).shadowRoot.innerHTML);
+  const sun = (state) => ({ ...states, "sun.sun": { entity_id: "sun.sun", state, attributes: {} } });
+  assert.equal(night({}), false);
+  assert.equal(night({}, states, { themes: { darkMode: true } }), true);
+  assert.equal(night({}, sun("below_horizon")), true);
+  assert.equal(night({}, sun("above_horizon"), { themes: { darkMode: true } }), false);
+  assert.equal(night({ illustration_theme: "night" }, sun("above_horizon")), true);
+  assert.equal(night({ illustration_theme: "day" }, sun("below_horizon")), false);
+});
+
+test("illustrated header: show_picture: false or image: none leaves the door bare, a URL is drawn on it", () => {
+  for (const config of [{ show_picture: false }, { image: "none" }]) {
+    const html = newCard(makeHass(), config).shadowRoot.innerHTML;
+    assert.match(html, /class="sl-scene"/);
+    assert.doesNotMatch(html, /class="sl-lock"|<image /);
+  }
+  const own = newCard(makeHass(), { image: "/local/lock.png" }).shadowRoot.innerHTML;
+  assert.match(own, /<image href="\/local\/lock\.png"/);
+});
+
+test("illustrated header: illustration: false keeps the classic header", () => {
+  const html = newCard(makeHass(), { illustration: false }).shadowRoot.innerHTML;
+  assert.doesNotMatch(html, /class="banner|sl-scene/);
+  assert.match(html, /<div class="header">/);
+});
+
+test("illustrated mini card: battery and buttons under the banner, detail button on it", () => {
+  const html = newCard(makeHass(), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  assert.match(html, /<div class="banner">[\s\S]*<button class="zoom"[\s\S]*<\/div>\s*<div class="mfoot"><div class="batt clickable ok"[\s\S]*<div class="controls">/);
+  const tags = clickables(html);
+  for (const cls of ["badge", "name", "sub", "batt"]) assert.ok(tags.some((t) => t.includes(`class="${cls} `)), `no clickable .${cls}`);
+  for (const t of tags) assert.match(t, /role="button" tabindex="0"/, t);
+});
+
+test("editor: illustration toggle on both cards, its theme only with the illustration, defaults left out of the YAML", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    ed._config = { entity: "lock.porte_entree" };
+    const names = (schema) => schema.flatMap((f) => (f.schema ? names(f.schema) : [f.name]));
+    assert.ok(names(ed._schema()).includes("illustration"));
+    assert.ok(names(ed._schema()).includes("illustration_theme"));
+    ed._config = { entity: "lock.porte_entree", illustration: false };
+    assert.ok(!names(ed._schema()).includes("illustration_theme"));
+  }
 });

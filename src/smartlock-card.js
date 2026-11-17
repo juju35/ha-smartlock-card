@@ -279,7 +279,7 @@ const doorScene = (lock) => {
 // The banner: the wall behind the text (boards), the scene at the right, a 10 px floor strip under the whole width.
 const BANNER_STYLE = `
   ${ANIM_CSS}
-  .banner { position: relative; overflow: hidden; height: 90px; --g: 10px; --scene-w: min(160px, 40cqw); color: #0d2a45;
+  .banner { position: relative; overflow: hidden; height: 90px; --g: 10px; --scene-w: min(160px, 40cqw, max(100cqw - 265px, 28cqw)); color: #0d2a45;
             background: repeating-linear-gradient(180deg, transparent 0 5.8px, #e2d6c6 5.8px 6.5px) #efe6da; }
   .banner.night { color: #fff; background: repeating-linear-gradient(180deg, transparent 0 5.8px, #353a47 5.8px 6.5px) #2b2f3a; }
   .sl-scene { position: absolute; right: 0; bottom: var(--g); height: calc(100% - var(--g)); width: var(--scene-w);

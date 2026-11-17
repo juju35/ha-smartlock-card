@@ -172,7 +172,8 @@ function measureCard() {
   const cut = (n) => !!n && n.getBoundingClientRect().width > 0 && n.scrollWidth > n.clientWidth + 0.5;
   // A state word drawn on more than one line (overflow-wrap broke it).
   const broken = [];
-  const st = q(".hero .state");
+  const shown = (n) => n.getClientRects().length > 0;
+  const st = [...root.querySelectorAll(".hero .state")].find(shown);
   if (st) {
     const txt = st.firstChild;
     for (const m of txt.textContent.matchAll(/\S+/g)) {
@@ -194,6 +195,8 @@ function measureCard() {
     titlesMin: parseFloat(getComputedStyle(q(".titles")).minWidth),
     nameFont: parseFloat(getComputedStyle(name).fontSize),
     // The lock's state word (in the header pill; big in the hero only when it calls for attention).
+    // The lock's state drawn big in the hero (the door sensor's line left aside).
+    heroState: [...root.querySelectorAll(".hero .state:not(.door)")].find(shown)?.textContent ?? null,
     state: (() => {
       const el = document.getElementById("card");
       return el._fmtState(el._state(el._s("lock.porte_entree")));
@@ -235,6 +238,7 @@ for (const [tag, zoom] of [
           assert.equal(r.chip.text, "", "the chip shows only its dot");
           assert.ok(r.chip.width >= 13.5, `the chip is squeezed to ${r.chip.width} px`);
           assert.equal(r.chip.label, r.state, "the chip keeps the state in aria-label");
+          assert.equal(r.heroState, r.state, "the state is written big in the hero while the chip shows only its dot");
         });
 
 // From 9 columns of a phone up: the chip shows its whole text, the name keeps its first letters and the hero its

@@ -3350,6 +3350,15 @@ const FULL_STYLE = `
   .picture img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }
   .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
   .state.door:not(.warn) { color: var(--primary-text-color); }
+  .state.pill-echo { display: none; }
+  @container sl-card (max-width: 200px) {
+    .banner ~ .content .state.pill-echo { display: block; }
+    .banner ~ .content .state.pill-echo + .state.door { font-size: 15px; }
+  }
+  @container sl-card (max-width: 230px) {
+    .header ~ .content .state.pill-echo { display: block; }
+    .header ~ .content .state.pill-echo + .state.door { font-size: 15px; }
+  }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }
@@ -3456,8 +3465,11 @@ class SmartLockCard extends SmartLockBase {
     if (lock.attributes?.code_format) tags.push(`<span class="tag">${svgIcon(ICONS.keypad)}${esc(this._t("code"))}</span>`);
     // The lock's state is already in the header pill: it stays big here only when it calls for attention (jammed,
     // open, moving, unavailable). Locked or unlocked, the big line is what the pill does not say: the door sensor.
+    // On a card so narrow that the pill keeps only its dot, the state comes back big here (.pill-echo).
     const calm = ["locked", "unlocked"].includes(String(state || "").toLowerCase());
-    const big = calm ? this._doorLine(m, true) : `<div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>`;
+    const stateBig = (extra) =>
+      `<div class="state clickable ${statusClass(state)}${extra}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>`;
+    const big = calm ? `${stateBig(" pill-echo")}${this._doorLine(m, true)}` : stateBig("");
     return `<div class="hero">
       ${this._picture(lock, state)}
       <div class="info">

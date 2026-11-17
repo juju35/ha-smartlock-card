@@ -7,6 +7,7 @@
 - Day and night pictures: night when `sun.sun` is below the horizon or Home Assistant is in dark mode; `illustration_theme: day | night` forces one. `illustration: false` keeps the classic header (and, on the mini card, the model picture as the icon). Both options are in the visual editors of both cards.
 - Mini card: battery and buttons under the banner, the detail button on it. On narrow cards (300 px or less) the door gives its room to the name and the state; the full card then shows the lock picture in its body.
 - Full card: the lock's state is no longer repeated big under the header (it is in the status pill); locked or unlocked, the big line is the door sensor (closed / open), and jammed, moving, open or unavailable stay big. The door is said once: the banner sub-line keeps the last change.
+- The status pill (the lock's state, in the icon's colour) sits on the title row right after the name only when the whole name and its whole word fit there (measured, in every language); otherwise on its own line under the detail (then kept to one line), and only its dot when even that does not fit in the banner above the floor or beside the door, or on a card 200 px wide or less; the state is then written big under the header. The same rule on the classic header.
 
 ## 1.11.0 - 2026-11-15
 

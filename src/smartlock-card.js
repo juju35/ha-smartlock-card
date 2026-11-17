@@ -277,6 +277,11 @@ const doorScene = (lock) => {
 };
 
 // The banner: the wall behind the text (boards), the scene at the right, a 10 px floor strip under the whole width.
+// The banner's ground strip, that the title block keeps clear of, and the gap between the name and the status pill
+// on its row (.trow).
+const PILL_GROUND_PX = 10;
+const PILL_GAP_PX = 8;
+
 const BANNER_STYLE = `
   ${ANIM_CSS}
   .banner { position: relative; overflow: hidden; height: 90px; --g: 10px; --scene-w: min(160px, 40cqw, max(100cqw - 265px, 28cqw)); color: #0d2a45;
@@ -299,27 +304,14 @@ const BANNER_STYLE = `
   /* The text on the wall, at the left of the scene: state icon, name, state and detail. */
   .htext { position: absolute; left: 12px; top: 0; bottom: var(--g); right: calc(var(--scene-w) + 4px);
            display: flex; align-items: center; gap: 10px; min-width: 0; }
-  /* Title row: the name, then the status pill 8 px after it, both shrinking (the name keeps a few letters, the pill
-     at most about half the row); the detail under them. Short of room the pill takes its own line under the detail;
-     on a very narrow card only its dot shows (its word stays in its title and for screen readers). */
-  .htext .titles { flex: 1 1 0; min-width: 5ch; display: grid; row-gap: 2px; column-gap: 8px; align-items: center; justify-content: start;
-                   grid-template-columns: minmax(min(4.5ch, 100%), max-content) max-content; container: sl-titles / inline-size; }
-  .htext .titles > .sub { grid-column: 1 / -1; }
-  .banner .chip { --c: var(--sl-ok); max-width: 100%; justify-self: start; line-height: 16px;
+  /* Title row: the name, then the status pill 8 px after it (see .trow); the detail under them. */
+  .htext .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .banner .chip { --c: var(--sl-ok); line-height: 16px;
                   background: color-mix(in srgb, var(--c) 18%, rgba(255,255,255,.78)); color: color-mix(in srgb, var(--c) 45%, #0d2a45); }
   .banner.night .chip { background: color-mix(in srgb, var(--c) 30%, rgba(8,18,38,.55)); color: color-mix(in srgb, var(--c) 35%, #ffffff); }
   .banner .chip.ok { --c: var(--sl-ok); } .banner .chip.warn { --c: var(--sl-warn); } .banner .chip.crit { --c: var(--sl-crit); }
   .banner .chip.active { --c: var(--sl-active); } .banner .chip.idle { --c: #8a9097; }
   .banner .chip .dot { width: 7px; height: 7px; }
-  /* The pill leaves the name's line once it would take more than about half of it (by its word's length). */
-  @container sl-titles (max-width: 160px) { .htext .titles > .chip { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
-  @container sl-titles (max-width: 190px) { .htext .titles > .chip.len-m, .htext .titles > .chip.len-l, .htext .titles > .chip.len-xl { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
-  @container sl-titles (max-width: 225px) { .htext .titles > .chip.len-l, .htext .titles > .chip.len-xl { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
-  @container sl-titles (max-width: 270px) { .htext .titles > .chip.len-xl { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
-  @container sl-card (max-width: 200px) {
-    .banner .chip { padding: 4px; }
-    .banner .chip .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  }
   .htext .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* The icon always shows the state color: green locked, amber unlocked, blue moving, red jammed, grey unknown. */
   .banner .badge { background: rgba(255,255,255,.62); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 28%, transparent); }
@@ -2551,8 +2543,22 @@ const BASE_STYLE = `
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--sl-ok)); flex: none; display: inline-block; }
   .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap;
           background: color-mix(in srgb, var(--c, var(--sl-ok)) 15%, transparent); color: var(--ink, var(--c, var(--sl-ok)));
-          box-sizing: border-box; flex: 0 1 auto; min-width: 0; overflow: hidden; }
-  .chip .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+          box-sizing: border-box; flex: none; }
+  /* The status pill (classic header and banner): on the title row, 8 px after the name, only when the whole name and
+     the pill's whole word fit there; otherwise on its own line under the detail, which then keeps one line. Its dot
+     alone at 200 px or less, or when the banner has no room left for its word (pill-dot): the word stays in its
+     title and for screen readers. Measured after each render (_fitPill), in every language, never by a fixed width. */
+  .trow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .trow .name { flex: 0 1 auto; min-width: 0; }
+  .titles.pill-below .trow { display: contents; }
+  .titles.pill-below .sub { order: 1; }
+  .titles.pill-below .chip { order: 2; align-self: flex-start; margin-top: 2px; }
+  .titles.pill-dot .chip { padding: 4px; }
+  .titles.pill-dot .chip .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  @container sl-card (max-width: 200px) {
+    .titles .chip { padding: 4px; }
+    .titles .chip .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  }
   .bar { height: 4px; border-radius: 3px; background: var(--divider-color, rgba(127,127,127,.25)); overflow: hidden; }
   .bar > div { height: 100%; border-radius: 3px; background: var(--c, var(--sl-ok)); transition: width .6s ease; }
   .header { display: flex; align-items: center; gap: 10px; padding: 12px 12px 0; }
@@ -2561,12 +2567,10 @@ const BASE_STYLE = `
   .badge .icon { width: 24px; height: 24px; }
   /* The name block takes what the badge, the chip and the buttons leave (basis 0: its long name never squeezes the
      chip), down to its first letters; only then does the chip shrink. Narrower, the chip shows only its dot. */
-  .titles { flex: 1 1 0; min-width: 5ch; }
-  :host([hide-title]) .titles > .name, :host([hide-subtitle]) .titles > .sub { display: none; }
+  .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; }
+  :host([hide-title]) .titles .name, :host([hide-subtitle]) .titles > .sub { display: none; }
   .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sub { font-size: 12px; line-height: 1.2; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* With a sub-line, the chip sits on the name line: lifted by half the sub-line (12px × 1.2). */
-  .header:has(.sub) > .chip { margin-bottom: 14.4px; }
   .warning { padding: 16px; color: color-mix(in srgb, var(--sl-warn) 40%, var(--primary-text-color, #212121)); }
   .picture { flex: none; display: flex; align-items: center; justify-content: center; }
   .picture img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -2593,12 +2597,6 @@ const BASE_STYLE = `
   .zoom:hover { background: color-mix(in srgb, var(--sl-idle) 16%, transparent); color: var(--primary-text-color); }
   .zoom:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 1px; }
   [role="button"]:focus-visible, .btn:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 2px; }
-  /* Narrow full card (6 and 8 columns of a phone, mini card zoomed in there): the chip keeps only its whole dot,
-     the state is in its title / aria-label and in big under the header. From 9 columns of a phone, it has its text. */
-  @container (max-width: 230px) {
-    .header .chip { padding: 4px; flex: none; }
-    .header .chip .t { display: none; }
-  }
   /* 6 columns of a phone (156-178 px): tighter header, so that the name, the dot and the detail button all fit
      next to the badge, which keeps its 40 px. */
   @container (max-width: 200px) {
@@ -2798,6 +2796,7 @@ class SmartLockBase extends HTMLElement {
       else this._update();
     });
     this._outside.on();
+    this._watchPill();
     // Back on the page after leaving it: rendered again in its default state.
     if (this._hass && this._config) this._update();
     // The relative "changed … ago" text moves on its own: re-render once a minute so it does not stay frozen on a
@@ -2815,6 +2814,7 @@ class SmartLockBase extends HTMLElement {
 
   disconnectedCallback() {
     this._outside?.off();
+    this._unwatchPill();
     this._dropPress();
     // Left (another dashboard view, a conditional card hidden): back to the defaults, so that the card does not
     // come back unfolded or with its popup open.
@@ -2854,6 +2854,53 @@ class SmartLockBase extends HTMLElement {
     return id ? this._hass.states[id] : undefined;
   }
 
+  // The status pill goes on the title row, right after the title, only when the whole title and the pill's whole
+  // label fit there; otherwise it takes its own line under the subtitle (the subtitle then on one line). In the
+  // banner, when title, subtitle and pill still do not fit above the ground strip (or the pill's label runs past the
+  // text, over the picture), the pill keeps its dot only.
+  // Measured after each render and on every new width (or once the web font is loaded), never by a fixed width.
+  _fitPill() {
+    for (const t of this.shadowRoot?.querySelectorAll?.(".titles") || []) {
+      const row = t.querySelector?.(".trow");
+      const name = row?.querySelector(".name");
+      const chips = row ? [...row.children].filter((n) => n.classList.contains("chip")) : [];
+      if (!name?.getBoundingClientRect || !chips.length) continue;
+      t.classList.remove("pill-below", "pill-dot");
+      // The title's whole width (scrollWidth is rounded: 1 px more, so that a title that fits is never cut).
+      const need = chips.reduce((w, c) => w + PILL_GAP_PX + c.getBoundingClientRect().width, name.scrollWidth + 1);
+      if (need <= row.getBoundingClientRect().width + 0.5) continue;
+      t.classList.add("pill-below");
+      const banner = t.closest(".banner");
+      if (!banner) continue;
+      const box = banner.getBoundingClientRect();
+      const ground = box.bottom - PILL_GROUND_PX;
+      const right = t.getBoundingClientRect().right;
+      const out = [name, ...t.querySelectorAll(".sub"), ...chips].some((n) => {
+        const r = n.getBoundingClientRect();
+        return r.height > 0 && (r.top < box.top - 0.5 || r.bottom > ground + 0.5 || r.right > right + 0.5);
+      });
+      if (out) t.classList.add("pill-dot");
+    }
+  }
+
+  _watchPill() {
+    if (typeof ResizeObserver !== "function") return;
+    this._pillResize ??= new ResizeObserver((entries) => {
+      const w = Math.round(entries.at(-1).contentRect.width);
+      if (w === this._pillWidth) return;
+      this._pillWidth = w;
+      cancelAnimationFrame(this._pillFrame);
+      this._pillFrame = requestAnimationFrame(() => this._fitPill());
+    });
+    this._pillResize.observe(this);
+    document.fonts?.ready?.then(() => this._fitPill());
+  }
+
+  _unwatchPill() {
+    this._pillResize?.disconnect();
+    this._pillWidth = null;
+  }
+
   _update() {
     if (!this._hass || !this._config) return;
     // Held under a press (see holdUnderPress), drawn after its click.
@@ -2877,6 +2924,7 @@ class SmartLockBase extends HTMLElement {
     const nth = key ? this._focusables(key).indexOf(active) : -1;
     this._html = html;
     this.shadowRoot.innerHTML = html;
+    this._fitPill();
     if (key) {
       const same = this._focusables(key);
       (same[nth] || same[0])?.focus({ preventScroll: true });
@@ -3087,10 +3135,9 @@ class SmartLockBase extends HTMLElement {
       <div class="header">
         ${this._badge(lock, state)}
         <div class="titles">
-          <div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div>
-          ${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
+          <div class="trow"><div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div><span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span></div>
+          ${sub ? `<div class="sub" title="${esc(sub)}">${esc(sub)}</div>` : ""}
         </div>
-        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>
         ${this._zoomButton()}
       </div>`;
   }
@@ -3132,11 +3179,8 @@ class SmartLockBase extends HTMLElement {
 
   // The banner's status pill, right after the name: the state's dot and word, in the icon's color.
   _pill(lock, state) {
-    const word = this._fmtState(state);
-    const label = esc(word);
-    // Its length bucket, for the width under which it takes its own line (see the banner style).
-    const len = word.length <= 7 ? "s" : word.length <= 10 ? "m" : word.length <= 14 ? "l" : "xl";
-    return `<span class="chip clickable ${statusClass(state)} len-${len}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>`;
+    const label = esc(this._fmtState(state));
+    return `<span class="chip clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>`;
   }
 
   // The banner's sub-line: the detail only (the state is in the pill), in the warning color for a warning.
@@ -3144,7 +3188,7 @@ class SmartLockBase extends HTMLElement {
     const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
     const detail = this._miniDetail(m, lock, door).replace(/^ · /, "");
     if (!detail && !alert) return "";
-    return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(detail || alert)}${alert && detail ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
+    return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${esc(detail || alert)}"><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(detail || alert)}${alert && detail ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
   }
 
   // The illustrated header (`illustration: false` keeps the classic one).
@@ -3171,7 +3215,7 @@ class SmartLockBase extends HTMLElement {
         <div class="htext">
           ${this._badge(lock, state)}
           <div class="titles">
-            <div class="name clickable" data-entity="${id}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>${this._pill(lock, state)}
+            <div class="trow"><div class="name clickable" data-entity="${id}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>${this._pill(lock, state)}</div>
             ${this._bannerSub(lock, m, state, door)}
           </div>
         </div>
@@ -3351,14 +3395,13 @@ const FULL_STYLE = `
   .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
   .state.door:not(.warn) { color: var(--primary-text-color); }
   .state.pill-echo { display: none; }
+  /* The pill keeps only its dot: the lock's state is written big again. */
   @container sl-card (max-width: 200px) {
-    .banner ~ .content .state.pill-echo { display: block; }
-    .banner ~ .content .state.pill-echo + .state.door { font-size: 15px; }
+    .content .state.pill-echo { display: block; }
+    .content .state.pill-echo + .state.door { font-size: 15px; }
   }
-  @container sl-card (max-width: 230px) {
-    .header ~ .content .state.pill-echo { display: block; }
-    .header ~ .content .state.pill-echo + .state.door { font-size: 15px; }
-  }
+  ha-card:has(.titles.pill-dot) .content .state.pill-echo { display: block; }
+  ha-card:has(.titles.pill-dot) .content .state.pill-echo + .state.door { font-size: 15px; }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }

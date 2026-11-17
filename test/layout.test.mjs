@@ -189,7 +189,7 @@ function measureCard() {
     out,
     broken,
     valueCut: cut(q(".batt .v")),
-    chip: chip && { ...chip.getBoundingClientRect().toJSON(), text: chip.innerText.trim(), cut: cut(chip.querySelector(".t")), label: chip.getAttribute("aria-label") },
+    chip: chip && { ...chip.getBoundingClientRect().toJSON(), text: chip.querySelector(".t").getBoundingClientRect().width > 1 ? chip.innerText.trim() : "", cut: cut(chip.querySelector(".t")), label: chip.getAttribute("aria-label") },
     card: card.toJSON(),
     titles: q(".titles").getBoundingClientRect().width,
     titlesMin: parseFloat(getComputedStyle(q(".titles")).minWidth),
@@ -702,3 +702,54 @@ test("illustrated header: prefers-reduced-motion stops the lock animations", asy
   assert.ok(names.length > 0);
   assert.deepEqual([...new Set(names)], ["none"]);
 });
+
+// The status pill's place, decided by measurement: full card and mini card (compact and zoomed in), illustrated and
+// classic, six languages, 190-500 px. Beside the name only when the name stays whole; otherwise under the detail;
+// its word whole or its dot alone (always at 200 px or less); nothing under the banner's ground strip, out of the
+// banner or past the text column.
+for (const [tag, zoom] of [
+  ["smartlock-card", false],
+  ["smartlock-mini-card", false],
+  ["smartlock-mini-card", true],
+])
+  for (const illustration of [true, false])
+    for (const language of ["en", "fr", "de", "hu", "el", "ru"])
+      test(`status pill, ${tag}${zoom ? " zoomed in" : ""}${illustration ? "" : " classic"}, ${language}: beside a whole name, else under the detail`, async (t) => {
+        if (skip) return t.skip(skip);
+        const page = await open(tag, 190, { language, illustration, title: "Front door of the house" });
+        if (zoom) await page.evaluate(() => document.getElementById("card").shadowRoot.querySelector(".zoom").click());
+        const bad = [];
+        for (const width of [190, 245, 300, 400, 460, 500]) {
+          await page.evaluate((w) => {
+            document.getElementById("root").style.width = `${w}px`;
+            return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          }, width);
+          bad.push(
+            ...(await page.evaluate((width) => {
+              const out = [];
+              const titles = document.getElementById("card").shadowRoot.querySelector(".titles");
+              const chip = titles?.querySelector(".chip");
+              if (!chip) return out; // the classic mini card writes the state in its sub-line
+              const name = titles.querySelector(".name");
+              const text = chip.querySelector(".t");
+              const p = chip.getBoundingClientRect();
+              const n = name.getBoundingClientRect();
+              const dot = text.getBoundingClientRect().width <= 1;
+              const beside = Math.abs((p.top + p.bottom) / 2 - (n.top + n.bottom) / 2) < 6;
+              if (beside && name.scrollWidth > name.clientWidth + 0.5) out.push(`${width} px: the name is cut beside the pill`);
+              if (!dot && text.scrollWidth > text.clientWidth + 0.5) out.push(`${width} px: the pill's word is cut`);
+              if (width <= 200 && !dot) out.push(`${width} px: the pill shows its word`);
+              const banner = titles.closest(".banner")?.getBoundingClientRect();
+              const right = titles.getBoundingClientRect().right;
+              if (banner)
+                for (const part of [name, chip, ...titles.querySelectorAll(".sub")]) {
+                  const r = part.getBoundingClientRect();
+                  if (r.height && (r.top < banner.top - 0.5 || r.bottom > banner.bottom - 10.5 || r.right > right + 0.5)) out.push(`${width} px: .${part.className} leaves the text column`);
+                }
+              return out;
+            }, width)),
+          );
+        }
+        await page.close();
+        assert.deepEqual(bad, []);
+      });

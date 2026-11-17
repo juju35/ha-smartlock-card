@@ -320,7 +320,7 @@ test("jammed lock: red state and alert", () => {
   // Illustrated header: the icon and the state word in red, the alert icon.
   const banner = newCard(makeHass(st), { entity: "lock.garage" }).shadowRoot.innerHTML;
   assert.match(banner, /class="badge clickable crit"[^>]*><svg class="icon "[^>]*><path d="M13 14H11V9H13/);
-  assert.match(banner, /class="chip clickable crit len-s"[^>]*title="Jammed"/);
+  assert.match(banner, /class="chip clickable crit"[^>]*title="Jammed"/);
 });
 
 test("door open while the lock is unlocked: warning on the full and mini cards", () => {
@@ -871,7 +871,7 @@ test("illustrated header: door scene with the lock's own picture on it, state ic
     assert.match(html, /class="badge clickable ok"/);
     assert.match(html, /class="name clickable"[^>]*>Front door</);
     // The state in the pill right after the name; the sub-line keeps the detail only.
-    assert.match(html, /class="name clickable"[^>]*>Front door<\/div><span class="chip clickable ok len-s"[^>]*title="Locked" aria-label="Locked"><span class="dot"><\/span><span class="t">Locked<\/span><\/span>/);
+    assert.match(html, /<div class="trow"><div class="name clickable"[^>]*>Front door<\/div><span class="chip clickable ok"[^>]*title="Locked" aria-label="Locked"><span class="dot"><\/span><span class="t">Locked<\/span><\/span>/);
     assert.doesNotMatch(html, /class="st ok"/);
     assert.doesNotMatch(html, /class="header"/);
     assert.match(html, /\.banner \{ position: relative; overflow: hidden; height: 90px;/);

@@ -299,7 +299,27 @@ const BANNER_STYLE = `
   /* The text on the wall, at the left of the scene: state icon, name, state and detail. */
   .htext { position: absolute; left: 12px; top: 0; bottom: var(--g); right: calc(var(--scene-w) + 4px);
            display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .htext .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; gap: 2px; }
+  /* Title row: the name, then the status pill 8 px after it, both shrinking (the name keeps a few letters, the pill
+     at most about half the row); the detail under them. Short of room the pill takes its own line under the detail;
+     on a very narrow card only its dot shows (its word stays in its title and for screen readers). */
+  .htext .titles { flex: 1 1 0; min-width: 5ch; display: grid; row-gap: 2px; column-gap: 8px; align-items: center; justify-content: start;
+                   grid-template-columns: minmax(min(4.5ch, 100%), max-content) max-content; container: sl-titles / inline-size; }
+  .htext .titles > .sub { grid-column: 1 / -1; }
+  .banner .chip { --c: var(--sl-ok); max-width: 100%; justify-self: start; line-height: 16px;
+                  background: color-mix(in srgb, var(--c) 18%, rgba(255,255,255,.78)); color: color-mix(in srgb, var(--c) 45%, #0d2a45); }
+  .banner.night .chip { background: color-mix(in srgb, var(--c) 30%, rgba(8,18,38,.55)); color: color-mix(in srgb, var(--c) 35%, #ffffff); }
+  .banner .chip.ok { --c: var(--sl-ok); } .banner .chip.warn { --c: var(--sl-warn); } .banner .chip.crit { --c: var(--sl-crit); }
+  .banner .chip.active { --c: var(--sl-active); } .banner .chip.idle { --c: #8a9097; }
+  .banner .chip .dot { width: 7px; height: 7px; }
+  /* The pill leaves the name's line once it would take more than about half of it (by its word's length). */
+  @container sl-titles (max-width: 160px) { .htext .titles > .chip { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
+  @container sl-titles (max-width: 190px) { .htext .titles > .chip.len-m, .htext .titles > .chip.len-l, .htext .titles > .chip.len-xl { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
+  @container sl-titles (max-width: 225px) { .htext .titles > .chip.len-l, .htext .titles > .chip.len-xl { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
+  @container sl-titles (max-width: 270px) { .htext .titles > .chip.len-xl { grid-column: 1 / -1; grid-row: 3; margin-top: 2px; } }
+  @container sl-card (max-width: 200px) {
+    .banner .chip { padding: 4px; }
+    .banner .chip .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  }
   .htext .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* The icon always shows the state color: green locked, amber unlocked, blue moving, red jammed, grey unknown. */
   .banner .badge { background: rgba(255,255,255,.62); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 28%, transparent); }
@@ -317,9 +337,12 @@ const BANNER_STYLE = `
   .banner .sub .more.warn { color: var(--ink); font-weight: 500; }
   .banner .sub .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .banner .sub .dot { margin-right: 5px; }
-  .banner .zoom { position: absolute; top: 6px; right: 6px; margin: 0; color: #10283f; background: rgba(255,255,255,.55); }
-  .banner.night .zoom { color: #fff; background: rgba(10,20,40,.45); }
-  .banner .zoom:hover { background: rgba(255,255,255,.8); } .banner.night .zoom:hover { background: rgba(10,20,40,.7); }
+  /* The expand / collapse button: 24 px, round, frosted, in the banner's top right corner. */
+  .banner .zoom { position: absolute; z-index: 2; top: 5px; right: 5px; width: 24px; height: 24px; margin: 0; color: #33506b;
+                  background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.7);
+                  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  .banner.night .zoom { color: #fff; background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+  .banner .zoom:hover { background: rgba(255,255,255,.75); color: #33506b; } .banner.night .zoom:hover { background: rgba(255,255,255,.22); color: #fff; }
   /* Mini card, under the banner: the battery at the left, the buttons at the right. */
   .mfoot { display: flex; align-items: center; gap: 10px; padding: 10px 12px 12px; min-height: 32px; }
   .mfoot .batt { flex: 1 1 auto; display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
@@ -333,21 +356,16 @@ const BANNER_STYLE = `
   .mfoot .controls .btn .icon { width: 16px; height: 16px; }
   @container (max-width: 260px) { .mfoot .batt .bar { display: none; } .mfoot { gap: 6px; padding: 8px 10px 10px; } }
   /* Narrow card: the state word keeps the sub-line, its detail (but a warning) stays in the card body. */
-  @container (max-width: 300px) { .banner .sub .more:not(.warn) { display: none; } }
+  @container sl-card (max-width: 300px) { .banner .sub .more:not(.warn) { display: none; } }
   /* Narrow card: no room for the door beside the text, the wall alone stays (the full card shows the picture in
      its body). */
   @container (max-width: 300px) {
     .sl-scene { display: none; }
     .htext { right: 12px; }
-    .banner:has(.zoom) .htext .name { margin-right: 26px; }
+    .banner:has(.zoom) .htext { right: 34px; }
   }
-  /* 6 columns of a phone: the icon shares the name's line, the state takes the whole width under them. */
-  @container (max-width: 240px) {
-    .htext { left: 10px; right: 10px; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 8px; row-gap: 6px; align-content: center; }
-    .htext .titles { display: contents; }
-    .htext .name { align-self: center; }
-    .htext .sub { grid-column: 1 / -1; }
-  }
+  /* 6 columns of a phone: a tighter left margin. */
+  @container (max-width: 240px) { .htext { left: 10px; gap: 8px; } }
 `;
 
 const ICONS = {
@@ -2521,7 +2539,7 @@ const BASE_STYLE = `
      its column instead of overflowing it. Anywhere else (Sections, masonry, stacks) the parent sets the width. */
   :host { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; }
   :host::before { content: ""; width: 300px; max-width: 100%; height: 0; }
-  ha-card { overflow: hidden; container-type: inline-size; }
+  ha-card { overflow: hidden; container: sl-card / inline-size; }
   .icon { width: 18px; height: 18px; fill: currentColor; flex: none; }
   .muted { color: var(--secondary-text-color); }
   .clickable { cursor: pointer; }
@@ -3111,6 +3129,23 @@ class SmartLockBase extends HTMLElement {
     return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}${alert ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
   }
 
+  // The banner's status pill, right after the name: the state's dot and word, in the icon's color.
+  _pill(lock, state) {
+    const word = this._fmtState(state);
+    const label = esc(word);
+    // Its length bucket, for the width under which it takes its own line (see the banner style).
+    const len = word.length <= 7 ? "s" : word.length <= 10 ? "m" : word.length <= 14 ? "l" : "xl";
+    return `<span class="chip clickable ${statusClass(state)} len-${len}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>`;
+  }
+
+  // The banner's sub-line: the detail only (the state is in the pill), in the warning color for a warning.
+  _bannerSub(lock, m, state) {
+    const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
+    const detail = this._miniDetail(m, lock).replace(/^ · /, "");
+    if (!detail && !alert) return "";
+    return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(detail || alert)}${alert && detail ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
+  }
+
   // The illustrated header (`illustration: false` keeps the classic one).
   _illustrated() {
     return this._config.illustration !== false;
@@ -3134,8 +3169,8 @@ class SmartLockBase extends HTMLElement {
         <div class="htext">
           ${this._badge(lock, state)}
           <div class="titles">
-            <div class="name clickable" data-entity="${id}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            ${this._subLine(lock, m, state)}
+            <div class="name clickable" data-entity="${id}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>${this._pill(lock, state)}
+            ${this._bannerSub(lock, m, state)}
           </div>
         </div>
         ${this._zoomButton()}

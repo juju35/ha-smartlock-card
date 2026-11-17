@@ -318,7 +318,7 @@ test("jammed lock: red state and alert", () => {
   // Illustrated header: the icon and the state word in red, the alert icon.
   const banner = newCard(makeHass(st), { entity: "lock.garage" }).shadowRoot.innerHTML;
   assert.match(banner, /class="badge clickable crit"[^>]*><svg class="icon "[^>]*><path d="M13 14H11V9H13/);
-  assert.match(banner, /class="st crit"/);
+  assert.match(banner, /class="chip clickable crit len-s"[^>]*title="Jammed"/);
 });
 
 test("door open while the lock is unlocked: warning on the full and mini cards", () => {
@@ -330,7 +330,7 @@ test("door open while the lock is unlocked: warning on the full and mini cards",
     assert.match(html, /class="alert-line warn clickable" data-entity="binary_sensor\.porte_entree_porte"/, lock);
     assert.match(html, /The door is open while the lock is unlocked\./, lock);
     // Not by color only: the warning is also in words, for screen readers.
-    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\."> · Door open<span class="sr"> · The door is open while the lock is unlocked\.<\/span>/, lock);
+    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\.">Door open<span class="sr"> · The door is open while the lock is unlocked\.<\/span>/, lock);
   }
   // Locked with the door open, or unlocked with the door closed: no warning.
   for (const [lock, door] of [["locked", "on"], ["unlocked", "off"]]) {
@@ -428,7 +428,7 @@ test("auto-lock: countdown from the device's delay while unlocked, ticking every
   assert.ok(card._relockTimer, "a one-second timer is armed");
   // The delay entity stays among the settings.
   assert.ok(sl.describe(card._hass, {}, "lock.porte_entree").settings.includes("number.porte_entree_auto_lock_delay"));
-  assert.match(mini.shadowRoot.innerHTML, /· Locks again in 2:(19|20)/);
+  assert.match(mini.shadowRoot.innerHTML, /class="more">Locks again in 2:(19|20)/);
 });
 
 test("auto-lock: nothing while locked, with the switch off, or once the delay is past; auto_lock_delay overrides", (t) => {
@@ -863,7 +863,9 @@ test("illustrated header: door scene with the lock's own picture on it, state ic
     assert.doesNotMatch(html, /id="g"/);
     assert.match(html, /class="badge clickable ok"/);
     assert.match(html, /class="name clickable"[^>]*>Front door</);
-    assert.match(html, /class="st ok" title="Locked"/);
+    // The state in the pill right after the name; the sub-line keeps the detail only.
+    assert.match(html, /class="name clickable"[^>]*>Front door<\/div><span class="chip clickable ok len-s"[^>]*title="Locked" aria-label="Locked"><span class="dot"><\/span><span class="t">Locked<\/span><\/span>/);
+    assert.doesNotMatch(html, /class="st ok"/);
     assert.doesNotMatch(html, /class="header"/);
     assert.match(html, /\.banner \{ position: relative; overflow: hidden; height: 90px;/);
   }

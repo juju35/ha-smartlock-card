@@ -23,7 +23,7 @@ let skip = false;
 before(async () => {
   try {
     const { chromium } = await import("playwright");
-    browser = await chromium.launch();
+    browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
   } catch (err) {
     if (process.env.CI) throw err;
     skip = `Chromium not available (${err.message.split("\n")[0]})`;
@@ -582,7 +582,13 @@ function measureBanner() {
       return (b.width || b.height) && (b.right > card.right + 0.5 || b.left < card.left - 0.5);
     })
     .map((n) => String(n.className?.baseVal ?? n.className));
-  const t = q(".banner .sub .st .t");
+  // The status pill after the name: its word, unless only its dot shows (very narrow card: the word is hidden
+  // visually, kept for screen readers).
+  const t = q(".banner .chip .t");
+  const dotOnly = getComputedStyle(t).position === "absolute";
+  const pill = box(q(".banner .chip"));
+  const nameEl = q(".banner .name");
+  const nameBox = box(nameEl);
   return {
     out,
     banner: box(q(".banner")),
@@ -595,8 +601,15 @@ function measureBanner() {
     titles: box(q(".banner .titles")) || box(q(".banner .name")),
     name: box(q(".banner .name")),
     zoom: box(q(".banner .zoom")),
-    cut: t.scrollWidth > t.clientWidth + 0.5,
+    cut: !dotOnly && t.scrollWidth > t.clientWidth + 0.5,
     state: t.textContent,
+    dotOnly,
+    pill,
+    // On the name's line (else on its own line under the detail), its share of the title block.
+    beside: !!pill && Math.abs(pill.top + pill.height / 2 - (nameBox.top + nameBox.height / 2)) < 2,
+    nameCut: nameEl.scrollWidth > nameEl.clientWidth + 0.5,
+    // How many characters of the name show (its visible width over the width of one of its characters).
+    nameChars: (nameBox.width / nameEl.scrollWidth) * nameEl.textContent.length,
     card: card.toJSON(),
   };
 }
@@ -617,6 +630,10 @@ for (const tag of ["smartlock-card", "smartlock-mini-card"])
           assert.equal(Math.round(r.ground.height), 10, `${at}: ground ${r.ground.height} px high`);
           assert.ok(Math.abs(r.ground.bottom - r.banner.bottom) < 0.5 && r.ground.width >= r.banner.width - 0.5, `${at}: the ground is not edge to edge at the bottom`);
           assert.equal(r.cut, false, `${at}: state "${r.state}" cut`);
+          assert.equal(r.dotOnly, width <= 200, `${at}: the pill ${r.dotOnly ? "shows only its dot" : "shows its word"}`);
+          // Beside a cut name, the pill takes at most about half the title block (a short name leaves it more).
+          if (r.beside && r.nameCut) assert.ok(r.pill.width <= r.titles.width * 0.51 + 0.5, `${at}: the pill takes ${r.pill.width} of ${r.titles.width} px`);
+          assert.ok(r.nameChars >= 4 - 0.01 || r.dotOnly, `${at}: ${r.nameChars.toFixed(1)} characters of the name show`);
           assert.ok(r.titles.width >= 40, `${at}: the name block is ${r.titles.width} px wide`);
           assert.ok(r.badge.width === 40 && r.badge.height === 40, `${at}: badge ${r.badge.width}×${r.badge.height}`);
           if (r.zoom) {

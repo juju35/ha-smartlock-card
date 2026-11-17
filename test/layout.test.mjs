@@ -722,7 +722,7 @@ for (const [tag, zoom] of [
         for (const width of [190, 245, 300, 400, 460, 500]) {
           await page.evaluate((w) => {
             document.getElementById("root").style.width = `${w}px`;
-            return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+            return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))));
           }, width);
           bad.push(
             ...(await page.evaluate((width) => {

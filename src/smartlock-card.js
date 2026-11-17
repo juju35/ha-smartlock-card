@@ -3107,9 +3107,10 @@ class SmartLockBase extends HTMLElement {
     return "";
   }
 
-  // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>".
-  _miniDetail(m, lock) {
-    if (this._doorOpen(m)) return ` · ${this._t("door_open")}`;
+  // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>". `door`: false
+  // when the card shows the door elsewhere (the full card's hero), so the sub-line keeps the last change.
+  _miniDetail(m, lock, door = true) {
+    if (door && this._doorOpen(m)) return ` · ${this._t("door_open")}`;
     if (!valid(lock)) return "";
     const left = this._autoLockLeft(m, lock, this._state(lock));
     if (left != null) return ` · ${this._relocksText(left)}`;
@@ -3139,9 +3140,9 @@ class SmartLockBase extends HTMLElement {
   }
 
   // The banner's sub-line: the detail only (the state is in the pill), in the warning color for a warning.
-  _bannerSub(lock, m, state) {
+  _bannerSub(lock, m, state, door = true) {
     const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
-    const detail = this._miniDetail(m, lock).replace(/^ · /, "");
+    const detail = this._miniDetail(m, lock, door).replace(/^ · /, "");
     if (!detail && !alert) return "";
     return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(detail || alert)}${alert && detail ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
   }
@@ -3162,7 +3163,8 @@ class SmartLockBase extends HTMLElement {
   }
 
   // The banner: wall and door (day or night), the state icon, the name and the state with its detail on the wall.
-  _banner(lock, m, state) {
+  // `door`: false on the full card, whose hero shows the door sensor (the sub-line then keeps the last change).
+  _banner(lock, m, state, door = true) {
     const id = esc(lock.entity_id);
     return `<div class="banner${isNight(this._hass, this._config) ? " night" : ""}">
         ${doorScene(this._doorLock(lock, state))}<div class="ground"></div>
@@ -3170,7 +3172,7 @@ class SmartLockBase extends HTMLElement {
           ${this._badge(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${id}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>${this._pill(lock, state)}
-            ${this._bannerSub(lock, m, state)}
+            ${this._bannerSub(lock, m, state, door)}
           </div>
         </div>
         ${this._zoomButton()}
@@ -3280,10 +3282,14 @@ class SmartLockBase extends HTMLElement {
     return `<div class="line relock">${svgIcon(ICONS.clock)}<span>${esc(this._relocksText(left))}</span></div>`;
   }
 
-  _doorLine(m) {
+  // The door sensor's line; `big`: as the hero's big line (when the lock's state is only in the header pill).
+  _doorLine(m, big = false) {
     const d = this._s(m.door);
     if (!valid(d)) return "";
     const open = this._doorOpen(m);
+    if (big) {
+      return `<div class="state door clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}" role="button" tabindex="0">${esc(this._t(open ? "door_open" : "door_closed"))}</div>`;
+    }
     return `<div class="line clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}" role="button" tabindex="0">${svgIcon(open ? ICONS.door_open : ICONS.door_closed)}<span>${esc(
       this._t(open ? "door_open" : "door_closed"),
     )}</span></div>`;
@@ -3343,6 +3349,7 @@ const FULL_STYLE = `
   .picture { width: 88px; height: 102px; }
   .picture img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }
   .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+  .state.door:not(.warn) { color: var(--primary-text-color); }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }
@@ -3434,7 +3441,7 @@ class SmartLockCard extends SmartLockBase {
     if (c.show_details !== false) parts.push(this._details(m));
     if (c.show_settings !== false) parts.push(this._settings(m));
     if (c.show_activity !== false) parts.push(this._activityHtml(lock));
-    const head = this._illustrated() ? this._banner(lock, m, state) : this._header(lock, state, this._changedText(lock));
+    const head = this._illustrated() ? this._banner(lock, m, state, false) : this._header(lock, state, this._changedText(lock));
     return `<style>${BASE_STYLE}${FULL_STYLE}${this._illustrated() ? BANNER_STYLE : ""}</style>
       <ha-card>
         ${head}
@@ -3447,12 +3454,16 @@ class SmartLockCard extends SmartLockBase {
     const platform = m.platform && (PLATFORMS[m.platform] || pretty(m.platform));
     if (platform) tags.push(`<span class="tag">${svgIcon(ICONS.signal)}${esc(platform)}</span>`);
     if (lock.attributes?.code_format) tags.push(`<span class="tag">${svgIcon(ICONS.keypad)}${esc(this._t("code"))}</span>`);
+    // The lock's state is already in the header pill: it stays big here only when it calls for attention (jammed,
+    // open, moving, unavailable). Locked or unlocked, the big line is what the pill does not say: the door sensor.
+    const calm = ["locked", "unlocked"].includes(String(state || "").toLowerCase());
+    const big = calm ? this._doorLine(m, true) : `<div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>`;
     return `<div class="hero">
       ${this._picture(lock, state)}
       <div class="info">
-        <div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>
+        ${big}
         ${this._batteryLine(this._battery(m))}
-        ${this._doorLine(m)}
+        ${calm ? "" : this._doorLine(m)}
         ${this._autoLockLine(m, lock, state)}
         ${this._alertLine(m, state)}
         ${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}

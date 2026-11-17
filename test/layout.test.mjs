@@ -193,7 +193,11 @@ function measureCard() {
     titles: q(".titles").getBoundingClientRect().width,
     titlesMin: parseFloat(getComputedStyle(q(".titles")).minWidth),
     nameFont: parseFloat(getComputedStyle(name).fontSize),
-    state: q(".state")?.textContent,
+    // The lock's state word (in the header pill; big in the hero only when it calls for attention).
+    state: (() => {
+      const el = document.getElementById("card");
+      return el._fmtState(el._state(el._s("lock.porte_entree")));
+    })(),
   };
 }
 
@@ -485,7 +489,7 @@ test("keyboard: the focus stays on a detail tile when the lock state changes", a
     tiles()[1].focus();
     const lock = el.hass.states["lock.porte_entree"];
     el.hass = { ...el.hass, states: { ...el.hass.states, "lock.porte_entree": { ...lock, state: "unlocked", last_changed: new Date().toISOString() } } };
-    return { index: tiles().indexOf(el.shadowRoot.activeElement), state: el.shadowRoot.querySelector(".state").textContent };
+    return { index: tiles().indexOf(el.shadowRoot.activeElement), state: el.shadowRoot.querySelector(".chip").getAttribute("aria-label") };
   });
   await page.close();
   assert.deepEqual(r, { index: 1, state: "Unlocked" });

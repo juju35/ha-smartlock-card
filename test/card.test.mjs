@@ -32,9 +32,11 @@ test("setConfig refuses an entity that is not a lock", () => {
 
 test("the full card shows state, battery, door, integration and the Open button", () => {
   const html = newCard(makeHass()).shadowRoot.innerHTML;
-  assert.match(html, /class="state clickable ok"[^>]*>Locked</);
+  assert.match(html, /class="chip clickable ok[^"]*"[^>]*><span class="dot"><\/span><span class="t">Locked</);
   assert.match(html, /78 %/);
-  assert.match(html, /Door closed/);
+  // Locked: the state is in the header pill only, the hero's big line is the door sensor.
+  assert.match(html, /class="state door clickable "[^>]*>Door closed</);
+  assert.doesNotMatch(html, /class="state clickable ok"/);
   assert.match(html, />Nuki</);
   assert.match(html, /data-action="open"/);
   assert.match(html, /class="btn primary" data-action="unlock"/);
@@ -136,7 +138,7 @@ test("a failed call drops the requested state and leaves no unhandled rejection"
   assert.match(card.shadowRoot.innerHTML, />Unlocking</);
   await new Promise((r) => setTimeout(r, 0));
   assert.equal(card._pending, null);
-  assert.match(card.shadowRoot.innerHTML, /class="state clickable ok"[^>]*>Locked</);
+  assert.match(card.shadowRoot.innerHTML, /class="chip clickable ok[^"]*"[^>]*><span class="dot"><\/span><span class="t">Locked</);
   clearTimeout(card._pendingTimer);
 });
 
@@ -235,7 +237,7 @@ test("Open on a lock that never reports opening drops Opening shortly after the 
   assert.match(card.shadowRoot.innerHTML, />Opening</);
   await new Promise((r) => setTimeout(r, 4200));
   assert.equal(card._pending, null);
-  assert.match(card.shadowRoot.innerHTML, /class="state clickable ok"[^>]*>Locked</);
+  assert.match(card.shadowRoot.innerHTML, /class="chip clickable ok[^"]*"[^>]*><span class="dot"><\/span><span class="t">Locked</);
   clearTimeout(card._pendingTimer);
 });
 
@@ -737,7 +739,12 @@ test("activity: an unfold after a successful read does not read the logbook agai
 const clickables = (html) => [...html.matchAll(/<(\w+)([^>]*class="[^"]*\bclickable\b[^"]*"[^>]*)>/g)].map((m) => m[0]);
 
 test("keyboard: every clickable part of the full card is a focusable button", () => {
-  const st = { ...states, "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" } };
+  // Unlocking (the state stays big in the hero, the door on its own line), door open.
+  const st = {
+    ...states,
+    "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocking" },
+    "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" },
+  };
   const card = newCard(makeHass(st, { callWS: async () => logbook }), { collapsed: [], illustration: false });
   return new Promise((r) => setTimeout(r, 0)).then(() => {
     const html = card.shadowRoot.innerHTML;
@@ -935,4 +942,19 @@ test("editor: illustration toggle on both cards, its theme only with the illustr
     ed._config = { entity: "lock.porte_entree", illustration: false };
     assert.ok(!names(ed._schema()).includes("illustration_theme"));
   }
+});
+
+test("full card: the door is said once, big in the hero; the banner sub-line keeps the last change", () => {
+  const st = {
+    ...states,
+    "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked", last_changed: new Date(Date.now() - 5 * 60e3).toISOString() },
+    "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" },
+  };
+  const html = newCard(makeHass(st)).shadowRoot.innerHTML;
+  assert.match(html, /class="state door clickable warn"[^>]*>Door open</);
+  assert.equal((html.match(/Door open/g) || []).length, 1, "Door open written once");
+  assert.match(html, /class="sub clickable"[^>]*><span class="more warn"[^>]*>5 minutes ago/);
+  // The mini card (no hero) keeps the open door in its banner sub-line.
+  const mini = newCard(makeHass(st), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  assert.match(mini, /class="sub clickable"[^>]*><span class="more warn"[^>]*>Door open/);
 });

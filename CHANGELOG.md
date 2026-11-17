@@ -6,6 +6,7 @@
 - **Illustrated header** on the full and the mini card (90 px): the inside of the entrance door, with the card's own lock picture (per model, animated) drawn big and centred on the door, a plant, a light switch and a key hook beside it, and a floor strip under the whole width. The name and the state sit on the wall at the left, next to the 40 px mdi state icon, which always shows the state color (green locked, amber unlocked, blue while moving, red jammed, grey unknown). The picture follows the lock state (locked, unlocked, open, jammed, locking / unlocking / opening animations).
 - Day and night pictures: night when `sun.sun` is below the horizon or Home Assistant is in dark mode; `illustration_theme: day | night` forces one. `illustration: false` keeps the classic header (and, on the mini card, the model picture as the icon). Both options are in the visual editors of both cards.
 - Mini card: battery and buttons under the banner, the detail button on it. On narrow cards (300 px or less) the door gives its room to the name and the state; the full card then shows the lock picture in its body.
+- Full card: the lock's state is no longer repeated big under the header (it is in the status pill); locked or unlocked, the big line is the door sensor (closed / open), and jammed, moving, open or unavailable stay big. The door is said once: the banner sub-line keeps the last change.
 
 ## 1.11.0 - 2026-11-15
 

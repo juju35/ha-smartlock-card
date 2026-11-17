@@ -23,7 +23,7 @@ let skip = false;
 before(async () => {
   try {
     const { chromium } = await import("playwright");
-    browser = await chromium.launch();
+    browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
   } catch (err) {
     if (process.env.CI) throw err;
     skip = `Chromium not available (${err.message.split("\n")[0]})`;
@@ -43,7 +43,7 @@ async function boxes(width, config, overrides = {}) {
   const out = await page.evaluate(
     ({ config, states, entities, devices, logbook }) => {
       const el = document.createElement("smartlock-mini-card");
-      el.setConfig({ type: "custom:smartlock-mini-card", ...config });
+      el.setConfig({ type: "custom:smartlock-mini-card", illustration: false, ...config });
       el.hass = { states, entities, devices, language: "en", locale: { language: "en" }, callService() {}, callWS: async () => logbook };
       document.getElementById("root").appendChild(el);
       const root = el.shadowRoot;
@@ -138,7 +138,7 @@ async function open(tag, width, config = {}, overrides = {}, theme = "light") {
     async ({ tag, config, states, entities, devices, logbook }) => {
       const el = document.createElement(tag);
       el.id = "card";
-      el.setConfig({ type: `custom:${tag}`, ...config });
+      el.setConfig({ type: `custom:${tag}`, illustration: false, ...config });
       el.hass = { states, entities, devices, language: "en", locale: { language: "en" }, callService() {}, callWS: async () => logbook };
       window.events = [];
       el.addEventListener("hass-more-info", (ev) => window.events.push(ev.detail.entityId));
@@ -172,7 +172,8 @@ function measureCard() {
   const cut = (n) => !!n && n.getBoundingClientRect().width > 0 && n.scrollWidth > n.clientWidth + 0.5;
   // A state word drawn on more than one line (overflow-wrap broke it).
   const broken = [];
-  const st = q(".hero .state");
+  const shown = (n) => n.getClientRects().length > 0;
+  const st = [...root.querySelectorAll(".hero .state")].find(shown);
   if (st) {
     const txt = st.firstChild;
     for (const m of txt.textContent.matchAll(/\S+/g)) {
@@ -188,12 +189,18 @@ function measureCard() {
     out,
     broken,
     valueCut: cut(q(".batt .v")),
-    chip: chip && { ...chip.getBoundingClientRect().toJSON(), text: chip.innerText.trim(), cut: cut(chip.querySelector(".t")), label: chip.getAttribute("aria-label") },
+    chip: chip && { ...chip.getBoundingClientRect().toJSON(), text: chip.querySelector(".t").getBoundingClientRect().width > 1 ? chip.innerText.trim() : "", cut: cut(chip.querySelector(".t")), label: chip.getAttribute("aria-label") },
     card: card.toJSON(),
     titles: q(".titles").getBoundingClientRect().width,
     titlesMin: parseFloat(getComputedStyle(q(".titles")).minWidth),
     nameFont: parseFloat(getComputedStyle(name).fontSize),
-    state: q(".state")?.textContent,
+    // The lock's state word (in the header pill; big in the hero only when it calls for attention).
+    // The lock's state drawn big in the hero (the door sensor's line left aside).
+    heroState: [...root.querySelectorAll(".hero .state:not(.door)")].find(shown)?.textContent ?? null,
+    state: (() => {
+      const el = document.getElementById("card");
+      return el._fmtState(el._state(el._s("lock.porte_entree")));
+    })(),
   };
 }
 
@@ -231,6 +238,7 @@ for (const [tag, zoom] of [
           assert.equal(r.chip.text, "", "the chip shows only its dot");
           assert.ok(r.chip.width >= 13.5, `the chip is squeezed to ${r.chip.width} px`);
           assert.equal(r.chip.label, r.state, "the chip keeps the state in aria-label");
+          assert.equal(r.heroState, r.state, "the state is written big in the hero while the chip shows only its dot");
         });
 
 // From 9 columns of a phone up: the chip shows its whole text, the name keeps its first letters and the hero its
@@ -485,7 +493,7 @@ test("keyboard: the focus stays on a detail tile when the lock state changes", a
     tiles()[1].focus();
     const lock = el.hass.states["lock.porte_entree"];
     el.hass = { ...el.hass, states: { ...el.hass.states, "lock.porte_entree": { ...lock, state: "unlocked", last_changed: new Date().toISOString() } } };
-    return { index: tiles().indexOf(el.shadowRoot.activeElement), state: el.shadowRoot.querySelector(".state").textContent };
+    return { index: tiles().indexOf(el.shadowRoot.activeElement), state: el.shadowRoot.querySelector(".chip").getAttribute("aria-label") };
   });
   await page.close();
   assert.deepEqual(r, { index: 1, state: "Unlocked" });
@@ -558,3 +566,190 @@ for (const width of [...PHONE_6, 210, 246, 300, 380])
     assert.ok(r.zoom.top < r.controls.top, `zoom at ${r.zoom.top}, buttons at ${r.controls.top}`);
     assert.ok(r.card.right - r.zoom.right <= 16, `zoom ${r.card.right - r.zoom.right} px from the right edge`);
   });
+
+// ---------------------------------------------------------------------------
+// Illustrated header (the classic header is tested above with illustration: false)
+// ---------------------------------------------------------------------------
+
+const BANNER = { illustration: true };
+
+// The banner parts, measured in the page.
+function measureBanner() {
+  const root = document.getElementById("card").shadowRoot;
+  const q = (s) => root.querySelector(s);
+  const box = (n) => {
+    if (!n) return null;
+    const r = n.getBoundingClientRect();
+    return r.width || r.height ? r.toJSON() : null;
+  };
+  const card = q("ha-card").getBoundingClientRect();
+  const out = [...root.querySelectorAll("ha-card *")]
+    .filter((n) => !n.closest("svg") || n.tagName === "svg")
+    .filter((n) => {
+      const b = n.getBoundingClientRect();
+      return (b.width || b.height) && (b.right > card.right + 0.5 || b.left < card.left - 0.5);
+    })
+    .map((n) => String(n.className?.baseVal ?? n.className));
+  // The status pill after the name: its word, unless only its dot shows (very narrow card: the word is hidden
+  // visually, kept for screen readers).
+  const t = q(".banner .chip .t");
+  const dotOnly = getComputedStyle(t).position === "absolute";
+  const pill = box(q(".banner .chip"));
+  const nameEl = q(".banner .name");
+  const nameBox = box(nameEl);
+  return {
+    out,
+    banner: box(q(".banner")),
+    ground: box(q(".banner .ground")),
+    scene: box(q(".banner .sl-scene")),
+    lock: box(q(".banner .sl-lock")),
+    leaf: box(q(".banner .sl-leaf")),
+    htext: box(q(".banner .htext")),
+    badge: box(q(".banner .badge")),
+    titles: box(q(".banner .titles")) || box(q(".banner .name")),
+    name: box(q(".banner .name")),
+    zoom: box(q(".banner .zoom")),
+    cut: !dotOnly && t.scrollWidth > t.clientWidth + 0.5,
+    state: t.textContent,
+    dotOnly,
+    pill,
+    // On the name's line (else on its own line under the detail), its share of the title block.
+    beside: !!pill && Math.abs(pill.top + pill.height / 2 - (nameBox.top + nameBox.height / 2)) < 2,
+    nameCut: nameEl.scrollWidth > nameEl.clientWidth + 0.5,
+    // How many characters of the name show (its visible width over the width of one of its characters).
+    nameChars: (nameBox.width / nameEl.scrollWidth) * nameEl.textContent.length,
+    card: card.toJSON(),
+  };
+}
+
+for (const tag of ["smartlock-card", "smartlock-mini-card"])
+  for (const width of [...PHONE_6, 210, 246, 300, 303, 340, 380, 500])
+    test(`${tag} illustrated at ${width} px: 90 px banner, 10 px ground, nothing cut or overlapping`, async (t) => {
+      if (skip) return t.skip(skip);
+      for (const language of ["en", "pl", "ru", "lv"])
+        for (const [what, overrides] of [...LOCK_STATES, ["jammed", { "lock.porte_entree": { state: "jammed" } }]]) {
+          const page = await open(tag, width, { ...BANNER, language }, overrides);
+          const r = await page.evaluate(measureBanner);
+          assert.deepEqual(page.errors, []);
+          await page.close();
+          const at = `${language} ${what}`;
+          assert.deepEqual(r.out, [], `${at}: parts leave the card`);
+          assert.equal(Math.round(r.banner.height), 90, `${at}: banner ${r.banner.height} px high`);
+          assert.equal(Math.round(r.ground.height), 10, `${at}: ground ${r.ground.height} px high`);
+          assert.ok(Math.abs(r.ground.bottom - r.banner.bottom) < 0.5 && r.ground.width >= r.banner.width - 0.5, `${at}: the ground is not edge to edge at the bottom`);
+          assert.equal(r.cut, false, `${at}: state "${r.state}" cut`);
+          assert.equal(r.dotOnly, width <= 200, `${at}: the pill ${r.dotOnly ? "shows only its dot" : "shows its word"}`);
+          // Beside a cut name, the pill takes at most about half the title block (a short name leaves it more).
+          if (r.beside && r.nameCut) assert.ok(r.pill.width <= r.titles.width * 0.51 + 0.5, `${at}: the pill takes ${r.pill.width} of ${r.titles.width} px`);
+          assert.ok(r.nameChars >= 4 - 0.01 || r.dotOnly, `${at}: ${r.nameChars.toFixed(1)} characters of the name show`);
+          assert.ok(r.titles.width >= 40, `${at}: the name block is ${r.titles.width} px wide`);
+          assert.ok(r.badge.width === 40 && r.badge.height === 40, `${at}: badge ${r.badge.width}×${r.badge.height}`);
+          if (r.zoom) {
+            assert.ok(r.zoom.top - r.banner.top <= 8 && r.card.right - r.zoom.right <= 10, `${at}: the detail button is not at the top right`);
+            assert.ok(r.name.right <= r.zoom.left + 0.5 || r.name.top >= r.zoom.bottom, `${at}: the name runs under the detail button`);
+          }
+          if (width > 300) {
+            assert.ok(r.scene, `${at}: the door is hidden`);
+            assert.ok(r.htext.right <= r.scene.left + 0.5, `${at}: the text runs over the door`);
+            // The lock is big and centred on the door leaf, inside the banner, above the ground.
+            assert.ok(Math.abs((r.lock.left + r.lock.right) / 2 - (r.leaf.left + r.leaf.right) / 2) < 1, `${at}: the lock is not centred on the door`);
+            assert.ok(r.lock.height >= 60, `${at}: the lock is ${r.lock.height} px high`);
+            assert.ok(r.lock.top >= r.banner.top && r.lock.bottom <= r.ground.top + 0.5, `${at}: the lock leaves the wall`);
+            assert.ok(Math.abs(r.leaf.bottom - r.ground.top) < 0.5, `${at}: the door does not stand on the ground`);
+          } else assert.equal(r.scene, null, `${at}: the door is drawn on a narrow card`);
+        }
+    });
+
+// The banner keeps its own day / night colors whatever the theme: its texts must read on it in all four cases.
+for (const theme of ["light", "dark"])
+  for (const illustration_theme of ["day", "night"])
+    for (const [what, overrides] of STATE_CASES)
+      test(`illustrated header texts readable (4.5:1), ${theme} theme, ${illustration_theme}, ${what}`, async (t) => {
+        if (skip) return t.skip(skip);
+        const results = {};
+        for (const tag of ["smartlock-card", "smartlock-mini-card"]) {
+          const page = await open(tag, 500, { ...BANNER, illustration_theme, unlocked_alert: 1 }, overrides, theme);
+          Object.assign(
+            results,
+            await page.evaluate(
+              ({ fn, tag }) => {
+                const contrast = new Function(`return ${fn}`)();
+                const root = document.getElementById("card").shadowRoot;
+                const out = {};
+                for (const s of [".banner .name", ".banner .sub .st", ".banner .sub .more"]) {
+                  const n = root.querySelector(s);
+                  if (n && n.textContent.trim()) out[`${tag} ${s}`] = Math.round(contrast(n) * 100) / 100;
+                }
+                return out;
+              },
+              { fn: contrastIn.toString(), tag },
+            ),
+          );
+          await page.close();
+        }
+        assert.ok(Object.keys(results).length >= 4, JSON.stringify(results));
+        for (const [s, r] of Object.entries(results)) assert.ok(r >= 4.5, `${s}: ${r}:1 (${JSON.stringify(results)})`);
+      });
+
+test("illustrated header: prefers-reduced-motion stops the lock animations", async (t) => {
+  if (skip) return t.skip(skip);
+  const page = await open("smartlock-card", 500, BANNER, UNLOCKING);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const names = await page.evaluate(() =>
+    [...document.getElementById("card").shadowRoot.querySelectorAll(".banner .part, .banner .glow")].map((n) => getComputedStyle(n).animationName),
+  );
+  await page.close();
+  assert.ok(names.length > 0);
+  assert.deepEqual([...new Set(names)], ["none"]);
+});
+
+// The status pill's place, decided by measurement: full card and mini card (compact and zoomed in), illustrated and
+// classic, six languages, 190-500 px. Beside the name only when the name stays whole; otherwise under the detail;
+// its word whole or its dot alone (always at 200 px or less); nothing under the banner's ground strip, out of the
+// banner or past the text column.
+for (const [tag, zoom] of [
+  ["smartlock-card", false],
+  ["smartlock-mini-card", false],
+  ["smartlock-mini-card", true],
+])
+  for (const illustration of [true, false])
+    for (const language of ["en", "fr", "de", "hu", "el", "ru"])
+      test(`status pill, ${tag}${zoom ? " zoomed in" : ""}${illustration ? "" : " classic"}, ${language}: beside a whole name, else under the detail`, async (t) => {
+        if (skip) return t.skip(skip);
+        const page = await open(tag, 190, { language, illustration, title: "Front door of the house" });
+        if (zoom) await page.evaluate(() => document.getElementById("card").shadowRoot.querySelector(".zoom").click());
+        const bad = [];
+        for (const width of [190, 245, 300, 400, 460, 500]) {
+          await page.evaluate((w) => {
+            document.getElementById("root").style.width = `${w}px`;
+            return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))));
+          }, width);
+          bad.push(
+            ...(await page.evaluate((width) => {
+              const out = [];
+              const titles = document.getElementById("card").shadowRoot.querySelector(".titles");
+              const chip = titles?.querySelector(".chip");
+              if (!chip) return out; // the classic mini card writes the state in its sub-line
+              const name = titles.querySelector(".name");
+              const text = chip.querySelector(".t");
+              const p = chip.getBoundingClientRect();
+              const n = name.getBoundingClientRect();
+              const dot = text.getBoundingClientRect().width <= 1;
+              const beside = Math.abs((p.top + p.bottom) / 2 - (n.top + n.bottom) / 2) < 6;
+              if (beside && name.scrollWidth > name.clientWidth + 0.5) out.push(`${width} px: the name is cut beside the pill`);
+              if (!dot && text.scrollWidth > text.clientWidth + 0.5) out.push(`${width} px: the pill's word is cut`);
+              if (width <= 200 && !dot) out.push(`${width} px: the pill shows its word`);
+              const banner = titles.closest(".banner")?.getBoundingClientRect();
+              const right = titles.getBoundingClientRect().right;
+              if (banner)
+                for (const part of [name, chip, ...titles.querySelectorAll(".sub")]) {
+                  const r = part.getBoundingClientRect();
+                  if (r.height && (r.top < banner.top - 0.5 || r.bottom > banner.bottom - 10.5 || r.right > right + 0.5)) out.push(`${width} px: .${part.className} leaves the text column`);
+                }
+              return out;
+            }, width)),
+          );
+        }
+        await page.close();
+        assert.deepEqual(bad, []);
+      });

@@ -230,6 +230,136 @@ const autoImage = (hass, id) => {
 
 const svgUri = (svg) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
 
+// ---------------------------------------------------------------------------
+// Illustrated header: the inside of the entrance door, the lock drawn big in the middle of the door
+// ---------------------------------------------------------------------------
+
+// Night picture: forced by illustration_theme, else the sun below the horizon or Home Assistant's dark mode.
+const isNight = (hass, config) => {
+  const theme = config.illustration_theme;
+  if (theme === "night") return true;
+  if (theme === "day") return false;
+  return hass?.states?.["sun.sun"]?.state === "below_horizon" || !!hass?.themes?.darkMode;
+};
+
+// The lock picture (lockSvg) inlined in the scene, so that its animations run with the card's and can be paused:
+// its gradient ids get the card's uid, so that two pictures in one card (banner and hero) never share an id.
+const inlineLock = (svg, uid, x, y, w, h) =>
+  svg
+    .replace(/^<svg[^>]*>/, `<svg class="sl-lock" x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 120 140" overflow="visible">`)
+    .replace(/<style>[\s\S]*?<\/style>/, "")
+    .replace(/id="(\w+)"/g, `id="sl${uid}-$1"`)
+    .replace(/url\(#(\w+)\)/g, `url(#sl${uid}-$1)`);
+
+// The scene, 160 × 80 at 1 px per unit: the door in the middle (x 44-116), a plant at its left, a light switch
+// and a key hook at its right. `lock` is drawn on the door leaf (x 48-112, y 6-80), centred on it.
+const doorScene = (lock) => {
+  const leaves = [
+    [21, 53, 0, 3.4, 10],
+    [16.5, 57, -32, 3, 8.5],
+    [25.5, 57, 32, 3, 8.5],
+    [13.5, 62, -58, 2.4, 6.5],
+    [28.5, 62, 58, 2.4, 6.5],
+  ]
+    .map(([x, y, r, rx, ry], i) => `<ellipse class="sl-plant${i % 2 ? " dk" : ""}" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" transform="rotate(${r} ${x} ${y})"/>`)
+    .join("");
+  return `<svg class="sl-scene" viewBox="0 0 160 80" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+    ${leaves}<path class="sl-pot" d="M12 66H30L28 80H14Z"/><rect class="sl-pot rim" x="11" y="65" width="20" height="3" rx="1"/>
+    <rect class="sl-frame" x="44" y="2" width="72" height="78" rx="1"/>
+    <rect class="sl-leaf" x="48" y="6" width="64" height="74"/>
+    <rect class="sl-panel" x="54" y="12" width="52" height="26" rx="1.5"/><rect class="sl-panel" x="54" y="44" width="52" height="30" rx="1.5"/>
+    <rect class="sl-hinge" x="47" y="14" width="2.4" height="7" rx=".6"/><rect class="sl-hinge" x="47" y="62" width="2.4" height="7" rx=".6"/>
+    <rect class="sl-switch" x="124" y="38" width="8" height="11" rx="1.5"/><rect class="sl-switch key" x="126" y="40.5" width="4" height="6" rx=".8"/>
+    <g transform="translate(146 34)"><rect class="sl-hook" x="-6" y="0" width="12" height="4" rx="1"/>
+      <path class="sl-key" d="M-3 4v7M3 4v5"/><circle class="sl-keyring" cx="-3" cy="13" r="2"/><circle class="sl-keyring" cx="3" cy="11" r="2"/></g>
+    ${lock}
+  </svg>`;
+};
+
+// The banner: the wall behind the text (boards), the scene at the right, a 10 px floor strip under the whole width.
+// The banner's ground strip, that the title block keeps clear of, and the gap between the name and the status pill
+// on its row (.trow).
+const PILL_GROUND_PX = 10;
+const PILL_GAP_PX = 8;
+
+const BANNER_STYLE = `
+  ${ANIM_CSS}
+  .banner { position: relative; overflow: hidden; height: 90px; --g: 10px; --scene-w: min(160px, 40cqw, max(100cqw - 265px, 28cqw)); color: #0d2a45;
+            background: repeating-linear-gradient(180deg, transparent 0 5.8px, #e2d6c6 5.8px 6.5px) #efe6da; }
+  .banner.night { color: #fff; background: repeating-linear-gradient(180deg, transparent 0 5.8px, #353a47 5.8px 6.5px) #2b2f3a; }
+  .sl-scene { position: absolute; right: 0; bottom: var(--g); height: calc(100% - var(--g)); width: var(--scene-w);
+              -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px); mask-image: linear-gradient(90deg, transparent, #000 14px); }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: var(--g); background: #9aa1a9; box-shadow: inset 0 2px 0 #b5bbc2; }
+  .night .ground { background: #2c323b; box-shadow: inset 0 2px 0 #4b535e; }
+  .sl-frame { fill: #6d4c3d; } .night .sl-frame { fill: #3a3040; }
+  .sl-leaf { fill: #8a5a3a; } .night .sl-leaf { fill: #4a3a30; }
+  .sl-panel { fill: none; stroke: #7a4e30; stroke-width: 1; } .night .sl-panel { stroke: #5a4636; }
+  .sl-hinge { fill: #c9b27a; } .night .sl-hinge { fill: #7d6f50; }
+  .sl-switch { fill: #fff; stroke: #d6ccbe; stroke-width: .6; } .sl-switch.key { fill: #f4f0ea; }
+  .night .sl-switch { fill: #55617a; stroke: #3f475a; } .night .sl-switch.key { fill: #66728c; }
+  .sl-hook { fill: #c9ced6; } .night .sl-hook { fill: #55617a; }
+  .sl-key { stroke: #9aa3ae; stroke-width: 1; } .sl-keyring { fill: none; stroke: #d4b26a; stroke-width: 1.2; }
+  .sl-plant { fill: #5aa83d; } .sl-plant.dk { fill: #4a9132; } .night .sl-plant { fill: #3e6a4a; } .night .sl-plant.dk { fill: #335a3e; }
+  .sl-pot { fill: #b0855a; } .sl-pot.rim { fill: #c39668; } .night .sl-pot { fill: #6e5238; } .night .sl-pot.rim { fill: #7d5f42; }
+  /* The text on the wall, at the left of the scene: state icon, name, state and detail. */
+  .htext { position: absolute; left: 12px; top: 0; bottom: var(--g); right: calc(var(--scene-w) + 4px);
+           display: flex; align-items: center; gap: 10px; min-width: 0; }
+  /* Title row: the name, then the status pill 8 px after it (see .trow); the detail under them. */
+  .htext .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .banner .chip { --c: var(--sl-ok); line-height: 16px;
+                  background: color-mix(in srgb, var(--c) 18%, rgba(255,255,255,.78)); color: color-mix(in srgb, var(--c) 45%, #0d2a45); }
+  .banner.night .chip { background: color-mix(in srgb, var(--c) 30%, rgba(8,18,38,.55)); color: color-mix(in srgb, var(--c) 35%, #ffffff); }
+  .banner .chip.ok { --c: var(--sl-ok); } .banner .chip.warn { --c: var(--sl-warn); } .banner .chip.crit { --c: var(--sl-crit); }
+  .banner .chip.active { --c: var(--sl-active); } .banner .chip.idle { --c: #8a9097; }
+  .banner .chip .dot { width: 7px; height: 7px; }
+  .htext .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* The icon always shows the state color: green locked, amber unlocked, blue moving, red jammed, grey unknown. */
+  .banner .badge { background: rgba(255,255,255,.62); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 28%, transparent); }
+  .banner .badge.idle { --c: #8a9097; }
+  .banner.night .badge { background: rgba(255,255,255,.12); color: color-mix(in srgb, var(--c) 72%, #fff);
+                          box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+  /* State texts: the banner keeps its own day / night colors whatever the theme, so its inks are mixed with them. */
+  .banner .ok, .banner .warn, .banner .crit, .banner .idle, .banner .active { --ink: color-mix(in srgb, var(--c) 42%, #10202f); }
+  .banner.night .ok, .banner.night .warn, .banner.night .crit, .banner.night .idle, .banner.night .active { --ink: color-mix(in srgb, var(--c) 45%, #fff); }
+  .banner .sub { display: flex; align-items: center; font-size: 13px; line-height: 18px; color: #3d4f60; white-space: nowrap; overflow: hidden; }
+  .banner.night .sub { color: rgba(255,255,255,.8); }
+  .banner .sub .st { display: inline-flex; align-items: center; flex: none; max-width: 100%; color: var(--ink); font-weight: 500; }
+  .banner .sub .t, .banner .sub .more { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .banner .sub .more { flex: 0 1 auto; white-space: pre; }
+  .banner .sub .more.warn { color: var(--ink); font-weight: 500; }
+  .banner .sub .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .banner .sub .dot { margin-right: 5px; }
+  /* The expand / collapse button: 24 px, round, frosted, in the banner's top right corner. */
+  .banner .zoom { position: absolute; z-index: 2; top: 5px; right: 5px; width: 24px; height: 24px; margin: 0; color: #33506b;
+                  background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.7);
+                  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  .banner.night .zoom { color: #fff; background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+  .banner .zoom:hover { background: rgba(255,255,255,.75); color: #33506b; } .banner.night .zoom:hover { background: rgba(255,255,255,.22); color: #fff; }
+  /* Mini card, under the banner: the battery at the left, the buttons at the right. */
+  .mfoot { display: flex; align-items: center; gap: 10px; padding: 10px 12px 12px; min-height: 32px; }
+  .mfoot .batt { flex: 1 1 auto; display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
+  .mfoot .batt .icon { color: var(--c); width: 14px; height: 14px; }
+  .mfoot .batt .bar { flex: 0 1 96px; min-width: 0; }
+  .mfoot .batt .v { font-weight: 500; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .mfoot .batt .bolt { color: var(--sl-ok); }
+  .mfoot > span:first-child { flex: 1; }
+  .mfoot .controls { display: flex; gap: 6px; flex: none; }
+  .mfoot .controls .btn.round { width: 32px; height: 32px; }
+  .mfoot .controls .btn .icon { width: 16px; height: 16px; }
+  @container (max-width: 260px) { .mfoot .batt .bar { display: none; } .mfoot { gap: 6px; padding: 8px 10px 10px; } }
+  /* Narrow card: the state word keeps the sub-line, its detail (but a warning) stays in the card body. */
+  @container sl-card (max-width: 300px) { .banner .sub .more:not(.warn) { display: none; } }
+  /* Narrow card: no room for the door beside the text, the wall alone stays (the full card shows the picture in
+     its body). */
+  @container (max-width: 300px) {
+    .sl-scene { display: none; }
+    .htext { right: 12px; }
+    .banner:has(.zoom) .htext { right: 34px; }
+  }
+  /* 6 columns of a phone: a tighter left margin. */
+  @container (max-width: 240px) { .htext { left: 10px; gap: 8px; } }
+`;
+
 const ICONS = {
   lock: "M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z",
   unlock:
@@ -298,6 +428,11 @@ const STRINGS = {
     show_icon: "Show the state icon in the header",
     show_title: "Show title",
     show_subtitle: "Show subtitle",
+    illustration: "Illustrated header (door and lock)",
+    illustration_theme: "Illustration theme",
+    theme_auto: "Automatic (sun or dark theme)",
+    theme_day: "Day",
+    theme_night: "Night",
     show_picture: "Show the lock picture",
     image: "Lock picture",
     image_auto: "Automatic (per model)",
@@ -383,6 +518,11 @@ const STRINGS = {
     show_icon: "Afficher l'icône d'état dans l'en-tête",
     show_title: "Afficher le titre",
     show_subtitle: "Afficher le sous-titre",
+    illustration: "En-tête illustré (porte et serrure)",
+    illustration_theme: "Thème de l'illustration",
+    theme_auto: "Automatique (soleil ou thème sombre)",
+    theme_day: "Jour",
+    theme_night: "Nuit",
     show_picture: "Afficher l'illustration de la serrure",
     image: "Illustration de la serrure",
     image_auto: "Automatique (selon le modèle)",
@@ -468,6 +608,11 @@ const STRINGS = {
     show_icon: "Zustandssymbol in der Kopfzeile anzeigen",
     show_title: "Titel anzeigen",
     show_subtitle: "Untertitel anzeigen",
+    illustration: "Illustrierte Kopfzeile (Tür und Schloss)",
+    illustration_theme: "Thema der Illustration",
+    theme_auto: "Automatisch (Sonne oder dunkles Design)",
+    theme_day: "Tag",
+    theme_night: "Nacht",
     show_picture: "Bild des Schlosses anzeigen",
     image: "Bild des Schlosses",
     image_auto: "Automatisch (je nach Modell)",
@@ -553,6 +698,11 @@ const STRINGS = {
     show_icon: "Mostrar el icono de estado en el encabezado",
     show_title: "Mostrar el título",
     show_subtitle: "Mostrar el subtítulo",
+    illustration: "Encabezado ilustrado (puerta y cerradura)",
+    illustration_theme: "Tema de la ilustración",
+    theme_auto: "Automático (sol o tema oscuro)",
+    theme_day: "Día",
+    theme_night: "Noche",
     show_picture: "Mostrar la ilustración de la cerradura",
     image: "Ilustración de la cerradura",
     image_auto: "Automática (según el modelo)",
@@ -638,6 +788,11 @@ const STRINGS = {
     show_icon: "Прикажи иконицу стања у заглављу",
     show_title: "Прикажи наслов",
     show_subtitle: "Прикажи поднаслов",
+    illustration: "Илустровано заглавље (врата и брава)",
+    illustration_theme: "Тема илустрације",
+    theme_auto: "Аутоматски (сунце или тамна тема)",
+    theme_day: "Дан",
+    theme_night: "Ноћ",
     show_picture: "Прикажи слику браве",
     image: "Слика браве",
     image_auto: "Аутоматски (према моделу)",
@@ -723,6 +878,11 @@ const STRINGS = {
     show_icon: "Prikaži ikonicu stanja u zaglavlju",
     show_title: "Prikaži naslov",
     show_subtitle: "Prikaži podnaslov",
+    illustration: "Ilustrovano zaglavlje (vrata i brava)",
+    illustration_theme: "Tema ilustracije",
+    theme_auto: "Automatski (sunce ili tamna tema)",
+    theme_day: "Dan",
+    theme_night: "Noć",
     show_picture: "Prikaži sliku brave",
     image: "Slika brave",
     image_auto: "Automatski (prema modelu)",
@@ -808,6 +968,11 @@ const STRINGS = {
     show_icon: "Mostra l'icona di stato nell'intestazione",
     show_title: "Mostra il titolo",
     show_subtitle: "Mostra il sottotitolo",
+    illustration: "Intestazione illustrata (porta e serratura)",
+    illustration_theme: "Tema dell'illustrazione",
+    theme_auto: "Automatico (sole o tema scuro)",
+    theme_day: "Giorno",
+    theme_night: "Notte",
     show_picture: "Mostra l'illustrazione della serratura",
     image: "Illustrazione della serratura",
     image_auto: "Automatica (in base al modello)",
@@ -893,6 +1058,11 @@ const STRINGS = {
     show_icon: "Statuspictogram in de koptekst tonen",
     show_title: "Titel tonen",
     show_subtitle: "Ondertitel tonen",
+    illustration: "Geïllustreerde koptekst (deur en slot)",
+    illustration_theme: "Thema van de illustratie",
+    theme_auto: "Automatisch (zon of donker thema)",
+    theme_day: "Dag",
+    theme_night: "Nacht",
     show_picture: "Afbeelding van het slot tonen",
     image: "Afbeelding van het slot",
     image_auto: "Automatisch (per model)",
@@ -978,6 +1148,11 @@ const STRINGS = {
     show_icon: "Mostrar o ícone de estado no cabeçalho",
     show_title: "Mostrar o título",
     show_subtitle: "Mostrar o subtítulo",
+    illustration: "Cabeçalho ilustrado (porta e fechadura)",
+    illustration_theme: "Tema da ilustração",
+    theme_auto: "Automático (sol ou tema escuro)",
+    theme_day: "Dia",
+    theme_night: "Noite",
     show_picture: "Mostrar a ilustração da fechadura",
     image: "Ilustração da fechadura",
     image_auto: "Automática (conforme o modelo)",
@@ -1063,6 +1238,11 @@ const STRINGS = {
     show_icon: "Pokaż ikonę stanu w nagłówku",
     show_title: "Pokaż tytuł",
     show_subtitle: "Pokaż podtytuł",
+    illustration: "Ilustrowany nagłówek (drzwi i zamek)",
+    illustration_theme: "Motyw ilustracji",
+    theme_auto: "Automatycznie (słońce lub ciemny motyw)",
+    theme_day: "Dzień",
+    theme_night: "Noc",
     show_picture: "Pokaż ilustrację zamka",
     image: "Ilustracja zamka",
     image_auto: "Automatycznie (według modelu)",
@@ -1148,6 +1328,11 @@ const STRINGS = {
     show_icon: "Afișează pictograma de stare în antet",
     show_title: "Afișează titlul",
     show_subtitle: "Afișează subtitlul",
+    illustration: "Antet ilustrat (ușă și încuietoare)",
+    illustration_theme: "Tema ilustrației",
+    theme_auto: "Automat (soare sau temă întunecată)",
+    theme_day: "Zi",
+    theme_night: "Noapte",
     show_picture: "Afișează imaginea încuietorii",
     image: "Imaginea încuietorii",
     image_auto: "Automată (după model)",
@@ -1233,6 +1418,11 @@ const STRINGS = {
     show_icon: "Vis statusikonet i overskriften",
     show_title: "Vis titel",
     show_subtitle: "Vis undertitel",
+    illustration: "Illustreret overskrift (dør og lås)",
+    illustration_theme: "Illustrationens tema",
+    theme_auto: "Automatisk (sol eller mørkt tema)",
+    theme_day: "Dag",
+    theme_night: "Nat",
     show_picture: "Vis billede af låsen",
     image: "Billede af låsen",
     image_auto: "Automatisk (efter model)",
@@ -1318,6 +1508,11 @@ const STRINGS = {
     show_icon: "Visa statusikonen i sidhuvudet",
     show_title: "Visa rubrik",
     show_subtitle: "Visa underrubrik",
+    illustration: "Illustrerad rubrik (dörr och lås)",
+    illustration_theme: "Illustrationens tema",
+    theme_auto: "Automatiskt (sol eller mörkt tema)",
+    theme_day: "Dag",
+    theme_night: "Natt",
     show_picture: "Visa bild av låset",
     image: "Bild av låset",
     image_auto: "Automatisk (efter modell)",
@@ -1403,6 +1598,11 @@ const STRINGS = {
     show_icon: "Показване на иконата на състоянието в заглавката",
     show_title: "Показване на заглавието",
     show_subtitle: "Показване на подзаглавието",
+    illustration: "Илюстрирано заглавие (врата и брава)",
+    illustration_theme: "Тема на илюстрацията",
+    theme_auto: "Автоматично (слънце или тъмна тема)",
+    theme_day: "Ден",
+    theme_night: "Нощ",
     show_picture: "Показване на изображение на бравата",
     image: "Изображение на бравата",
     image_auto: "Автоматично (според модела)",
@@ -1488,6 +1688,11 @@ const STRINGS = {
     show_icon: "Показывать значок состояния в заголовке",
     show_title: "Показывать заголовок",
     show_subtitle: "Показывать подзаголовок",
+    illustration: "Иллюстрированный заголовок (дверь и замок)",
+    illustration_theme: "Тема иллюстрации",
+    theme_auto: "Автоматически (солнце или тёмная тема)",
+    theme_day: "День",
+    theme_night: "Ночь",
     show_picture: "Показывать изображение замка",
     image: "Изображение замка",
     image_auto: "Автоматически (по модели)",
@@ -1573,6 +1778,11 @@ const STRINGS = {
     show_icon: "Показувати значок стану в заголовку",
     show_title: "Показувати заголовок",
     show_subtitle: "Показувати підзаголовок",
+    illustration: "Ілюстрований заголовок (двері та замок)",
+    illustration_theme: "Тема ілюстрації",
+    theme_auto: "Автоматично (сонце або темна тема)",
+    theme_day: "День",
+    theme_night: "Ніч",
     show_picture: "Показувати зображення замка",
     image: "Зображення замка",
     image_auto: "Автоматично (за моделлю)",
@@ -1658,6 +1868,11 @@ const STRINGS = {
     show_icon: "Állapotikon megjelenítése a fejlécben",
     show_title: "Cím megjelenítése",
     show_subtitle: "Alcím megjelenítése",
+    illustration: "Illusztrált fejléc (ajtó és zár)",
+    illustration_theme: "Az illusztráció témája",
+    theme_auto: "Automatikus (nap vagy sötét téma)",
+    theme_day: "Nappal",
+    theme_night: "Éjszaka",
     show_picture: "A zár képének megjelenítése",
     image: "A zár képe",
     image_auto: "Automatikus (modell szerint)",
@@ -1743,6 +1958,11 @@ const STRINGS = {
     show_icon: "Zobraziť ikonu stavu v hlavičke",
     show_title: "Zobraziť názov",
     show_subtitle: "Zobraziť podnázov",
+    illustration: "Ilustrovaná hlavička (dvere a zámok)",
+    illustration_theme: "Téma ilustrácie",
+    theme_auto: "Automaticky (slnko alebo tmavá téma)",
+    theme_day: "Deň",
+    theme_night: "Noc",
     show_picture: "Zobraziť obrázok zámku",
     image: "Obrázok zámku",
     image_auto: "Automaticky (podľa modelu)",
@@ -1828,6 +2048,11 @@ const STRINGS = {
     show_icon: "Zobrazit ikonu stavu v záhlaví",
     show_title: "Zobrazit název",
     show_subtitle: "Zobrazit podnázev",
+    illustration: "Ilustrované záhlaví (dveře a zámek)",
+    illustration_theme: "Motiv ilustrace",
+    theme_auto: "Automaticky (slunce nebo tmavý motiv)",
+    theme_day: "Den",
+    theme_night: "Noc",
     show_picture: "Zobrazit obrázek zámku",
     image: "Obrázek zámku",
     image_auto: "Automaticky (podle modelu)",
@@ -1913,6 +2138,11 @@ const STRINGS = {
     show_icon: "Prikaži ikono stanja v glavi",
     show_title: "Prikaži naslov",
     show_subtitle: "Prikaži podnaslov",
+    illustration: "Ilustrirana glava (vrata in ključavnica)",
+    illustration_theme: "Tema ilustracije",
+    theme_auto: "Samodejno (sonce ali temna tema)",
+    theme_day: "Dan",
+    theme_night: "Noč",
     show_picture: "Prikaži sliko ključavnice",
     image: "Slika ključavnice",
     image_auto: "Samodejno (glede na model)",
@@ -1998,6 +2228,11 @@ const STRINGS = {
     show_icon: "Rādīt stāvokļa ikonu galvenē",
     show_title: "Rādīt virsrakstu",
     show_subtitle: "Rādīt apakšvirsrakstu",
+    illustration: "Ilustrēta galvene (durvis un slēdzene)",
+    illustration_theme: "Ilustrācijas tēma",
+    theme_auto: "Automātiski (saule vai tumšā tēma)",
+    theme_day: "Diena",
+    theme_night: "Nakts",
     show_picture: "Rādīt slēdzenes attēlu",
     image: "Slēdzenes attēls",
     image_auto: "Automātiski (pēc modeļa)",
@@ -2083,6 +2318,11 @@ const STRINGS = {
     show_icon: "Εμφάνιση του εικονιδίου κατάστασης στην κεφαλίδα",
     show_title: "Εμφάνιση τίτλου",
     show_subtitle: "Εμφάνιση υπότιτλου",
+    illustration: "Εικονογραφημένη κεφαλίδα (πόρτα και κλειδαριά)",
+    illustration_theme: "Θέμα εικονογράφησης",
+    theme_auto: "Αυτόματο (ήλιος ή σκούρο θέμα)",
+    theme_day: "Ημέρα",
+    theme_night: "Νύχτα",
     show_picture: "Εμφάνιση της εικόνας της κλειδαριάς",
     image: "Εικόνα της κλειδαριάς",
     image_auto: "Αυτόματη (ανά μοντέλο)",
@@ -2291,7 +2531,7 @@ const BASE_STYLE = `
      its column instead of overflowing it. Anywhere else (Sections, masonry, stacks) the parent sets the width. */
   :host { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; }
   :host::before { content: ""; width: 300px; max-width: 100%; height: 0; }
-  ha-card { overflow: hidden; container-type: inline-size; }
+  ha-card { overflow: hidden; container: sl-card / inline-size; }
   .icon { width: 18px; height: 18px; fill: currentColor; flex: none; }
   .muted { color: var(--secondary-text-color); }
   .clickable { cursor: pointer; }
@@ -2303,8 +2543,22 @@ const BASE_STYLE = `
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--sl-ok)); flex: none; display: inline-block; }
   .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap;
           background: color-mix(in srgb, var(--c, var(--sl-ok)) 15%, transparent); color: var(--ink, var(--c, var(--sl-ok)));
-          box-sizing: border-box; flex: 0 1 auto; min-width: 0; overflow: hidden; }
-  .chip .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+          box-sizing: border-box; flex: none; }
+  /* The status pill (classic header and banner): on the title row, 8 px after the name, only when the whole name and
+     the pill's whole word fit there; otherwise on its own line under the detail, which then keeps one line. Its dot
+     alone at 200 px or less, or when the banner has no room left for its word (pill-dot): the word stays in its
+     title and for screen readers. Measured after each render (_fitPill), in every language, never by a fixed width. */
+  .trow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .trow .name { flex: 0 1 auto; min-width: 0; }
+  .titles.pill-below .trow { display: contents; }
+  .titles.pill-below .sub { order: 1; }
+  .titles.pill-below .chip { order: 2; align-self: flex-start; margin-top: 2px; }
+  .titles.pill-dot .chip { padding: 4px; }
+  .titles.pill-dot .chip .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  @container sl-card (max-width: 200px) {
+    .titles .chip { padding: 4px; }
+    .titles .chip .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  }
   .bar { height: 4px; border-radius: 3px; background: var(--divider-color, rgba(127,127,127,.25)); overflow: hidden; }
   .bar > div { height: 100%; border-radius: 3px; background: var(--c, var(--sl-ok)); transition: width .6s ease; }
   .header { display: flex; align-items: center; gap: 10px; padding: 12px 12px 0; }
@@ -2313,12 +2567,10 @@ const BASE_STYLE = `
   .badge .icon { width: 24px; height: 24px; }
   /* The name block takes what the badge, the chip and the buttons leave (basis 0: its long name never squeezes the
      chip), down to its first letters; only then does the chip shrink. Narrower, the chip shows only its dot. */
-  .titles { flex: 1 1 0; min-width: 5ch; }
-  :host([hide-title]) .titles > .name, :host([hide-subtitle]) .titles > .sub { display: none; }
+  .titles { flex: 1 1 0; min-width: 5ch; display: flex; flex-direction: column; }
+  :host([hide-title]) .titles .name, :host([hide-subtitle]) .titles > .sub { display: none; }
   .name { font-size: 16px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sub { font-size: 12px; line-height: 1.2; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* With a sub-line, the chip sits on the name line: lifted by half the sub-line (12px × 1.2). */
-  .header:has(.sub) > .chip { margin-bottom: 14.4px; }
   .warning { padding: 16px; color: color-mix(in srgb, var(--sl-warn) 40%, var(--primary-text-color, #212121)); }
   .picture { flex: none; display: flex; align-items: center; justify-content: center; }
   .picture img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -2345,12 +2597,6 @@ const BASE_STYLE = `
   .zoom:hover { background: color-mix(in srgb, var(--sl-idle) 16%, transparent); color: var(--primary-text-color); }
   .zoom:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 1px; }
   [role="button"]:focus-visible, .btn:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 2px; }
-  /* Narrow full card (6 and 8 columns of a phone, mini card zoomed in there): the chip keeps only its whole dot,
-     the state is in its title / aria-label and in big under the header. From 9 columns of a phone, it has its text. */
-  @container (max-width: 230px) {
-    .header .chip { padding: 4px; flex: none; }
-    .header .chip .t { display: none; }
-  }
   /* 6 columns of a phone (156-178 px): tighter header, so that the name, the dot and the detail button all fit
      next to the badge, which keeps its 40 px. */
   @container (max-width: 200px) {
@@ -2475,10 +2721,14 @@ const focusKey = (n) => [n.classList?.[0], n.dataset?.action, n.dataset?.entity,
 // would otherwise land on what lies under the button.
 const CONFIRM_GUARD_MS = 400;
 
+let _slUid = 0;
+
 class SmartLockBase extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    // Keeps the ids of the banner's pictures apart from those of other cards' on the page.
+    this._uid = ++_slUid;
     this._html = "";
     holdUnderPress(this, () => this._update());
     this.shadowRoot.addEventListener("click", (ev) => this._onClick(ev));
@@ -2533,7 +2783,7 @@ class SmartLockBase extends HTMLElement {
     const { id } = findLock(h, this._config);
     if (!id) return null;
     const ids = [id, this._config.door_entity, this._config.battery_entity, ...siblingsOf(h, id)];
-    return [h.entities, h.devices, h.language, h.locale, h.formatEntityState, this._changedText(h.states[id]), ...ids.map((e) => h.states[e])];
+    return [h.entities, h.devices, h.language, h.locale, h.formatEntityState, h.themes?.darkMode, h.states["sun.sun"], this._changedText(h.states[id]), ...ids.map((e) => h.states[e])];
   }
 
   // A tap or click elsewhere on the page folds the sections back to their defaults (as in ha-carburants-france) and
@@ -2546,6 +2796,7 @@ class SmartLockBase extends HTMLElement {
       else this._update();
     });
     this._outside.on();
+    this._watchPill();
     // Back on the page after leaving it: rendered again in its default state.
     if (this._hass && this._config) this._update();
     // The relative "changed … ago" text moves on its own: re-render once a minute so it does not stay frozen on a
@@ -2563,6 +2814,7 @@ class SmartLockBase extends HTMLElement {
 
   disconnectedCallback() {
     this._outside?.off();
+    this._unwatchPill();
     this._dropPress();
     // Left (another dashboard view, a conditional card hidden): back to the defaults, so that the card does not
     // come back unfolded or with its popup open.
@@ -2602,6 +2854,53 @@ class SmartLockBase extends HTMLElement {
     return id ? this._hass.states[id] : undefined;
   }
 
+  // The status pill goes on the title row, right after the title, only when the whole title and the pill's whole
+  // label fit there; otherwise it takes its own line under the subtitle (the subtitle then on one line). In the
+  // banner, when title, subtitle and pill still do not fit above the ground strip (or the pill's label runs past the
+  // text, over the picture), the pill keeps its dot only.
+  // Measured after each render and on every new width (or once the web font is loaded), never by a fixed width.
+  _fitPill() {
+    for (const t of this.shadowRoot?.querySelectorAll?.(".titles") || []) {
+      const row = t.querySelector?.(".trow");
+      const name = row?.querySelector(".name");
+      const chips = row ? [...row.children].filter((n) => n.classList.contains("chip")) : [];
+      if (!name?.getBoundingClientRect || !chips.length) continue;
+      t.classList.remove("pill-below", "pill-dot");
+      // The title's whole width (scrollWidth is rounded: 1 px more, so that a title that fits is never cut).
+      const need = chips.reduce((w, c) => w + PILL_GAP_PX + c.getBoundingClientRect().width, name.scrollWidth + 1);
+      if (need <= row.getBoundingClientRect().width + 0.5) continue;
+      t.classList.add("pill-below");
+      const banner = t.closest(".banner");
+      if (!banner) continue;
+      const box = banner.getBoundingClientRect();
+      const ground = box.bottom - PILL_GROUND_PX;
+      const right = t.getBoundingClientRect().right;
+      const out = [name, ...t.querySelectorAll(".sub"), ...chips].some((n) => {
+        const r = n.getBoundingClientRect();
+        return r.height > 0 && (r.top < box.top - 0.5 || r.bottom > ground + 0.5 || r.right > right + 0.5);
+      });
+      if (out) t.classList.add("pill-dot");
+    }
+  }
+
+  _watchPill() {
+    if (typeof ResizeObserver !== "function") return;
+    this._pillResize ??= new ResizeObserver((entries) => {
+      const w = Math.round(entries.at(-1).contentRect.width);
+      if (w === this._pillWidth) return;
+      this._pillWidth = w;
+      cancelAnimationFrame(this._pillFrame);
+      this._pillFrame = requestAnimationFrame(() => this._fitPill());
+    });
+    this._pillResize.observe(this);
+    document.fonts?.ready?.then(() => this._fitPill());
+  }
+
+  _unwatchPill() {
+    this._pillResize?.disconnect();
+    this._pillWidth = null;
+  }
+
   _update() {
     if (!this._hass || !this._config) return;
     // Held under a press (see holdUnderPress), drawn after its click.
@@ -2625,6 +2924,7 @@ class SmartLockBase extends HTMLElement {
     const nth = key ? this._focusables(key).indexOf(active) : -1;
     this._html = html;
     this.shadowRoot.innerHTML = html;
+    this._fitPill();
     if (key) {
       const same = this._focusables(key);
       (same[nth] || same[0])?.focus({ preventScroll: true });
@@ -2835,10 +3135,9 @@ class SmartLockBase extends HTMLElement {
       <div class="header">
         ${this._badge(lock, state)}
         <div class="titles">
-          <div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div>
-          ${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
+          <div class="trow"><div class="name">${esc(c.title || name(this._hass, lock.entity_id))}</div><span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span></div>
+          ${sub ? `<div class="sub" title="${esc(sub)}">${esc(sub)}</div>` : ""}
         </div>
-        <span class="chip clickable ${cls}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>
         ${this._zoomButton()}
       </div>`;
   }
@@ -2853,6 +3152,75 @@ class SmartLockBase extends HTMLElement {
   // Detail button at the far right of the header (mini card only).
   _zoomButton() {
     return "";
+  }
+
+  // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>". `door`: false
+  // when the card shows the door elsewhere (the full card's hero), so the sub-line keeps the last change.
+  _miniDetail(m, lock, door = true) {
+    if (door && this._doorOpen(m)) return ` · ${this._t("door_open")}`;
+    if (!valid(lock)) return "";
+    const left = this._autoLockLeft(m, lock, this._state(lock));
+    if (left != null) return ` · ${this._relocksText(left)}`;
+    const when = ago(this._hass, this._config, lock.last_changed);
+    if (!when) return "";
+    const by = lock.attributes?.changed_by;
+    return ` · ${when}${by ? ` · ${this._t("by", { who: by })}` : ""}`;
+  }
+
+  // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change). A door
+  // left open while the lock is unlocked, or a lock unlocked for longer than `unlocked_alert`, shows in the
+  // warning color.
+  _subLine(lock, m, state) {
+    const cls = statusClass(state);
+    const label = esc(this._fmtState(state));
+    const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
+    return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}${alert ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
+  }
+
+  // The banner's status pill, right after the name: the state's dot and word, in the icon's color.
+  _pill(lock, state) {
+    const label = esc(this._fmtState(state));
+    return `<span class="chip clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${label}" aria-label="${label}"><span class="dot"></span><span class="t">${label}</span></span>`;
+  }
+
+  // The banner's sub-line: the detail only (the state is in the pill), in the warning color for a warning.
+  _bannerSub(lock, m, state, door = true) {
+    const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
+    const detail = this._miniDetail(m, lock, door).replace(/^ · /, "");
+    if (!detail && !alert) return "";
+    return `<div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0" title="${esc(detail || alert)}"><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(detail || alert)}${alert && detail ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>`;
+  }
+
+  // The illustrated header (`illustration: false` keeps the classic one).
+  _illustrated() {
+    return this._config.illustration !== false;
+  }
+
+  // The lock on the door of the banner: the family's drawing (inlined, animated), a picture of your own, or nothing.
+  _doorLock(lock, state) {
+    const img = this._config.image;
+    if (this._config.show_picture === false || img === "none") return "";
+    if (img && img !== "auto" && !FAMILIES[img]) return `<image href="${esc(img)}" x="53" y="12" width="54" height="62" preserveAspectRatio="xMidYMid meet"/>`;
+    const [family, finish] = FAMILIES[img] ? [img] : autoImage(this._hass, lock.entity_id);
+    // 68 px high (body ~60 px), centred on the door leaf (x 80, y 43).
+    return inlineLock(lockSvg(state, family, this._config.finish || finish), this._uid, 50.9, 9.5, 58.3, 68);
+  }
+
+  // The banner: wall and door (day or night), the state icon, the name and the state with its detail on the wall.
+  // `door`: false on the full card, whose hero shows the door sensor (the sub-line then keeps the last change).
+  _banner(lock, m, state, door = true) {
+    const id = esc(lock.entity_id);
+    return `<div class="banner${isNight(this._hass, this._config) ? " night" : ""}">
+        ${doorScene(this._doorLock(lock, state))}<div class="ground"></div>
+        <div class="htext">
+          ${this._badge(lock, state)}
+          <div class="titles">
+            <div class="trow"><div class="name clickable" data-entity="${id}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>${this._pill(lock, state)}</div>
+            ${this._bannerSub(lock, m, state, door)}
+          </div>
+        </div>
+        ${this._zoomButton()}
+      </div>`;
   }
 
   // Drawn picture of the lock family (`image`: auto, a family, none) or a picture of your own (URL).
@@ -2958,10 +3326,14 @@ class SmartLockBase extends HTMLElement {
     return `<div class="line relock">${svgIcon(ICONS.clock)}<span>${esc(this._relocksText(left))}</span></div>`;
   }
 
-  _doorLine(m) {
+  // The door sensor's line; `big`: as the hero's big line (when the lock's state is only in the header pill).
+  _doorLine(m, big = false) {
     const d = this._s(m.door);
     if (!valid(d)) return "";
     const open = this._doorOpen(m);
+    if (big) {
+      return `<div class="state door clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}" role="button" tabindex="0">${esc(this._t(open ? "door_open" : "door_closed"))}</div>`;
+    }
     return `<div class="line clickable ${open ? "warn" : ""}" data-entity="${esc(d.entity_id)}" role="button" tabindex="0">${svgIcon(open ? ICONS.door_open : ICONS.door_closed)}<span>${esc(
       this._t(open ? "door_open" : "door_closed"),
     )}</span></div>`;
@@ -3021,6 +3393,15 @@ const FULL_STYLE = `
   .picture { width: 88px; height: 102px; }
   .picture img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); }
   .state { font-size: 22px; font-weight: 400; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+  .state.door:not(.warn) { color: var(--primary-text-color); }
+  .state.pill-echo { display: none; }
+  /* The pill keeps only its dot: the lock's state is written big again. */
+  @container sl-card (max-width: 200px) {
+    .content .state.pill-echo { display: block; }
+    .content .state.pill-echo + .state.door { font-size: 15px; }
+  }
+  ha-card:has(.titles.pill-dot) .content .state.pill-echo { display: block; }
+  ha-card:has(.titles.pill-dot) .content .state.pill-echo + .state.door { font-size: 15px; }
   .batt { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
   .batt .icon { color: var(--c); width: 16px; height: 16px; }
   .batt .bar { flex: 1; max-width: 140px; }
@@ -3074,6 +3455,10 @@ const FULL_STYLE = `
     .hero .picture { align-self: center; }
     .state { font-size: clamp(16px, 12.6cqi - 2px, 22px); }
   }
+  /* Illustrated header: the lock is drawn on its door, the body shows it again only when the door is hidden. */
+  .banner ~ .content .hero > .picture { display: none; }
+  @container (max-width: 300px) { .banner ~ .content .hero > .picture { display: flex; } }
+  .banner ~ .content { padding-top: 12px; }
 `;
 
 class SmartLockCard extends SmartLockBase {
@@ -3108,9 +3493,10 @@ class SmartLockCard extends SmartLockBase {
     if (c.show_details !== false) parts.push(this._details(m));
     if (c.show_settings !== false) parts.push(this._settings(m));
     if (c.show_activity !== false) parts.push(this._activityHtml(lock));
-    return `<style>${BASE_STYLE}${FULL_STYLE}</style>
+    const head = this._illustrated() ? this._banner(lock, m, state, false) : this._header(lock, state, this._changedText(lock));
+    return `<style>${BASE_STYLE}${FULL_STYLE}${this._illustrated() ? BANNER_STYLE : ""}</style>
       <ha-card>
-        ${this._header(lock, state, this._changedText(lock))}
+        ${head}
         <div class="content">${parts.filter(Boolean).join("")}</div>
       </ha-card>`;
   }
@@ -3120,12 +3506,19 @@ class SmartLockCard extends SmartLockBase {
     const platform = m.platform && (PLATFORMS[m.platform] || pretty(m.platform));
     if (platform) tags.push(`<span class="tag">${svgIcon(ICONS.signal)}${esc(platform)}</span>`);
     if (lock.attributes?.code_format) tags.push(`<span class="tag">${svgIcon(ICONS.keypad)}${esc(this._t("code"))}</span>`);
+    // The lock's state is already in the header pill: it stays big here only when it calls for attention (jammed,
+    // open, moving, unavailable). Locked or unlocked, the big line is what the pill does not say: the door sensor.
+    // On a card so narrow that the pill keeps only its dot, the state comes back big here (.pill-echo).
+    const calm = ["locked", "unlocked"].includes(String(state || "").toLowerCase());
+    const stateBig = (extra) =>
+      `<div class="state clickable ${statusClass(state)}${extra}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>`;
+    const big = calm ? `${stateBig(" pill-echo")}${this._doorLine(m, true)}` : stateBig("");
     return `<div class="hero">
       ${this._picture(lock, state)}
       <div class="info">
-        <div class="state clickable ${statusClass(state)}" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._fmtState(state))}</div>
+        ${big}
         ${this._batteryLine(this._battery(m))}
-        ${this._doorLine(m)}
+        ${calm ? "" : this._doorLine(m)}
         ${this._autoLockLine(m, lock, state)}
         ${this._alertLine(m, state)}
         ${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}
@@ -3405,38 +3798,29 @@ class SmartLockMiniCard extends SmartLockCard {
     const lock = this._s(id);
     const m = describe(this._hass, this._config, id);
     const state = this._state(lock);
-    const cls = statusClass(state);
-    const label = esc(this._fmtState(state));
     const controls = this._controls(lock, state, true);
-    // Sub-line, like the alarm card: the state in color, then a short detail (open door or last change). A door
-    // left open while the lock is unlocked, or a lock unlocked for longer than `unlocked_alert`, shows in the
-    // warning color.
-    const alert = this._doorUnlocked(m, state) ? this._t("door_unlocked") : this._unlockedTooLong(lock, state) ? this._unlockedText() : "";
+    if (this._illustrated()) {
+      // The banner (name, state and detail on the wall, the lock on its door), then the battery and the buttons.
+      const batt = this._batteryLine(this._battery(m));
+      return `<style>${BASE_STYLE}${MINI_STYLE}${BANNER_STYLE}</style>
+      <ha-card>
+        ${this._banner(lock, m, state)}
+        ${batt || controls ? `<div class="mfoot">${batt || "<span></span>"}${controls ? `<div class="controls">${controls}</div>` : ""}</div>` : ""}
+      </ha-card>`;
+    }
     return `<style>${BASE_STYLE}${MINI_STYLE}</style>
       <ha-card>
         <div class="mini">
           ${this._picture(lock, state) || this._badge(lock, state)}
           <div class="titles">
             <div class="name clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0">${esc(this._config.title || name(this._hass, lock.entity_id))}</div>
-            <div class="sub clickable" data-entity="${esc(lock.entity_id)}" role="button" tabindex="0"><span class="st ${cls}" title="${label}"><span class="dot"></span><span class="t">${label}</span></span><span class="more${alert ? ` warn" title="${esc(alert)}` : ""}">${esc(this._miniDetail(m, lock))}${alert ? `<span class="sr"> · ${esc(alert)}</span>` : ""}</span></div>
+            ${this._subLine(lock, m, state)}
             ${this._batteryLine(this._battery(m))}
           </div>
           ${controls ? `<div class="controls">${controls}</div>` : ""}
           ${this._zoomButton()}
         </div>
       </ha-card>`;
-  }
-
-  // What follows the state in the sub-line: " · Door open" while it is, else " · <when> · by <who>".
-  _miniDetail(m, lock) {
-    if (this._doorOpen(m)) return ` · ${this._t("door_open")}`;
-    if (!valid(lock)) return "";
-    const left = this._autoLockLeft(m, lock, this._state(lock));
-    if (left != null) return ` · ${this._relocksText(left)}`;
-    const when = ago(this._hass, this._config, lock.last_changed);
-    if (!when) return "";
-    const by = lock.attributes?.changed_by;
-    return ` · ${when}${by ? ` · ${this._t("by", { who: by })}` : ""}`;
   }
 }
 
@@ -3474,7 +3858,8 @@ class SmartLockEditorBase extends HTMLElement {
     const tr = (k) => t(this._hass, this._config, k);
     const picture = this._config.show_picture !== false;
     const controls = this._config.show_controls !== false;
-    const drop = new Set([...(picture ? [] : ["image", "finish"]), ...(controls ? [] : ["show_open", "confirm"])]);
+    const illustrated = this._config.illustration !== false;
+    const drop = new Set([...(picture ? [] : ["image", "finish"]), ...(controls ? [] : ["show_open", "confirm"]), ...(illustrated ? [] : ["illustration_theme"])]);
     const keep = (f) => !drop.has(f.name);
     return [
       { name: "entity", selector: { entity: { domain: "lock" } } },
@@ -3498,6 +3883,10 @@ class SmartLockEditorBase extends HTMLElement {
         selector: {
           select: { mode: "dropdown", options: ["", "white", "black", "steel"].map((v) => ({ value: v, label: tr(v ? `finish_${v}` : "finish_auto") })) },
         },
+      },
+      {
+        name: "illustration_theme",
+        selector: { select: { mode: "dropdown", options: ["auto", "day", "night"].map((v) => ({ value: v, label: tr(`theme_${v}`) })) } },
       },
       ...this.constructor.extraFields(tr),
       {
@@ -3559,7 +3948,7 @@ class SmartLockEditorBase extends HTMLElement {
   }
 
   _toggles() {
-    return [["show_icon", true], ["show_picture", true], ["show_controls", true], ["show_open", true], ...this.constructor.toggles];
+    return [["illustration", true], ["show_icon", true], ["show_picture", true], ["show_controls", true], ["show_open", true], ...this.constructor.toggles];
   }
 
   _render() {
@@ -3572,7 +3961,7 @@ class SmartLockEditorBase extends HTMLElement {
       this._form.addEventListener("value-changed", (ev) => {
         ev.stopPropagation();
         const config = { ...ev.detail.value };
-        const defaults = { ...Object.fromEntries(toggles), image: "auto", ...this.constructor.selects };
+        const defaults = { ...Object.fromEntries(toggles), image: "auto", illustration_theme: "auto", ...this.constructor.selects };
         // Keep the YAML minimal: drop empty values and options left at their default.
         for (const [k, v] of Object.entries(config))
           if (v === "" || v === undefined || v === null || (k in defaults && JSON.stringify(v) === JSON.stringify(defaults[k]))) delete config[k];
@@ -3581,7 +3970,7 @@ class SmartLockEditorBase extends HTMLElement {
       });
       this.appendChild(this._form);
     }
-    const data = { image: "auto", ...this.constructor.selects, ...this._config };
+    const data = { image: "auto", illustration_theme: "auto", ...this.constructor.selects, ...this._config };
     for (const [name, def] of toggles) if (data[name] === undefined) data[name] = def;
     if (!data.entity) data.entity = SmartLockCard.getStubConfig(this._hass).entity;
     this._form.hass = this._hass;
@@ -3594,7 +3983,7 @@ class SmartLockEditorBase extends HTMLElement {
       this._dataDeps = dataDeps;
       this._form.data = data;
     }
-    const schemaDeps = [lang(h, this._config), h.entities, this._config.show_picture, this._config.show_controls];
+    const schemaDeps = [lang(h, this._config), h.entities, this._config.show_picture, this._config.show_controls, this._config.illustration];
     if (!same(this._schemaDeps, schemaDeps)) {
       this._schemaDeps = schemaDeps;
       this._form.schema = this._schema();

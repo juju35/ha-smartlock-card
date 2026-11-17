@@ -32,9 +32,11 @@ test("setConfig refuses an entity that is not a lock", () => {
 
 test("the full card shows state, battery, door, integration and the Open button", () => {
   const html = newCard(makeHass()).shadowRoot.innerHTML;
-  assert.match(html, /class="state clickable ok"[^>]*>Locked</);
+  assert.match(html, /class="chip clickable ok[^"]*"[^>]*><span class="dot"><\/span><span class="t">Locked</);
   assert.match(html, /78 %/);
-  assert.match(html, /Door closed/);
+  // Locked: the state is in the header pill only, the hero's big line is the door sensor.
+  assert.match(html, /class="state door clickable "[^>]*>Door closed</);
+  assert.doesNotMatch(html, /class="state clickable ok"/);
   assert.match(html, />Nuki</);
   assert.match(html, /data-action="open"/);
   assert.match(html, /class="btn primary" data-action="unlock"/);
@@ -136,7 +138,7 @@ test("a failed call drops the requested state and leaves no unhandled rejection"
   assert.match(card.shadowRoot.innerHTML, />Unlocking</);
   await new Promise((r) => setTimeout(r, 0));
   assert.equal(card._pending, null);
-  assert.match(card.shadowRoot.innerHTML, /class="state clickable ok"[^>]*>Locked</);
+  assert.match(card.shadowRoot.innerHTML, /class="chip clickable ok[^"]*"[^>]*><span class="dot"><\/span><span class="t">Locked</);
   clearTimeout(card._pendingTimer);
 });
 
@@ -235,7 +237,7 @@ test("Open on a lock that never reports opening drops Opening shortly after the 
   assert.match(card.shadowRoot.innerHTML, />Opening</);
   await new Promise((r) => setTimeout(r, 4200));
   assert.equal(card._pending, null);
-  assert.match(card.shadowRoot.innerHTML, /class="state clickable ok"[^>]*>Locked</);
+  assert.match(card.shadowRoot.innerHTML, /class="chip clickable ok[^"]*"[^>]*><span class="dot"><\/span><span class="t">Locked</);
   clearTimeout(card._pendingTimer);
 });
 
@@ -312,9 +314,13 @@ test("activity reads the logbook when unfolded", async () => {
 
 test("jammed lock: red state and alert", () => {
   const st = { ...states, "lock.garage": { ...states["lock.garage"], state: "jammed" } };
-  const html = newCard(makeHass(st), { entity: "lock.garage" }).shadowRoot.innerHTML;
+  const html = newCard(makeHass(st), { entity: "lock.garage", illustration: false }).shadowRoot.innerHTML;
   assert.match(html, /chip clickable crit/);
   assert.match(html, /The lock is jammed/);
+  // Illustrated header: the icon and the state word in red, the alert icon.
+  const banner = newCard(makeHass(st), { entity: "lock.garage" }).shadowRoot.innerHTML;
+  assert.match(banner, /class="badge clickable crit"[^>]*><svg class="icon "[^>]*><path d="M13 14H11V9H13/);
+  assert.match(banner, /class="chip clickable crit"[^>]*title="Jammed"/);
 });
 
 test("door open while the lock is unlocked: warning on the full and mini cards", () => {
@@ -326,7 +332,7 @@ test("door open while the lock is unlocked: warning on the full and mini cards",
     assert.match(html, /class="alert-line warn clickable" data-entity="binary_sensor\.porte_entree_porte"/, lock);
     assert.match(html, /The door is open while the lock is unlocked\./, lock);
     // Not by color only: the warning is also in words, for screen readers.
-    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\."> · Door open<span class="sr"> · The door is open while the lock is unlocked\.<\/span>/, lock);
+    assert.match(mini(set(lock, "on")), /class="more warn" title="The door is open while the lock is unlocked\.">Door open<span class="sr"> · The door is open while the lock is unlocked\.<\/span>/, lock);
   }
   // Locked with the door open, or unlocked with the door closed: no warning.
   for (const [lock, door] of [["locked", "on"], ["unlocked", "off"]]) {
@@ -424,7 +430,7 @@ test("auto-lock: countdown from the device's delay while unlocked, ticking every
   assert.ok(card._relockTimer, "a one-second timer is armed");
   // The delay entity stays among the settings.
   assert.ok(sl.describe(card._hass, {}, "lock.porte_entree").settings.includes("number.porte_entree_auto_lock_delay"));
-  assert.match(mini.shadowRoot.innerHTML, /· Locks again in 2:(19|20)/);
+  assert.match(mini.shadowRoot.innerHTML, /class="more">Locks again in 2:(19|20)/);
 });
 
 test("auto-lock: nothing while locked, with the switch off, or once the delay is past; auto_lock_delay overrides", (t) => {
@@ -450,7 +456,7 @@ test("editor: auto_lock_delay is a number of seconds", () => {
 });
 
 test("mini card: the model picture is the icon, the mdi badge only a fallback, detail button at the top right", () => {
-  const card = newCard(makeHass(), {}, sl.SmartLockMiniCard);
+  const card = newCard(makeHass(), { illustration: false }, sl.SmartLockMiniCard);
   const html = card.shadowRoot.innerHTML;
   assert.match(html, /class="picture clickable"/, "the compact mini shows the model picture as its icon");
   assert.doesNotMatch(html, /class="badge/, "no mdi badge when the picture is shown");
@@ -459,12 +465,12 @@ test("mini card: the model picture is the icon, the mdi badge only a fallback, d
   click(card, { action: "zoom" });
   assert.deepEqual(plain(card.getGridOptions()), { columns: 12, min_columns: 6, rows: "auto" });
   // With the picture off, the mdi badge comes back as the icon (40 px, never shrunk).
-  const noPic = newCard(makeHass(), { show_picture: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  const noPic = newCard(makeHass(), { show_picture: false, illustration: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML;
   assert.match(noPic, /<div class="badge clickable ok" data-entity="lock\.porte_entree" role="button" tabindex="0" aria-label="Locked">/);
   assert.match(noPic, /\.badge \{ width: 40px; height: 40px;/);
   // Neither picture nor badge: no icon at all.
   assert.doesNotMatch(
-    newCard(makeHass(), { show_picture: false, show_icon: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML,
+    newCard(makeHass(), { show_picture: false, show_icon: false, illustration: false }, sl.SmartLockMiniCard).shadowRoot.innerHTML,
     /class="(badge|picture)/,
   );
 });
@@ -733,8 +739,13 @@ test("activity: an unfold after a successful read does not read the logbook agai
 const clickables = (html) => [...html.matchAll(/<(\w+)([^>]*class="[^"]*\bclickable\b[^"]*"[^>]*)>/g)].map((m) => m[0]);
 
 test("keyboard: every clickable part of the full card is a focusable button", () => {
-  const st = { ...states, "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" } };
-  const card = newCard(makeHass(st, { callWS: async () => logbook }), { collapsed: [] });
+  // Unlocking (the state stays big in the hero, the door on its own line), door open.
+  const st = {
+    ...states,
+    "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocking" },
+    "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" },
+  };
+  const card = newCard(makeHass(st, { callWS: async () => logbook }), { collapsed: [], illustration: false });
   return new Promise((r) => setTimeout(r, 0)).then(() => {
     const html = card.shadowRoot.innerHTML;
     const tags = clickables(html);
@@ -841,4 +852,109 @@ test("no rewrite under a press: drawn after its release, and at once by its clic
   assert.doesNotMatch(card.shadowRoot.innerHTML, />Auto lock</);
   card.disconnectedCallback();
   assert.equal(card._pressing, false);
+});
+
+// ---------------------------------------------------------------------------
+// Illustrated header
+// ---------------------------------------------------------------------------
+
+test("illustrated header: door scene with the lock's own picture on it, state icon, name and state, on both cards", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const html = newCard(makeHass(), {}, Cls).shadowRoot.innerHTML;
+    assert.match(html, /<div class="banner">/);
+    assert.match(html, /<svg class="sl-scene" viewBox="0 0 160 80"/);
+    assert.match(html, /<div class="ground"><\/div>/);
+    // The Nuki front door: the retrofit family, inlined on the door leaf, its gradients with the card's uid.
+    assert.match(html, /<svg class="sl-lock" x="50\.9" y="9\.5" width="58\.3" height="68" viewBox="0 0 120 140"/);
+    assert.match(html, /fill="url\(#sl\d+-g\)"/);
+    assert.doesNotMatch(html, /id="g"/);
+    assert.match(html, /class="badge clickable ok"/);
+    assert.match(html, /class="name clickable"[^>]*>Front door</);
+    // The state in the pill right after the name; the sub-line keeps the detail only.
+    assert.match(html, /<div class="trow"><div class="name clickable"[^>]*>Front door<\/div><span class="chip clickable ok"[^>]*title="Locked" aria-label="Locked"><span class="dot"><\/span><span class="t">Locked<\/span><\/span>/);
+    assert.doesNotMatch(html, /class="st ok"/);
+    assert.doesNotMatch(html, /class="header"/);
+    assert.match(html, /\.banner \{ position: relative; overflow: hidden; height: 90px;/);
+  }
+});
+
+test("illustrated header: the icon color and shape follow the state", () => {
+  const icon = (state) => {
+    const st = { ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state } };
+    return newCard(makeHass(st), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML.match(/class="badge clickable (\w+)"/)[1];
+  };
+  assert.deepEqual(["locked", "unlocked", "unlocking", "jammed", "unavailable"].map(icon), ["ok", "warn", "active", "crit", "crit"]);
+});
+
+test("illustrated header: two cards never share an id", () => {
+  const ids = (card) => [...card.shadowRoot.innerHTML.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+  const a = ids(newCard(makeHass()));
+  const b = ids(newCard(makeHass()));
+  assert.ok(a.length > 0);
+  assert.deepEqual(a.filter((id) => b.includes(id)), []);
+});
+
+test("illustrated header: night from illustration_theme, else sun.sun below the horizon or the dark mode", () => {
+  const night = (config, st = states, extra = {}) => /class="banner night"/.test(newCard(makeHass(st, extra), config).shadowRoot.innerHTML);
+  const sun = (state) => ({ ...states, "sun.sun": { entity_id: "sun.sun", state, attributes: {} } });
+  assert.equal(night({}), false);
+  assert.equal(night({}, states, { themes: { darkMode: true } }), true);
+  assert.equal(night({}, sun("below_horizon")), true);
+  assert.equal(night({}, sun("above_horizon")), false);
+  assert.equal(night({}, sun("above_horizon"), { themes: { darkMode: true } }), true);
+  assert.equal(night({ illustration_theme: "day" }, sun("above_horizon"), { themes: { darkMode: true } }), false);
+  assert.equal(night({ illustration_theme: "night" }, sun("above_horizon")), true);
+  assert.equal(night({ illustration_theme: "day" }, sun("below_horizon")), false);
+});
+
+test("illustrated header: show_picture: false or image: none leaves the door bare, a URL is drawn on it", () => {
+  for (const config of [{ show_picture: false }, { image: "none" }]) {
+    const html = newCard(makeHass(), config).shadowRoot.innerHTML;
+    assert.match(html, /class="sl-scene"/);
+    assert.doesNotMatch(html, /class="sl-lock"|<image /);
+  }
+  const own = newCard(makeHass(), { image: "/local/lock.png" }).shadowRoot.innerHTML;
+  assert.match(own, /<image href="\/local\/lock\.png"/);
+});
+
+test("illustrated header: illustration: false keeps the classic header", () => {
+  const html = newCard(makeHass(), { illustration: false }).shadowRoot.innerHTML;
+  assert.doesNotMatch(html, /class="banner|sl-scene/);
+  assert.match(html, /<div class="header">/);
+});
+
+test("illustrated mini card: battery and buttons under the banner, detail button on it", () => {
+  const html = newCard(makeHass(), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  assert.match(html, /<div class="banner">[\s\S]*<button class="zoom"[\s\S]*<\/div>\s*<div class="mfoot"><div class="batt clickable ok"[\s\S]*<div class="controls">/);
+  const tags = clickables(html);
+  for (const cls of ["badge", "name", "sub", "batt"]) assert.ok(tags.some((t) => t.includes(`class="${cls} `)), `no clickable .${cls}`);
+  for (const t of tags) assert.match(t, /role="button" tabindex="0"/, t);
+});
+
+test("editor: illustration toggle on both cards, its theme only with the illustration, defaults left out of the YAML", () => {
+  for (const Cls of [sl.SmartLockCard, sl.SmartLockMiniCard]) {
+    const ed = Cls.getConfigElement();
+    ed._hass = makeHass();
+    ed._config = { entity: "lock.porte_entree" };
+    const names = (schema) => schema.flatMap((f) => (f.schema ? names(f.schema) : [f.name]));
+    assert.ok(names(ed._schema()).includes("illustration"));
+    assert.ok(names(ed._schema()).includes("illustration_theme"));
+    ed._config = { entity: "lock.porte_entree", illustration: false };
+    assert.ok(!names(ed._schema()).includes("illustration_theme"));
+  }
+});
+
+test("full card: the door is said once, big in the hero; the banner sub-line keeps the last change", () => {
+  const st = {
+    ...states,
+    "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked", last_changed: new Date(Date.now() - 5 * 60e3).toISOString() },
+    "binary_sensor.porte_entree_porte": { ...states["binary_sensor.porte_entree_porte"], state: "on" },
+  };
+  const html = newCard(makeHass(st)).shadowRoot.innerHTML;
+  assert.match(html, /class="state door clickable warn"[^>]*>Door open</);
+  assert.equal((html.match(/Door open/g) || []).length, 1, "Door open written once");
+  assert.match(html, /class="sub clickable"[^>]*><span class="more warn"[^>]*>5 minutes ago/);
+  // The mini card (no hero) keeps the open door in its banner sub-line.
+  const mini = newCard(makeHass(st), {}, sl.SmartLockMiniCard).shadowRoot.innerHTML;
+  assert.match(mini, /class="sub clickable"[^>]*><span class="more warn"[^>]*>Door open/);
 });

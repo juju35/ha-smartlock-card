@@ -894,12 +894,12 @@ test("illustrated header: two cards never share an id", () => {
   assert.deepEqual(a.filter((id) => b.includes(id)), []);
 });
 
-test("illustrated header: night from illustration_theme, else sun.sun below the horizon or the dark mode", () => {
+test("illustrated header: night from illustration_theme, else the dark mode alone", () => {
   const night = (config, st = states, extra = {}) => /class="banner night"/.test(newCard(makeHass(st, extra), config).shadowRoot.innerHTML);
   const sun = (state) => ({ ...states, "sun.sun": { entity_id: "sun.sun", state, attributes: {} } });
   assert.equal(night({}), false);
   assert.equal(night({}, states, { themes: { darkMode: true } }), true);
-  assert.equal(night({}, sun("below_horizon")), true);
+  assert.equal(night({}, sun("below_horizon")), false, "light theme after sunset: day");
   assert.equal(night({}, sun("above_horizon")), false);
   assert.equal(night({}, sun("above_horizon"), { themes: { darkMode: true } }), true);
   assert.equal(night({ illustration_theme: "day" }, sun("above_horizon"), { themes: { darkMode: true } }), false);

@@ -2441,15 +2441,21 @@ const locksOf = (hass) =>
 const name = (hass, id) => hass.states[id]?.attributes?.friendly_name || id;
 
 // First lock of the instance (no `entity` configured), resolved on every `set hass` (before the `_deps` test):
-// cached so the scan of all the states and the localeCompare sort only run again when the set of locks (or one of
-// their names) changed — the same `hass` object (several cards) skips even the scan.
+// cached so the scan of all the states only runs again when the entity registry or the number of states changes
+// (an entity added or removed), and the localeCompare sort only when the set of locks (or one of their names)
+// changed — the same `hass` object (several cards) skips even that.
 let _firstLock = {};
 const firstLock = (hass) => {
   if (_firstLock.states === hass.states && _firstLock.entities === hass.entities) return _firstLock.id;
-  const locks = Object.keys(hass.states || {}).filter((id) => domainOf(id) === "lock" && !hass.entities?.[id]?.hidden);
+  const count = Object.keys(hass.states || {}).length;
+  const all =
+    _firstLock.entities === hass.entities && _firstLock.count === count && _firstLock.all?.every((id) => hass.states[id])
+      ? _firstLock.all
+      : Object.keys(hass.states || {}).filter((id) => domainOf(id) === "lock");
+  const locks = all.filter((id) => !hass.entities?.[id]?.hidden);
   const key = locks.map((id) => `${id}\n${name(hass, id)}`).join("\n");
   const id = _firstLock.key === key ? _firstLock.id : locks.sort((a, b) => name(hass, a).localeCompare(name(hass, b)))[0];
-  _firstLock = { states: hass.states, entities: hass.entities, key, id };
+  _firstLock = { states: hass.states, entities: hass.entities, count, all, key, id };
   return id;
 };
 
@@ -2718,6 +2724,48 @@ const keepsFocus = (card, el) => !card._byPointer || typeof el?.selectionStart =
 // (ok, warn…) change with the lock and are left out.
 const focusKey = (n) => [n.classList?.[0], n.dataset?.action, n.dataset?.entity, n.dataset?.section].join("|");
 
+// In-place redraw. Home Assistant sets `hass` on every state change of the house; rewriting the card's whole
+// content then (innerHTML) replaces every node: <ha-card> comes back empty until its own update (the status pill was
+// measured before it, at 0 px, and went to the wrong line: another height), the picture is decoded again and its
+// animations start over, and the sections view reflows under the page (it moves by itself). morph brings the nodes
+// in place in line with the new markup instead: a node is kept when the new one at its place has the same tag and
+// acts on the same thing (data-entity / data-action / data-section), its text and attributes updated; any other
+// is replaced. The listeners are on the shadow root (delegated): kept nodes need no wiring.
+const morphKey = (n) => (n.nodeType === 1 ? [n.getAttribute("data-entity"), n.getAttribute("data-action"), n.getAttribute("data-section")].join("|") : "");
+
+const morphNode = (a, b) => {
+  if (a.nodeType !== 1) {
+    if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue;
+    return;
+  }
+  for (const { name, value } of b.attributes) if (a.getAttribute(name) !== value) a.setAttribute(name, value);
+  for (const { name } of [...a.attributes]) if (!b.hasAttribute(name)) a.removeAttribute(name);
+  morphChildren(a, b);
+};
+
+const morphChildren = (from, to) => {
+  const want = [...to.childNodes];
+  for (let i = 0; i < want.length; i++) {
+    const n = want[i];
+    const old = from.childNodes[i];
+    if (old && old.nodeName === n.nodeName && morphKey(old) === morphKey(n)) morphNode(old, n);
+    else if (old) from.replaceChild(n, old);
+    else from.appendChild(n);
+  }
+  while (from.childNodes.length > want.length) from.removeChild(from.lastChild);
+};
+
+// `el`'s content brought in line with `html`, in place; a plain rewrite where there is no DOM to morph (the tests).
+const morph = (el, html) => {
+  if (!el.childNodes || typeof document.createElement("template").content !== "object") {
+    el.innerHTML = html;
+    return;
+  }
+  const t = document.createElement("template");
+  t.innerHTML = html;
+  morphChildren(el, t.content);
+};
+
 // After the popup closes, clicks on the card are ignored for this long: the second click of a double click on OK
 // would otherwise land on what lies under the button.
 const CONFIRM_GUARD_MS = 400;
@@ -2861,6 +2909,13 @@ class SmartLockBase extends HTMLElement {
   // text, over the picture), the pill keeps its dot only.
   // Measured after each render and on every new width (or once the web font is loaded), never by a fixed width.
   _fitPill() {
+    // Home Assistant's <ha-card> (a Lit element) lays out its content only from its first update, a microtask after
+    // it is connected: measured before, everything is 0 px wide and the pill lands on the wrong line. Fitted then.
+    const card = this.shadowRoot?.querySelector?.("ha-card");
+    if (card && card.hasUpdated === false && card.updateComplete?.then) {
+      card.updateComplete.then(() => this._fitPill());
+      return;
+    }
     for (const t of this.shadowRoot?.querySelectorAll?.(".titles") || []) {
       const row = t.querySelector?.(".trow");
       const name = row?.querySelector(".name");
@@ -2924,7 +2979,7 @@ class SmartLockBase extends HTMLElement {
     const key = !this._confirm && active && keepsFocus(this, active) ? focusKey(active) : null;
     const nth = key ? this._focusables(key).indexOf(active) : -1;
     this._html = html;
-    this.shadowRoot.innerHTML = html;
+    morph(this.shadowRoot, html);
     this._fitPill();
     if (key) {
       const same = this._focusables(key);
@@ -3076,7 +3131,8 @@ class SmartLockBase extends HTMLElement {
       const code = this._code || "";
       let ok = code.length > 0;
       try {
-        ok = ok && new RegExp(`^(?:${c.code})$`).test(code);
+        // A format of reasonable length only (no pathological pattern to backtrack on); a longer one is not checked.
+        ok = ok && (c.code.length > 256 || new RegExp(`^(?:${c.code})$`).test(code));
       } catch (_e) {
         /* the integration's format is not a valid regular expression: any non-empty code is sent */
       }

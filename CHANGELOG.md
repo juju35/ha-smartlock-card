@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.2 - 2026-11-20
+
+### Fixes
+- Lock card and mini card: a state update no longer rebuilds the card's content. The nodes are updated in place (text, attributes, classes), so the card keeps its height, its picture and its animations from one update to the next. Before, each update (and the one-minute "changed … ago" refresh) rewrote the whole card: the status pill was measured before Home Assistant's `<ha-card>` had laid out its new content and went under the subtitle (the card without illustration grew by 10 px), and the sections view reflowed, which made the page move by itself.
+
 ## 1.12.1 - 2026-11-18
 
 ### Fixes

@@ -69,6 +69,28 @@ test("the first lock (no entity configured) is cached but follows a new or renam
   assert.equal(sl.findLock(makeHass(renamed), {}).id, "lock.garage");
 });
 
+test("the first lock: a new states object with the same registry keeps the lock list, a removed lock is seen", () => {
+  const hass = makeHass();
+  assert.equal(sl.findLock(hass, {}).id, "lock.porte_entree");
+  // Every push brings a new states object: same registry, same count, a lock renamed → sorted again.
+  const renamed = { ...states, "lock.garage": { ...states["lock.garage"], attributes: { ...states["lock.garage"].attributes, friendly_name: "A garage" } } };
+  assert.equal(sl.findLock({ ...hass, states: renamed }, {}).id, "lock.garage");
+  // A lock gone (fewer states): scanned again.
+  const { "lock.garage": _gone, ...without } = renamed;
+  assert.equal(sl.findLock({ ...hass, states: without }, {}).id, "lock.porte_entree");
+});
+
+test("a code format too long to be a sane pattern is not run as a regular expression", () => {
+  const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked", attributes: { ...states["lock.porte_entree"].attributes, code_format: `(a+)+${"x".repeat(300)}` } } });
+  const card = newCard(hass);
+  let sent = null;
+  card._confirm = { code: `(a+)+${"x".repeat(300)}`, text: "", run: (code) => (sent = code) };
+  card._code = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!";
+  card._confirmOk();
+  assert.equal(sent, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!");
+  assert.notEqual(card._codeError, true);
+});
+
 test("Lock runs right away; the requested state shows until the lock changes", () => {
   const hass = makeHass({ ...states, "lock.porte_entree": { ...states["lock.porte_entree"], state: "unlocked" } });
   const card = newCard(hass);

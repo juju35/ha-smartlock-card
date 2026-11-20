@@ -2441,15 +2441,21 @@ const locksOf = (hass) =>
 const name = (hass, id) => hass.states[id]?.attributes?.friendly_name || id;
 
 // First lock of the instance (no `entity` configured), resolved on every `set hass` (before the `_deps` test):
-// cached so the scan of all the states and the localeCompare sort only run again when the set of locks (or one of
-// their names) changed — the same `hass` object (several cards) skips even the scan.
+// cached so the scan of all the states only runs again when the entity registry or the number of states changes
+// (an entity added or removed), and the localeCompare sort only when the set of locks (or one of their names)
+// changed — the same `hass` object (several cards) skips even that.
 let _firstLock = {};
 const firstLock = (hass) => {
   if (_firstLock.states === hass.states && _firstLock.entities === hass.entities) return _firstLock.id;
-  const locks = Object.keys(hass.states || {}).filter((id) => domainOf(id) === "lock" && !hass.entities?.[id]?.hidden);
+  const count = Object.keys(hass.states || {}).length;
+  const all =
+    _firstLock.entities === hass.entities && _firstLock.count === count && _firstLock.all?.every((id) => hass.states[id])
+      ? _firstLock.all
+      : Object.keys(hass.states || {}).filter((id) => domainOf(id) === "lock");
+  const locks = all.filter((id) => !hass.entities?.[id]?.hidden);
   const key = locks.map((id) => `${id}\n${name(hass, id)}`).join("\n");
   const id = _firstLock.key === key ? _firstLock.id : locks.sort((a, b) => name(hass, a).localeCompare(name(hass, b)))[0];
-  _firstLock = { states: hass.states, entities: hass.entities, key, id };
+  _firstLock = { states: hass.states, entities: hass.entities, count, all, key, id };
   return id;
 };
 
@@ -3125,7 +3131,8 @@ class SmartLockBase extends HTMLElement {
       const code = this._code || "";
       let ok = code.length > 0;
       try {
-        ok = ok && new RegExp(`^(?:${c.code})$`).test(code);
+        // A format of reasonable length only (no pathological pattern to backtrack on); a longer one is not checked.
+        ok = ok && (c.code.length > 256 || new RegExp(`^(?:${c.code})$`).test(code));
       } catch (_e) {
         /* the integration's format is not a valid regular expression: any non-empty code is sent */
       }

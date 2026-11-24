@@ -3,11 +3,11 @@
 // (`npx playwright install chromium`), except in CI where it must run. Drawn in DejaVu Sans, wider than Roboto and
 // installed on the CI runners, so that a tighter font does not hide an overflow.
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { after, before, test } from "node:test";
 import { devices, entities, logbook, states } from "../scripts/mock-states.mjs";
+import { source } from "./source.mjs";
 
-const cardJs = readFileSync(new URL("../src/smartlock-card.js", import.meta.url), "utf8");
+const cardJs = source;
 
 // Same stand-in for <ha-card> as scripts/screenshots.mjs.
 const HA_CARD = `customElements.define("ha-card", class extends HTMLElement {

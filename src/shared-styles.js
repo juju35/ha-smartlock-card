@@ -10,7 +10,7 @@ import { STRINGS } from "./i18n/strings.js";
 
 export const BASE_STYLE = `
   :host { --sl-ok: var(--success-color, #43a047); --sl-warn: var(--warning-color, #ffa600); --sl-crit: var(--error-color, #db4437);
-          --sl-idle: var(--disabled-text-color, #9e9e9e); --sl-active: var(--info-color, #039be5); --sl-accent: var(--primary-color, #03a9f4); }
+          --sl-idle: var(--secondary-text-color, #9e9e9e); --sl-active: var(--info-color, #039be5); --sl-accent: var(--primary-color, #03a9f4); }
   /* The card is the container of its width queries (@container below). Inline-size containment drops the content
      from the card's own intrinsic width: in a parent that sizes it from its content (layout-card, a button-card, a
      grid column auto, an inline-block), it would fall to a few pixels. An empty, zero-height row (::before) gives it

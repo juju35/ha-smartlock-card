@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.6 - 2026-11-27
+
+### Fixes
+- Idle states use the theme's secondary text colour (`--secondary-text-color`), like every ha-* card.
+
 ## 1.12.5 - 2026-11-24
 
 ### Maintenance
